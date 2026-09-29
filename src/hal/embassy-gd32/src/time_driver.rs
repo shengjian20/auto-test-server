@@ -63,10 +63,13 @@ impl Timer1Driver {
         // 写后读回同步（GD32 RCU 手册要求）
         let _ = rb.cnt().read();
 
-        // 1MHz tick，自由跑到 2^32
+        // 1MHz tick，自由跑到 2^32。
+        // PSC 是影子寄存器：写入后必须发 UG 更新事件才锁存生效，
+        // 否则计数器按 PSC=0（16MHz）跑——板上实测"闪烁过快"即此因
         rb.psc().write(|w| w.psc().set(PSC_DIV));
         rb.car().write(|w| w.carl().set(u32::MAX));
-        rb.ch1cv().write(|w| w.ch1val().set(u32::MAX));
+        rb.swevg().write(|w| w.upg().set_bit()); // UG: 装载 PSC/CAR 影子值
+        rb.intf().write(|w| w.upif().clear_bit()); // UG 会置 UPIF，清掉
         rb.intf().write(|w| w.upif().clear_bit().ch1if().clear_bit());
         rb.dmainten().write(|w| w.ch1ie().set_bit());
         rb.ctl0().modify(|_, w| w.cen().set_bit().arse().clear_bit());
