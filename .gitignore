@@ -1,0 +1,29 @@
+# Rust / Cargo
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# 构建产物
+*.elf
+*.bin
+*.uf2
+*.hex
+*.map
+!.cargo/config.toml
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# 系统与临时
+.DS_Store
+*.swp
+*~
+/tmp/
+
+# Docker 本地数据
+docker/data/
+
+# 日志
+*.log
