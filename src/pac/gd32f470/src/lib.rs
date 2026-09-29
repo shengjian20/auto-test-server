@@ -18514,11 +18514,11 @@
 #[doc = "Field `PW` reader - PHY write"] pub type PwR = crate :: BitReader ;
 #[doc = "Field `PW` writer - PHY write"] pub type PwW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `CLR` reader - Clock range"] pub type ClrR = crate :: FieldReader ;
-#[doc = "Field `CLR` writer - Clock range"] pub type ClrW < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 > ;
+#[doc = "Field `CLR` writer - Clock range"] pub type ClrW < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 , u8 , crate :: Safe > ;
 #[doc = "Field `PR` reader - PHY register"] pub type PrR = crate :: FieldReader ;
-#[doc = "Field `PR` writer - PHY register"] pub type PrW < 'a , REG > = crate :: FieldWriter < 'a , REG , 5 > ;
+#[doc = "Field `PR` writer - PHY register"] pub type PrW < 'a , REG > = crate :: FieldWriter < 'a , REG , 5 , u8 , crate :: Safe > ;
 #[doc = "Field `PA` reader - PHY address"] pub type PaR = crate :: FieldReader ;
-#[doc = "Field `PA` writer - PHY address"] pub type PaW < 'a , REG > = crate :: FieldWriter < 'a , REG , 5 > ; impl R {
+#[doc = "Field `PA` writer - PHY address"] pub type PaW < 'a , REG > = crate :: FieldWriter < 'a , REG , 5 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bit 0 - PHY busy"]
 #[inline (always)] pub fn pb (& self) -> PbR { PbR :: new ((self . bits & 1) != 0) }
 #[doc = "Bit 1 - PHY write"]

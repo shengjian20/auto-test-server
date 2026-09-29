@@ -38,6 +38,10 @@ CAN_ID_FIELDS = ("SFID_EFID", "EFID", "DLENC", "TS")
 CAN_DATA_FIELDS = ("DB0", "DB1", "DB2", "DB3", "DB4", "DB5", "DB6", "DB7")
 CAN_ID_REGS = ("TMI0", "TMI1", "TMI2", "TMP0", "TMP1", "TMP2",
                "RFIFOMI0", "RFIFOMI1", "RFIFOMP0", "RFIFOMP1", "RFIFOMP2")
+# ENET MAC PHY MDIO 控制（手册 ENET 章节）：CLR 3bit HCLK 分频范围 0-7、
+# PA 5bit PHY 地址 0-31、PR 5bit PHY 寄存器 0-31——均为全值域
+ENET_PHY_FULLRANGE = ("CLR", "PA", "PR")
+ENET_PHY_REG = "MAC_PHY_CTL"
 # BT 位时序字段：SJW 2b/BS1 4b/BS2 3b/BAUDPSC 10b 全部为无保留位全值域
 # （手册位时序章节：字段值为 N-1 编码，全范围合法）
 CAN_BT_FIELDS = ("SJW", "BS1", "BS2", "BAUDPSC")
@@ -128,6 +132,15 @@ for peri in root.iter("peripheral"):
             elif rn == "CTL0":
                 for field in reg.iter("field"):
                     if (field.findtext("name") or "") == "PSC":
+                        add_range_constraint(field)
+        continue
+
+    # 4d2: ENET MAC PHY_CTL 全值域
+    if pname == "ENET_MAC":
+        for reg in peri.iter("register"):
+            if (reg.findtext("name") or "") == ENET_PHY_REG:
+                for field in reg.iter("field"):
+                    if (field.findtext("name") or "") in ENET_PHY_FULLRANGE:
                         add_range_constraint(field)
         continue
 
