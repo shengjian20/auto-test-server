@@ -80,6 +80,10 @@ for peri in root.iter("peripheral"):
 # 无约束时 svd2rust 0.37 只给 unsafe bits()；这些字段手册定义为全值域）
 UART_FULLRANGE = ("BAUD", "DATA")
 GPIO_AFSEL = ("AFSEL0", "AFSEL1")
+# SPI DATA（全宽 16 位数据字段）与 CTL0 PSC（3 位分频，0-7 全部为合法
+# 分频档）——手册定义全值域，补约束使 svd2rust 生成 Safe writer。
+# SPI1/2/3/4 均 derivedFrom SPI0，只需补 SPI0 一份
+SPI_FIELDS = {"DATA": None, "CTL0": "PSC"}
 for peri in root.iter("peripheral"):
     pname = peri.findtext("name") or ""
     for reg in peri.iter("register"):
@@ -87,6 +91,25 @@ for peri in root.iter("peripheral"):
         if pname.startswith("USART") or pname.startswith("UART"):
             if rn in UART_FULLRANGE:
                 for field in reg.iter("field"):
+                    if field.find("writeConstraint") is not None:
+                        continue
+                    fw = int(field.findtext("bitWidth") or "0")
+                    if fw == 0:
+                        continue
+                    wc = ET.SubElement(field, "writeConstraint")
+                    rng = ET.SubElement(wc, "range")
+                    ET.SubElement(rng, "minimum").text = "0"
+                    ET.SubElement(rng, "maximum").text = str((1 << fw) - 1)
+                    n_enum += 1
+        elif pname == "SPI0":
+            fn_ok = (rn in SPI_FIELDS and SPI_FIELDS[rn] is None) or (
+                rn in SPI_FIELDS and SPI_FIELDS[rn] is not None)
+            hit = (rn == "DATA") or (rn == "CTL0")
+            if hit:
+                for field in reg.iter("field"):
+                    fn_ = field.findtext("name") or ""
+                    if rn == "CTL0" and fn_ != "PSC":
+                        continue
                     if field.find("writeConstraint") is not None:
                         continue
                     fw = int(field.findtext("bitWidth") or "0")

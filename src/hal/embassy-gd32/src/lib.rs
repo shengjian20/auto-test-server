@@ -13,11 +13,13 @@
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
+pub mod spi;
 pub mod time_driver;
 pub mod usart;
 
 pub use time_driver::init_time_driver;
 
 pub use gpio::{Pin, PinMode, Port};
+pub use spi::Spi;
 pub use usart::{Uart, Usart};
 pub use rcc::Rcc;

@@ -32293,7 +32293,7 @@
 #[doc = "Field `MSTMOD` reader - Master Mode Enable"] pub type MstmodR = crate :: BitReader ;
 #[doc = "Field `MSTMOD` writer - Master Mode Enable"] pub type MstmodW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `PSC` reader - Master Clock Prescaler Selection"] pub type PscR = crate :: FieldReader ;
-#[doc = "Field `PSC` writer - Master Clock Prescaler Selection"] pub type PscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 > ;
+#[doc = "Field `PSC` writer - Master Clock Prescaler Selection"] pub type PscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 , u8 , crate :: Safe > ;
 #[doc = "Field `SPIEN` reader - SPI enable"] pub type SpienR = crate :: BitReader ;
 #[doc = "Field `SPIEN` writer - SPI enable"] pub type SpienW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `LF` reader - LSB First Mode"] pub type LfR = crate :: BitReader ;
@@ -32473,7 +32473,7 @@
 #[doc = "Register `DATA` reader"] pub type R = crate :: R < DataSpec > ;
 #[doc = "Register `DATA` writer"] pub type W = crate :: W < DataSpec > ;
 #[doc = "Field `SPI_DATA` reader - Data transfer register"] pub type SpiDataR = crate :: FieldReader < u16 > ;
-#[doc = "Field `SPI_DATA` writer - Data transfer register"] pub type SpiDataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `SPI_DATA` writer - Data transfer register"] pub type SpiDataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:15 - Data transfer register"]
 #[inline (always)] pub fn spi_data (& self) -> SpiDataR { SpiDataR :: new ((self . bits & 0xffff) as u16) } } impl W {
 #[doc = "Bits 0:15 - Data transfer register"]
