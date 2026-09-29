@@ -203,3 +203,14 @@ auto_test_server/
   之前 255/256 为探针字节串扰的测试时序问题，非固件缺陷）
 - 流程教训：改 memory.x 后 touch 强制重链；openocd cfg 结尾 reset run；
   构建统一用户（root/ubuntu 交替致 target 权限混乱需 --user root 清理）
+
+### 阶段 5 前置（2026-09-29 完成，feat/stage5-bootloader 分支）
+- bootloader 跳转链验证——LED 慢闪经 app@0x08008000 实证（d2b1d6d）：
+  - bootloader @0x08000000（32K 区）：合法性检查（SP∈448K SRAM 界 + reset
+    thumb 位）-> VTOR 重定向 -> MSP 重载 -> 跳转（cortex-m-rt 官方序列）
+  - app-at-offset @0x08008000：独立 workspace，build.rs 提供 memory.x 搜索
+    路径（根配置 rustflags 叠加致 -Tlink.x 双份 -> FLASH 重复定义的修复）
+  - delay 修复：spin_loop 循环被 O1 优化空转 -> volatile 递减确定性 delay
+  - 烧录：openocd 双镜像（bl@0x08000000 + app@0x08008000，各自 verify）
+- 待续：W25Q 升级通道（控制协议写镜像到 W25Q -> bootloader 校验签名/
+  CRC -> 搬运到应用区 -> 跳转）
