@@ -1,0 +1,16 @@
+[package]
+name = "uart-echo"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "uart-echo"
+test = false
+bench = false
+
+[dependencies]
+embassy-gd32 = { path = "../../hal/embassy-gd32" }
+gd32f470 = { path = "../../pac/gd32f470" }
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+panic-halt = "1.0"

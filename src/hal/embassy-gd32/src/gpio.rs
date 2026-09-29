@@ -10,6 +10,31 @@ use core::convert::Infallible;
 use embedded_hal::digital::{ErrorType, InputPin, OutputPin};
 use gd32f470::gpioc;
 
+/// GPIO 端口寄存器块统一访问（Pin 构造函数接受任何端口引用）。
+///
+/// unsafe 依据（本 trait 各 impl 的 cast）：SVD 逐寄存器 diff 实证
+/// GPIOA/GPIOB/GPIOC 三者 RegisterBlock 完全一致（12 寄存器同名同偏移
+/// 同宽度），GPIOD/GPIOE 本就是 GPIOC 的 derivedFrom 别名；cast 仅生成
+/// 别名引用，不产生额外写路径。
+pub trait GpioRef<'a> {
+    fn port_regs(self) -> &'a gpioc::RegisterBlock;
+}
+
+macro_rules! impl_gpio_ref {
+    ($t:ident) => {
+        impl<'a> GpioRef<'a> for &'a gd32f470::$t {
+            fn port_regs(self) -> &'a gpioc::RegisterBlock {
+                unsafe { &*(gd32f470::$t::PTR as *const gpioc::RegisterBlock) }
+            }
+        }
+    };
+}
+impl_gpio_ref!(Gpioa);
+impl_gpio_ref!(Gpiob);
+impl_gpio_ref!(Gpioc);
+impl_gpio_ref!(Gpiod);
+impl_gpio_ref!(Gpioe);
+
 /// GPIO 端口（GD32F470VGT6 实有 A-I）
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Port {
@@ -124,35 +149,60 @@ pub struct Pin<'a> {
 
 impl<'a> Pin<'a> {
     /// 输入模式（复位默认态，显式构造以自证时钟已开）
-    pub fn input(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn input(port: impl GpioRef<'a>, n: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Input);
         pin
     }
 
     /// 输出模式
-    pub fn output(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn output(port: impl GpioRef<'a>, n: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Output);
         pin
     }
 
-    /// 复用功能模式（UART/SPI/CAN 等外设引脚）
-    pub fn alternate(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    /// 复用功能模式（UART/SPI/CAN 等外设引脚），同时写 AF 编号
+    pub fn alternate(port: impl GpioRef<'a>, n: u8, af: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Alternate);
+        pin.set_af(af);
         pin
     }
 
     /// 模拟模式（ADC/DAC）
-    pub fn analog(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn analog(port: impl GpioRef<'a>, n: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Analog);
         pin
     }
 
     pub fn pin_number(&self) -> u8 {
         self.n
+    }
+
+    /// 设置复用功能编号（AFSEL0/AFSEL1 的 SELx 4bit 字段，0-15）
+    /// AF8=UART6/7、AF7=USART0/1/2（GD32F470 手册 AF 表）
+    pub fn set_af(&mut self, af: u8) {
+        match self.n {
+            0 => self.rb.afsel0().modify(|_, w| w.sel0().set(af)),
+            1 => self.rb.afsel0().modify(|_, w| w.sel1().set(af)),
+            2 => self.rb.afsel0().modify(|_, w| w.sel2().set(af)),
+            3 => self.rb.afsel0().modify(|_, w| w.sel3().set(af)),
+            4 => self.rb.afsel0().modify(|_, w| w.sel4().set(af)),
+            5 => self.rb.afsel0().modify(|_, w| w.sel5().set(af)),
+            6 => self.rb.afsel0().modify(|_, w| w.sel6().set(af)),
+            7 => self.rb.afsel0().modify(|_, w| w.sel7().set(af)),
+            8 => self.rb.afsel1().modify(|_, w| w.sel8().set(af)),
+            9 => self.rb.afsel1().modify(|_, w| w.sel9().set(af)),
+            10 => self.rb.afsel1().modify(|_, w| w.sel10().set(af)),
+            11 => self.rb.afsel1().modify(|_, w| w.sel11().set(af)),
+            12 => self.rb.afsel1().modify(|_, w| w.sel12().set(af)),
+            13 => self.rb.afsel1().modify(|_, w| w.sel13().set(af)),
+            14 => self.rb.afsel1().modify(|_, w| w.sel14().set(af)),
+            15 => self.rb.afsel1().modify(|_, w| w.sel15().set(af)),
+            _ => unreachable!("pin number is 0-15"),
+        }; // svd2rust 0.37 modify() 返回 u32，语句位置丢弃
     }
 
     /// 切换工作模式

@@ -6,6 +6,11 @@ members = [
     "src/hal/embassy-gd32",
     "src/firmware/blink-hal",
     "src/firmware/blink-async",
+    "src/firmware/uart-echo",
+    "src/firmware/rs485-echo",
+    "src/firmware/flash-identify",
+    "src/firmware/flash-rw",
+    "src/firmware/can-loopback",
 ]
 # stage0 裸寄存器版 blink 独立构建（自带 .cargo/config + memory.x），不并入 workspace
 exclude = ["src/firmware/examples-stage0"]

@@ -1881,13 +1881,13 @@
 #[doc = "Register `BT` reader"] pub type R = crate :: R < BtSpec > ;
 #[doc = "Register `BT` writer"] pub type W = crate :: W < BtSpec > ;
 #[doc = "Field `BAUDPSC` reader - Baud rate prescaler"] pub type BaudpscR = crate :: FieldReader < u16 > ;
-#[doc = "Field `BAUDPSC` writer - Baud rate prescaler"] pub type BaudpscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 10 , u16 > ;
+#[doc = "Field `BAUDPSC` writer - Baud rate prescaler"] pub type BaudpscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 10 , u16 , crate :: Safe > ;
 #[doc = "Field `BS1` reader - Bit segment 1"] pub type Bs1R = crate :: FieldReader ;
-#[doc = "Field `BS1` writer - Bit segment 1"] pub type Bs1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `BS1` writer - Bit segment 1"] pub type Bs1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `BS2` reader - Bit segment 2"] pub type Bs2R = crate :: FieldReader ;
-#[doc = "Field `BS2` writer - Bit segment 2"] pub type Bs2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 > ;
+#[doc = "Field `BS2` writer - Bit segment 2"] pub type Bs2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 , u8 , crate :: Safe > ;
 #[doc = "Field `SJW` reader - Resynchronization jump width"] pub type SjwR = crate :: FieldReader ;
-#[doc = "Field `SJW` writer - Resynchronization jump width"] pub type SjwW < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
+#[doc = "Field `SJW` writer - Resynchronization jump width"] pub type SjwW < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , u8 , crate :: Safe > ;
 #[doc = "Field `LCMOD` reader - Loopback communication mode"] pub type LcmodR = crate :: BitReader ;
 #[doc = "Field `LCMOD` writer - Loopback communication mode"] pub type LcmodW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `SCMOD` reader - Silent communication mode"] pub type ScmodR = crate :: BitReader ;
@@ -1932,9 +1932,9 @@
 #[doc = "Field `FF` reader - Frame format"] pub type FfR = crate :: BitReader ;
 #[doc = "Field `FF` writer - Frame format"] pub type FfW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `EFID` reader - The frame identifier"] pub type EfidR = crate :: FieldReader < u32 > ;
-#[doc = "Field `EFID` writer - The frame identifier"] pub type EfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 18 , u32 > ;
+#[doc = "Field `EFID` writer - The frame identifier"] pub type EfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 18 , u32 , crate :: Safe > ;
 #[doc = "Field `SFID_EFID` reader - The frame identifier"] pub type SfidEfidR = crate :: FieldReader < u16 > ;
-#[doc = "Field `SFID_EFID` writer - The frame identifier"] pub type SfidEfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 11 , u16 > ; impl R {
+#[doc = "Field `SFID_EFID` writer - The frame identifier"] pub type SfidEfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 11 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bit 0 - Transmit enable"]
 #[inline (always)] pub fn ten (& self) -> TenR { TenR :: new ((self . bits & 1) != 0) }
 #[doc = "Bit 1 - Frame type"]
@@ -1965,11 +1965,11 @@
 #[doc = "Register `TMP0` reader"] pub type R = crate :: R < Tmp0Spec > ;
 #[doc = "Register `TMP0` writer"] pub type W = crate :: W < Tmp0Spec > ;
 #[doc = "Field `DLENC` reader - Data length code"] pub type DlencR = crate :: FieldReader ;
-#[doc = "Field `DLENC` writer - Data length code"] pub type DlencW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `DLENC` writer - Data length code"] pub type DlencW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `TSEN` reader - Time stamp enable"] pub type TsenR = crate :: BitReader ;
 #[doc = "Field `TSEN` writer - Time stamp enable"] pub type TsenW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `TS` reader - Time stamp"] pub type TsR = crate :: FieldReader < u16 > ;
-#[doc = "Field `TS` writer - Time stamp"] pub type TsW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `TS` writer - Time stamp"] pub type TsW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Data length code"]
 #[inline (always)] pub fn dlenc (& self) -> DlencR { DlencR :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bit 8 - Time stamp enable"]
@@ -1992,13 +1992,13 @@
 #[doc = "Register `TMDATA00` reader"] pub type R = crate :: R < Tmdata00Spec > ;
 #[doc = "Register `TMDATA00` writer"] pub type W = crate :: W < Tmdata00Spec > ;
 #[doc = "Field `DB0` reader - Data byte 0"] pub type Db0R = crate :: FieldReader ;
-#[doc = "Field `DB0` writer - Data byte 0"] pub type Db0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB0` writer - Data byte 0"] pub type Db0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB1` reader - Data byte 1"] pub type Db1R = crate :: FieldReader ;
-#[doc = "Field `DB1` writer - Data byte 1"] pub type Db1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB1` writer - Data byte 1"] pub type Db1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB2` reader - Data byte 2"] pub type Db2R = crate :: FieldReader ;
-#[doc = "Field `DB2` writer - Data byte 2"] pub type Db2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB2` writer - Data byte 2"] pub type Db2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB3` reader - Data byte 3"] pub type Db3R = crate :: FieldReader ;
-#[doc = "Field `DB3` writer - Data byte 3"] pub type Db3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ; impl R {
+#[doc = "Field `DB3` writer - Data byte 3"] pub type Db3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:7 - Data byte 0"]
 #[inline (always)] pub fn db0 (& self) -> Db0R { Db0R :: new ((self . bits & 0xff) as u8) }
 #[doc = "Bits 8:15 - Data byte 1"]
@@ -2025,13 +2025,13 @@
 #[doc = "Register `TMDATA10` reader"] pub type R = crate :: R < Tmdata10Spec > ;
 #[doc = "Register `TMDATA10` writer"] pub type W = crate :: W < Tmdata10Spec > ;
 #[doc = "Field `DB4` reader - Data byte 4"] pub type Db4R = crate :: FieldReader ;
-#[doc = "Field `DB4` writer - Data byte 4"] pub type Db4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB4` writer - Data byte 4"] pub type Db4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB5` reader - Data byte 5"] pub type Db5R = crate :: FieldReader ;
-#[doc = "Field `DB5` writer - Data byte 5"] pub type Db5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB5` writer - Data byte 5"] pub type Db5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB6` reader - Data byte 6"] pub type Db6R = crate :: FieldReader ;
-#[doc = "Field `DB6` writer - Data byte 6"] pub type Db6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB6` writer - Data byte 6"] pub type Db6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB7` reader - Data byte 7"] pub type Db7R = crate :: FieldReader ;
-#[doc = "Field `DB7` writer - Data byte 7"] pub type Db7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ; impl R {
+#[doc = "Field `DB7` writer - Data byte 7"] pub type Db7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:7 - Data byte 4"]
 #[inline (always)] pub fn db4 (& self) -> Db4R { Db4R :: new ((self . bits & 0xff) as u8) }
 #[doc = "Bits 8:15 - Data byte 5"]
@@ -2064,9 +2064,9 @@
 #[doc = "Field `FF` reader - Frame format"] pub type FfR = crate :: BitReader ;
 #[doc = "Field `FF` writer - Frame format"] pub type FfW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `EFID` reader - The frame identifier"] pub type EfidR = crate :: FieldReader < u32 > ;
-#[doc = "Field `EFID` writer - The frame identifier"] pub type EfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 18 , u32 > ;
+#[doc = "Field `EFID` writer - The frame identifier"] pub type EfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 18 , u32 , crate :: Safe > ;
 #[doc = "Field `SFID_EFID` reader - The frame identifier"] pub type SfidEfidR = crate :: FieldReader < u16 > ;
-#[doc = "Field `SFID_EFID` writer - The frame identifier"] pub type SfidEfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 11 , u16 > ; impl R {
+#[doc = "Field `SFID_EFID` writer - The frame identifier"] pub type SfidEfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 11 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bit 0 - Transmit enable"]
 #[inline (always)] pub fn ten (& self) -> TenR { TenR :: new ((self . bits & 1) != 0) }
 #[doc = "Bit 1 - Frame type"]
@@ -2097,11 +2097,11 @@
 #[doc = "Register `TMP1` reader"] pub type R = crate :: R < Tmp1Spec > ;
 #[doc = "Register `TMP1` writer"] pub type W = crate :: W < Tmp1Spec > ;
 #[doc = "Field `DLENC` reader - Data length code"] pub type DlencR = crate :: FieldReader ;
-#[doc = "Field `DLENC` writer - Data length code"] pub type DlencW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `DLENC` writer - Data length code"] pub type DlencW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `TSEN` reader - Time stamp enable"] pub type TsenR = crate :: BitReader ;
 #[doc = "Field `TSEN` writer - Time stamp enable"] pub type TsenW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `TS` reader - Time stamp"] pub type TsR = crate :: FieldReader < u16 > ;
-#[doc = "Field `TS` writer - Time stamp"] pub type TsW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `TS` writer - Time stamp"] pub type TsW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Data length code"]
 #[inline (always)] pub fn dlenc (& self) -> DlencR { DlencR :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bit 8 - Time stamp enable"]
@@ -2124,13 +2124,13 @@
 #[doc = "Register `TMDATA01` reader"] pub type R = crate :: R < Tmdata01Spec > ;
 #[doc = "Register `TMDATA01` writer"] pub type W = crate :: W < Tmdata01Spec > ;
 #[doc = "Field `DB0` reader - Data byte 0"] pub type Db0R = crate :: FieldReader ;
-#[doc = "Field `DB0` writer - Data byte 0"] pub type Db0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB0` writer - Data byte 0"] pub type Db0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB1` reader - Data byte 1"] pub type Db1R = crate :: FieldReader ;
-#[doc = "Field `DB1` writer - Data byte 1"] pub type Db1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB1` writer - Data byte 1"] pub type Db1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB2` reader - Data byte 2"] pub type Db2R = crate :: FieldReader ;
-#[doc = "Field `DB2` writer - Data byte 2"] pub type Db2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB2` writer - Data byte 2"] pub type Db2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB3` reader - Data byte 3"] pub type Db3R = crate :: FieldReader ;
-#[doc = "Field `DB3` writer - Data byte 3"] pub type Db3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ; impl R {
+#[doc = "Field `DB3` writer - Data byte 3"] pub type Db3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:7 - Data byte 0"]
 #[inline (always)] pub fn db0 (& self) -> Db0R { Db0R :: new ((self . bits & 0xff) as u8) }
 #[doc = "Bits 8:15 - Data byte 1"]
@@ -2157,13 +2157,13 @@
 #[doc = "Register `TMDATA11` reader"] pub type R = crate :: R < Tmdata11Spec > ;
 #[doc = "Register `TMDATA11` writer"] pub type W = crate :: W < Tmdata11Spec > ;
 #[doc = "Field `DB4` reader - Data byte 4"] pub type Db4R = crate :: FieldReader ;
-#[doc = "Field `DB4` writer - Data byte 4"] pub type Db4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB4` writer - Data byte 4"] pub type Db4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB5` reader - Data byte 5"] pub type Db5R = crate :: FieldReader ;
-#[doc = "Field `DB5` writer - Data byte 5"] pub type Db5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB5` writer - Data byte 5"] pub type Db5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB6` reader - Data byte 6"] pub type Db6R = crate :: FieldReader ;
-#[doc = "Field `DB6` writer - Data byte 6"] pub type Db6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB6` writer - Data byte 6"] pub type Db6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB7` reader - Data byte 7"] pub type Db7R = crate :: FieldReader ;
-#[doc = "Field `DB7` writer - Data byte 7"] pub type Db7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ; impl R {
+#[doc = "Field `DB7` writer - Data byte 7"] pub type Db7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:7 - Data byte 4"]
 #[inline (always)] pub fn db4 (& self) -> Db4R { Db4R :: new ((self . bits & 0xff) as u8) }
 #[doc = "Bits 8:15 - Data byte 5"]
@@ -2196,9 +2196,9 @@
 #[doc = "Field `FF` reader - Frame format"] pub type FfR = crate :: BitReader ;
 #[doc = "Field `FF` writer - Frame format"] pub type FfW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `EFID` reader - The frame identifier"] pub type EfidR = crate :: FieldReader < u32 > ;
-#[doc = "Field `EFID` writer - The frame identifier"] pub type EfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 18 , u32 > ;
+#[doc = "Field `EFID` writer - The frame identifier"] pub type EfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 18 , u32 , crate :: Safe > ;
 #[doc = "Field `SFID_EFID` reader - The frame identifier"] pub type SfidEfidR = crate :: FieldReader < u16 > ;
-#[doc = "Field `SFID_EFID` writer - The frame identifier"] pub type SfidEfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 11 , u16 > ; impl R {
+#[doc = "Field `SFID_EFID` writer - The frame identifier"] pub type SfidEfidW < 'a , REG > = crate :: FieldWriter < 'a , REG , 11 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bit 0 - Transmit enable"]
 #[inline (always)] pub fn ten (& self) -> TenR { TenR :: new ((self . bits & 1) != 0) }
 #[doc = "Bit 1 - Frame type"]
@@ -2229,11 +2229,11 @@
 #[doc = "Register `TMP2` reader"] pub type R = crate :: R < Tmp2Spec > ;
 #[doc = "Register `TMP2` writer"] pub type W = crate :: W < Tmp2Spec > ;
 #[doc = "Field `DLENC` reader - Data length code"] pub type DlencR = crate :: FieldReader ;
-#[doc = "Field `DLENC` writer - Data length code"] pub type DlencW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `DLENC` writer - Data length code"] pub type DlencW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `TSEN` reader - Time stamp enable"] pub type TsenR = crate :: BitReader ;
 #[doc = "Field `TSEN` writer - Time stamp enable"] pub type TsenW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `TS` reader - Time stamp"] pub type TsR = crate :: FieldReader < u16 > ;
-#[doc = "Field `TS` writer - Time stamp"] pub type TsW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `TS` writer - Time stamp"] pub type TsW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Data length code"]
 #[inline (always)] pub fn dlenc (& self) -> DlencR { DlencR :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bit 8 - Time stamp enable"]
@@ -2256,13 +2256,13 @@
 #[doc = "Register `TMDATA02` reader"] pub type R = crate :: R < Tmdata02Spec > ;
 #[doc = "Register `TMDATA02` writer"] pub type W = crate :: W < Tmdata02Spec > ;
 #[doc = "Field `DB0` reader - Data byte 0"] pub type Db0R = crate :: FieldReader ;
-#[doc = "Field `DB0` writer - Data byte 0"] pub type Db0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB0` writer - Data byte 0"] pub type Db0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB1` reader - Data byte 1"] pub type Db1R = crate :: FieldReader ;
-#[doc = "Field `DB1` writer - Data byte 1"] pub type Db1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB1` writer - Data byte 1"] pub type Db1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB2` reader - Data byte 2"] pub type Db2R = crate :: FieldReader ;
-#[doc = "Field `DB2` writer - Data byte 2"] pub type Db2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB2` writer - Data byte 2"] pub type Db2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB3` reader - Data byte 3"] pub type Db3R = crate :: FieldReader ;
-#[doc = "Field `DB3` writer - Data byte 3"] pub type Db3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ; impl R {
+#[doc = "Field `DB3` writer - Data byte 3"] pub type Db3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:7 - Data byte 0"]
 #[inline (always)] pub fn db0 (& self) -> Db0R { Db0R :: new ((self . bits & 0xff) as u8) }
 #[doc = "Bits 8:15 - Data byte 1"]
@@ -2289,13 +2289,13 @@
 #[doc = "Register `TMDATA12` reader"] pub type R = crate :: R < Tmdata12Spec > ;
 #[doc = "Register `TMDATA12` writer"] pub type W = crate :: W < Tmdata12Spec > ;
 #[doc = "Field `DB4` reader - Data byte 4"] pub type Db4R = crate :: FieldReader ;
-#[doc = "Field `DB4` writer - Data byte 4"] pub type Db4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB4` writer - Data byte 4"] pub type Db4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB5` reader - Data byte 5"] pub type Db5R = crate :: FieldReader ;
-#[doc = "Field `DB5` writer - Data byte 5"] pub type Db5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB5` writer - Data byte 5"] pub type Db5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB6` reader - Data byte 6"] pub type Db6R = crate :: FieldReader ;
-#[doc = "Field `DB6` writer - Data byte 6"] pub type Db6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ;
+#[doc = "Field `DB6` writer - Data byte 6"] pub type Db6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ;
 #[doc = "Field `DB7` reader - Data byte 7"] pub type Db7R = crate :: FieldReader ;
-#[doc = "Field `DB7` writer - Data byte 7"] pub type Db7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 > ; impl R {
+#[doc = "Field `DB7` writer - Data byte 7"] pub type Db7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 8 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:7 - Data byte 4"]
 #[inline (always)] pub fn db4 (& self) -> Db4R { Db4R :: new ((self . bits & 0xff) as u8) }
 #[doc = "Bits 8:15 - Data byte 5"]
@@ -23896,21 +23896,21 @@
 #[doc = "Register `AFSEL0` reader"] pub type R = crate :: R < Afsel0Spec > ;
 #[doc = "Register `AFSEL0` writer"] pub type W = crate :: W < Afsel0Spec > ;
 #[doc = "Field `SEL0` reader - Port 0 alternate function selected"] pub type Sel0R = crate :: FieldReader ;
-#[doc = "Field `SEL0` writer - Port 0 alternate function selected"] pub type Sel0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL0` writer - Port 0 alternate function selected"] pub type Sel0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL1` reader - Port 1 alternate function selected"] pub type Sel1R = crate :: FieldReader ;
-#[doc = "Field `SEL1` writer - Port 1 alternate function selected"] pub type Sel1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL1` writer - Port 1 alternate function selected"] pub type Sel1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL2` reader - Port 2 alternate function selected"] pub type Sel2R = crate :: FieldReader ;
-#[doc = "Field `SEL2` writer - Port 2 alternate function selected"] pub type Sel2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL2` writer - Port 2 alternate function selected"] pub type Sel2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL3` reader - Port 3 alternate function selected"] pub type Sel3R = crate :: FieldReader ;
-#[doc = "Field `SEL3` writer - Port 3 alternate function selected"] pub type Sel3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL3` writer - Port 3 alternate function selected"] pub type Sel3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL4` reader - Port 4 alternate function selected"] pub type Sel4R = crate :: FieldReader ;
-#[doc = "Field `SEL4` writer - Port 4 alternate function selected"] pub type Sel4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL4` writer - Port 4 alternate function selected"] pub type Sel4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL5` reader - Port 5 alternate function selected"] pub type Sel5R = crate :: FieldReader ;
-#[doc = "Field `SEL5` writer - Port 5 alternate function selected"] pub type Sel5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL5` writer - Port 5 alternate function selected"] pub type Sel5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL6` reader - Port 6 alternate function selected"] pub type Sel6R = crate :: FieldReader ;
-#[doc = "Field `SEL6` writer - Port 6 alternate function selected"] pub type Sel6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL6` writer - Port 6 alternate function selected"] pub type Sel6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL7` reader - Port 7 alternate function selected"] pub type Sel7R = crate :: FieldReader ;
-#[doc = "Field `SEL7` writer - Port 7 alternate function selected"] pub type Sel7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ; impl R {
+#[doc = "Field `SEL7` writer - Port 7 alternate function selected"] pub type Sel7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Port 0 alternate function selected"]
 #[inline (always)] pub fn sel0 (& self) -> Sel0R { Sel0R :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:7 - Port 1 alternate function selected"]
@@ -23953,21 +23953,21 @@
 #[doc = "Register `AFSEL1` reader"] pub type R = crate :: R < Afsel1Spec > ;
 #[doc = "Register `AFSEL1` writer"] pub type W = crate :: W < Afsel1Spec > ;
 #[doc = "Field `SEL8` reader - Port 8 alternate function selected"] pub type Sel8R = crate :: FieldReader ;
-#[doc = "Field `SEL8` writer - Port 8 alternate function selected"] pub type Sel8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL8` writer - Port 8 alternate function selected"] pub type Sel8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL9` reader - Port 9 alternate function selected"] pub type Sel9R = crate :: FieldReader ;
-#[doc = "Field `SEL9` writer - Port 9 alternate function selected"] pub type Sel9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL9` writer - Port 9 alternate function selected"] pub type Sel9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL10` reader - Port 10 alternate function selected"] pub type Sel10R = crate :: FieldReader ;
-#[doc = "Field `SEL10` writer - Port 10 alternate function selected"] pub type Sel10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL10` writer - Port 10 alternate function selected"] pub type Sel10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL11` reader - Port 11 alternate function selected"] pub type Sel11R = crate :: FieldReader ;
-#[doc = "Field `SEL11` writer - Port 11 alternate function selected"] pub type Sel11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL11` writer - Port 11 alternate function selected"] pub type Sel11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL12` reader - Port 12 alternate function selected"] pub type Sel12R = crate :: FieldReader ;
-#[doc = "Field `SEL12` writer - Port 12 alternate function selected"] pub type Sel12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL12` writer - Port 12 alternate function selected"] pub type Sel12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL13` reader - Port 13 alternate function selected"] pub type Sel13R = crate :: FieldReader ;
-#[doc = "Field `SEL13` writer - Port 13 alternate function selected"] pub type Sel13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL13` writer - Port 13 alternate function selected"] pub type Sel13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL14` reader - Port 14 alternate function selected"] pub type Sel14R = crate :: FieldReader ;
-#[doc = "Field `SEL14` writer - Port 14 alternate function selected"] pub type Sel14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL14` writer - Port 14 alternate function selected"] pub type Sel14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL15` reader - Port 15 alternate function selected"] pub type Sel15R = crate :: FieldReader ;
-#[doc = "Field `SEL15` writer - Port 15 alternate function selected"] pub type Sel15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ; impl R {
+#[doc = "Field `SEL15` writer - Port 15 alternate function selected"] pub type Sel15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Port 8 alternate function selected"]
 #[inline (always)] pub fn sel8 (& self) -> Sel8R { Sel8R :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:7 - Port 9 alternate function selected"]
@@ -25358,21 +25358,21 @@
 #[doc = "Register `AFSEL0` reader"] pub type R = crate :: R < Afsel0Spec > ;
 #[doc = "Register `AFSEL0` writer"] pub type W = crate :: W < Afsel0Spec > ;
 #[doc = "Field `SEL0` reader - Port 0 alternate function selected"] pub type Sel0R = crate :: FieldReader ;
-#[doc = "Field `SEL0` writer - Port 0 alternate function selected"] pub type Sel0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL0` writer - Port 0 alternate function selected"] pub type Sel0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL1` reader - Port 1 alternate function selected"] pub type Sel1R = crate :: FieldReader ;
-#[doc = "Field `SEL1` writer - Port 1 alternate function selected"] pub type Sel1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL1` writer - Port 1 alternate function selected"] pub type Sel1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL2` reader - Port 2 alternate function selected"] pub type Sel2R = crate :: FieldReader ;
-#[doc = "Field `SEL2` writer - Port 2 alternate function selected"] pub type Sel2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL2` writer - Port 2 alternate function selected"] pub type Sel2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL3` reader - Port 3 alternate function selected"] pub type Sel3R = crate :: FieldReader ;
-#[doc = "Field `SEL3` writer - Port 3 alternate function selected"] pub type Sel3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL3` writer - Port 3 alternate function selected"] pub type Sel3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL4` reader - Port 4 alternate function selected"] pub type Sel4R = crate :: FieldReader ;
-#[doc = "Field `SEL4` writer - Port 4 alternate function selected"] pub type Sel4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL4` writer - Port 4 alternate function selected"] pub type Sel4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL5` reader - Port 5 alternate function selected"] pub type Sel5R = crate :: FieldReader ;
-#[doc = "Field `SEL5` writer - Port 5 alternate function selected"] pub type Sel5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL5` writer - Port 5 alternate function selected"] pub type Sel5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL6` reader - Port 6 alternate function selected"] pub type Sel6R = crate :: FieldReader ;
-#[doc = "Field `SEL6` writer - Port 6 alternate function selected"] pub type Sel6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL6` writer - Port 6 alternate function selected"] pub type Sel6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL7` reader - Port 7 alternate function selected"] pub type Sel7R = crate :: FieldReader ;
-#[doc = "Field `SEL7` writer - Port 7 alternate function selected"] pub type Sel7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ; impl R {
+#[doc = "Field `SEL7` writer - Port 7 alternate function selected"] pub type Sel7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Port 0 alternate function selected"]
 #[inline (always)] pub fn sel0 (& self) -> Sel0R { Sel0R :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:7 - Port 1 alternate function selected"]
@@ -25415,21 +25415,21 @@
 #[doc = "Register `AFSEL1` reader"] pub type R = crate :: R < Afsel1Spec > ;
 #[doc = "Register `AFSEL1` writer"] pub type W = crate :: W < Afsel1Spec > ;
 #[doc = "Field `SEL8` reader - Port 8 alternate function selected"] pub type Sel8R = crate :: FieldReader ;
-#[doc = "Field `SEL8` writer - Port 8 alternate function selected"] pub type Sel8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL8` writer - Port 8 alternate function selected"] pub type Sel8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL9` reader - Port 9 alternate function selected"] pub type Sel9R = crate :: FieldReader ;
-#[doc = "Field `SEL9` writer - Port 9 alternate function selected"] pub type Sel9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL9` writer - Port 9 alternate function selected"] pub type Sel9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL10` reader - Port 10 alternate function selected"] pub type Sel10R = crate :: FieldReader ;
-#[doc = "Field `SEL10` writer - Port 10 alternate function selected"] pub type Sel10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL10` writer - Port 10 alternate function selected"] pub type Sel10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL11` reader - Port 11 alternate function selected"] pub type Sel11R = crate :: FieldReader ;
-#[doc = "Field `SEL11` writer - Port 11 alternate function selected"] pub type Sel11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL11` writer - Port 11 alternate function selected"] pub type Sel11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL12` reader - Port 12 alternate function selected"] pub type Sel12R = crate :: FieldReader ;
-#[doc = "Field `SEL12` writer - Port 12 alternate function selected"] pub type Sel12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL12` writer - Port 12 alternate function selected"] pub type Sel12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL13` reader - Port 13 alternate function selected"] pub type Sel13R = crate :: FieldReader ;
-#[doc = "Field `SEL13` writer - Port 13 alternate function selected"] pub type Sel13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL13` writer - Port 13 alternate function selected"] pub type Sel13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL14` reader - Port 14 alternate function selected"] pub type Sel14R = crate :: FieldReader ;
-#[doc = "Field `SEL14` writer - Port 14 alternate function selected"] pub type Sel14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL14` writer - Port 14 alternate function selected"] pub type Sel14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL15` reader - Port 15 alternate function selected"] pub type Sel15R = crate :: FieldReader ;
-#[doc = "Field `SEL15` writer - Port 15 alternate function selected"] pub type Sel15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ; impl R {
+#[doc = "Field `SEL15` writer - Port 15 alternate function selected"] pub type Sel15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Port 8 alternate function selected"]
 #[inline (always)] pub fn sel8 (& self) -> Sel8R { Sel8R :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:7 - Port 9 alternate function selected"]
@@ -26820,21 +26820,21 @@
 #[doc = "Register `AFSEL0` reader"] pub type R = crate :: R < Afsel0Spec > ;
 #[doc = "Register `AFSEL0` writer"] pub type W = crate :: W < Afsel0Spec > ;
 #[doc = "Field `SEL0` reader - Port 0 alternate function selected"] pub type Sel0R = crate :: FieldReader ;
-#[doc = "Field `SEL0` writer - Port 0 alternate function selected"] pub type Sel0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL0` writer - Port 0 alternate function selected"] pub type Sel0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL1` reader - Port 1 alternate function selected"] pub type Sel1R = crate :: FieldReader ;
-#[doc = "Field `SEL1` writer - Port 1 alternate function selected"] pub type Sel1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL1` writer - Port 1 alternate function selected"] pub type Sel1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL2` reader - Port 2 alternate function selected"] pub type Sel2R = crate :: FieldReader ;
-#[doc = "Field `SEL2` writer - Port 2 alternate function selected"] pub type Sel2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL2` writer - Port 2 alternate function selected"] pub type Sel2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL3` reader - Port 3 alternate function selected"] pub type Sel3R = crate :: FieldReader ;
-#[doc = "Field `SEL3` writer - Port 3 alternate function selected"] pub type Sel3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL3` writer - Port 3 alternate function selected"] pub type Sel3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL4` reader - Port 4 alternate function selected"] pub type Sel4R = crate :: FieldReader ;
-#[doc = "Field `SEL4` writer - Port 4 alternate function selected"] pub type Sel4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL4` writer - Port 4 alternate function selected"] pub type Sel4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL5` reader - Port 5 alternate function selected"] pub type Sel5R = crate :: FieldReader ;
-#[doc = "Field `SEL5` writer - Port 5 alternate function selected"] pub type Sel5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL5` writer - Port 5 alternate function selected"] pub type Sel5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL6` reader - Port 6 alternate function selected"] pub type Sel6R = crate :: FieldReader ;
-#[doc = "Field `SEL6` writer - Port 6 alternate function selected"] pub type Sel6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL6` writer - Port 6 alternate function selected"] pub type Sel6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL7` reader - Port 7 alternate function selected"] pub type Sel7R = crate :: FieldReader ;
-#[doc = "Field `SEL7` writer - Port 7 alternate function selected"] pub type Sel7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ; impl R {
+#[doc = "Field `SEL7` writer - Port 7 alternate function selected"] pub type Sel7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Port 0 alternate function selected"]
 #[inline (always)] pub fn sel0 (& self) -> Sel0R { Sel0R :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:7 - Port 1 alternate function selected"]
@@ -26877,21 +26877,21 @@
 #[doc = "Register `AFSEL1` reader"] pub type R = crate :: R < Afsel1Spec > ;
 #[doc = "Register `AFSEL1` writer"] pub type W = crate :: W < Afsel1Spec > ;
 #[doc = "Field `SEL8` reader - Port 8 alternate function selected"] pub type Sel8R = crate :: FieldReader ;
-#[doc = "Field `SEL8` writer - Port 8 alternate function selected"] pub type Sel8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL8` writer - Port 8 alternate function selected"] pub type Sel8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL9` reader - Port 9 alternate function selected"] pub type Sel9R = crate :: FieldReader ;
-#[doc = "Field `SEL9` writer - Port 9 alternate function selected"] pub type Sel9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL9` writer - Port 9 alternate function selected"] pub type Sel9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL10` reader - Port 10 alternate function selected"] pub type Sel10R = crate :: FieldReader ;
-#[doc = "Field `SEL10` writer - Port 10 alternate function selected"] pub type Sel10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL10` writer - Port 10 alternate function selected"] pub type Sel10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL11` reader - Port 11 alternate function selected"] pub type Sel11R = crate :: FieldReader ;
-#[doc = "Field `SEL11` writer - Port 11 alternate function selected"] pub type Sel11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL11` writer - Port 11 alternate function selected"] pub type Sel11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL12` reader - Port 12 alternate function selected"] pub type Sel12R = crate :: FieldReader ;
-#[doc = "Field `SEL12` writer - Port 12 alternate function selected"] pub type Sel12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL12` writer - Port 12 alternate function selected"] pub type Sel12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL13` reader - Port 13 alternate function selected"] pub type Sel13R = crate :: FieldReader ;
-#[doc = "Field `SEL13` writer - Port 13 alternate function selected"] pub type Sel13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL13` writer - Port 13 alternate function selected"] pub type Sel13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL14` reader - Port 14 alternate function selected"] pub type Sel14R = crate :: FieldReader ;
-#[doc = "Field `SEL14` writer - Port 14 alternate function selected"] pub type Sel14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `SEL14` writer - Port 14 alternate function selected"] pub type Sel14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `SEL15` reader - Port 15 alternate function selected"] pub type Sel15R = crate :: FieldReader ;
-#[doc = "Field `SEL15` writer - Port 15 alternate function selected"] pub type Sel15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ; impl R {
+#[doc = "Field `SEL15` writer - Port 15 alternate function selected"] pub type Sel15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Port 8 alternate function selected"]
 #[inline (always)] pub fn sel8 (& self) -> Sel8R { Sel8R :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:7 - Port 9 alternate function selected"]
@@ -32293,7 +32293,7 @@
 #[doc = "Field `MSTMOD` reader - Master Mode Enable"] pub type MstmodR = crate :: BitReader ;
 #[doc = "Field `MSTMOD` writer - Master Mode Enable"] pub type MstmodW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `PSC` reader - Master Clock Prescaler Selection"] pub type PscR = crate :: FieldReader ;
-#[doc = "Field `PSC` writer - Master Clock Prescaler Selection"] pub type PscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 > ;
+#[doc = "Field `PSC` writer - Master Clock Prescaler Selection"] pub type PscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 3 , u8 , crate :: Safe > ;
 #[doc = "Field `SPIEN` reader - SPI enable"] pub type SpienR = crate :: BitReader ;
 #[doc = "Field `SPIEN` writer - SPI enable"] pub type SpienW < 'a , REG > = crate :: BitWriter < 'a , REG > ;
 #[doc = "Field `LF` reader - LSB First Mode"] pub type LfR = crate :: BitReader ;
@@ -32473,7 +32473,7 @@
 #[doc = "Register `DATA` reader"] pub type R = crate :: R < DataSpec > ;
 #[doc = "Register `DATA` writer"] pub type W = crate :: W < DataSpec > ;
 #[doc = "Field `SPI_DATA` reader - Data transfer register"] pub type SpiDataR = crate :: FieldReader < u16 > ;
-#[doc = "Field `SPI_DATA` writer - Data transfer register"] pub type SpiDataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `SPI_DATA` writer - Data transfer register"] pub type SpiDataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:15 - Data transfer register"]
 #[inline (always)] pub fn spi_data (& self) -> SpiDataR { SpiDataR :: new ((self . bits & 0xffff) as u16) } } impl W {
 #[doc = "Bits 0:15 - Data transfer register"]
@@ -37044,7 +37044,7 @@
 #[doc = "Register `DATA` reader"] pub type R = crate :: R < DataSpec > ;
 #[doc = "Register `DATA` writer"] pub type W = crate :: W < DataSpec > ;
 #[doc = "Field `DATA` reader - Transmit or read data value"] pub type DataR = crate :: FieldReader < u16 > ;
-#[doc = "Field `DATA` writer - Transmit or read data value"] pub type DataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 9 , u16 > ; impl R {
+#[doc = "Field `DATA` writer - Transmit or read data value"] pub type DataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 9 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:8 - Transmit or read data value"]
 #[inline (always)] pub fn data (& self) -> DataR { DataR :: new ((self . bits & 0x01ff) as u16) } } impl W {
 #[doc = "Bits 0:8 - Transmit or read data value"]
@@ -37059,9 +37059,9 @@
 #[doc = "Register `BAUD` reader"] pub type R = crate :: R < BaudSpec > ;
 #[doc = "Register `BAUD` writer"] pub type W = crate :: W < BaudSpec > ;
 #[doc = "Field `FRADIV` reader - Fraction part of baud-rate divider"] pub type FradivR = crate :: FieldReader ;
-#[doc = "Field `FRADIV` writer - Fraction part of baud-rate divider"] pub type FradivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `FRADIV` writer - Fraction part of baud-rate divider"] pub type FradivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `INTDIV` reader - Integer part of baud-rate divider"] pub type IntdivR = crate :: FieldReader < u16 > ;
-#[doc = "Field `INTDIV` writer - Integer part of baud-rate divider"] pub type IntdivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 12 , u16 > ; impl R {
+#[doc = "Field `INTDIV` writer - Integer part of baud-rate divider"] pub type IntdivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 12 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Fraction part of baud-rate divider"]
 #[inline (always)] pub fn fradiv (& self) -> FradivR { FradivR :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:15 - Integer part of baud-rate divider"]
@@ -37536,7 +37536,7 @@
 #[doc = "Register `DATA` reader"] pub type R = crate :: R < DataSpec > ;
 #[doc = "Register `DATA` writer"] pub type W = crate :: W < DataSpec > ;
 #[doc = "Field `DATA` reader - Transmit or read data value"] pub type DataR = crate :: FieldReader < u16 > ;
-#[doc = "Field `DATA` writer - Transmit or read data value"] pub type DataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 9 , u16 > ; impl R {
+#[doc = "Field `DATA` writer - Transmit or read data value"] pub type DataW < 'a , REG > = crate :: FieldWriter < 'a , REG , 9 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:8 - Transmit or read data value"]
 #[inline (always)] pub fn data (& self) -> DataR { DataR :: new ((self . bits & 0x01ff) as u16) } } impl W {
 #[doc = "Bits 0:8 - Transmit or read data value"]
@@ -37551,9 +37551,9 @@
 #[doc = "Register `BAUD` reader"] pub type R = crate :: R < BaudSpec > ;
 #[doc = "Register `BAUD` writer"] pub type W = crate :: W < BaudSpec > ;
 #[doc = "Field `FRADIV` reader - Fraction part of baud-rate divider"] pub type FradivR = crate :: FieldReader ;
-#[doc = "Field `FRADIV` writer - Fraction part of baud-rate divider"] pub type FradivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 > ;
+#[doc = "Field `FRADIV` writer - Fraction part of baud-rate divider"] pub type FradivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 4 , u8 , crate :: Safe > ;
 #[doc = "Field `INTDIV` reader - Integer part of baud-rate divider"] pub type IntdivR = crate :: FieldReader < u16 > ;
-#[doc = "Field `INTDIV` writer - Integer part of baud-rate divider"] pub type IntdivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 12 , u16 > ; impl R {
+#[doc = "Field `INTDIV` writer - Integer part of baud-rate divider"] pub type IntdivW < 'a , REG > = crate :: FieldWriter < 'a , REG , 12 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:3 - Fraction part of baud-rate divider"]
 #[inline (always)] pub fn fradiv (& self) -> FradivR { FradivR :: new ((self . bits & 0x0f) as u8) }
 #[doc = "Bits 4:15 - Integer part of baud-rate divider"]
@@ -49615,9 +49615,3 @@ pub mod interrupt_shim;
 pub mod interrupt {
     pub use crate::interrupt_shim::consts::*;
 }
-
-#[allow(unused)]
-const _PAC_SCOPE_TEST: () = {
-    let _ = crate::Interrupt::TIMER1;
-    let _ = crate::interrupt::TIMER1;
-};
