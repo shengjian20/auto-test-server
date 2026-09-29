@@ -15,6 +15,7 @@
 #![no_main]
 #![deny(unsafe_code)]
 
+use embassy_gd32::can::{Can, Frame};
 use embassy_gd32::{cpld, Pin, Port, Rcc, Spi, Uart};
 use panic_halt as _;
 
@@ -65,6 +66,46 @@ fn eq(t: &[u8], s: &str) -> bool {
     t == s.as_bytes()
 }
 
+fn parse_u16_hex(t: &[u8]) -> Option<u16> {
+    if t.len() < 3 || t.len() > 4 {
+        return None;
+    }
+    let mut v: u16 = 0;
+    for &c in t {
+        v = (v << 4) + (c as char).to_digit(16)? as u16;
+    }
+    Some(v)
+}
+
+fn parse_u8_hex(t: &[u8]) -> Option<u8> {
+    if t.len() != 2 {
+        return None;
+    }
+    let mut v: u8 = 0;
+    for &c in t {
+        v = (v << 4) + (c as char).to_digit(16)? as u8;
+    }
+    Some(v)
+}
+
+/// hex 串按字节对解析到 buf（"1a2b3c" -> [0x1a,0x2b,0x3c]），返回字节数。
+/// 奇数长度/非法字符返回 None。
+fn parse_hex_bytes(t: &[u8], buf: &mut [u8]) -> Option<usize> {
+    if t.is_empty() || t.len() % 2 != 0 || t.len() > buf.len() * 2 {
+        return None;
+    }
+    let mut n = 0usize;
+    let mut i = 0usize;
+    while i < t.len() {
+        let hi = (t[i] as char).to_digit(16)? as u8;
+        let lo = (t[i + 1] as char).to_digit(16)? as u8;
+        buf[n] = (hi << 4) | lo;
+        n += 1;
+        i += 2;
+    }
+    Some(n)
+}
+
 fn parse_u8(t: &[u8]) -> Option<u8> {
     if t.len() == 2 {
         let hi = (t[0] as char).to_digit(16)?;
@@ -109,6 +150,16 @@ fn main() -> ! {
     let spi = Spi::new(&p.spi2);
     spi.enable_master(PCLK1_HZ, 500_000);
     let mut cpld_dev = cpld::Cpld::new(&spi, &mut cs);
+
+    // CAN0（PD0=RX / PD1=TX AF9，500k，正常模式）
+    rcc.enable_gpio_port(Port::D);
+    rcc.enable_can0();
+    let _crx = Pin::alternate(&p.gpiod, 0, 9);
+    let _ctx = Pin::alternate(&p.gpiod, 1, 9);
+    let can0 = Can::new(&p.can0, &p.can0);
+    if can0.init_loopback(&embassy_gd32::can::BitTiming::kbps500()).is_err() {
+        put_str(&uart, "can0 init failed (continuing without CAN)\r\n");
+    }
 
     // DMS OUT×8（OUT1-7=PE9-15，OUT8=PB10）、CTRL1-2=PB3/PB4
     let mut outs_e: [Pin; 7] = [
@@ -241,6 +292,55 @@ fn main() -> ! {
                             }
                         } else {
                             put_str(&uart, "ERR usage: ctrl <1|2> <0|1>\r\n");
+                        }
+                    } else if nt >= 2 && eq(toks[0], "can0") {
+                        if nt >= 3 && eq(toks[1], "send") {
+                            // can0 send <id> <db0> [db1..db7]（全部 hex）
+                            let id = match parse_u16_hex(toks[2]) {
+                                Some(v) if v <= 0x7FF => v,
+                                _ => {
+                                    put_str(&uart, "ERR id (0-7FF)\r\n");
+                                    n = 0;
+                                    continue;
+                                }
+                            };
+                            // 数据 = 各 token 的 hex 串按字节对解析合并
+                            // （兼容 "11223344" 连写与 "11 22 33 44" 空格分隔）
+                            let mut data = [0u8; 8];
+                            let mut len = 0usize;
+                            let mut parse_err = false;
+                            for t in toks[3..nt].iter() {
+                                let need = (t.len() + 1) / 2;
+                                if len + need > 8 {
+                                    put_str(&uart, "ERR data >8 bytes\r\n");
+                                    parse_err = true;
+                                    break;
+                                }
+                                match parse_hex_bytes(t, &mut data[len..]) {
+                                    Some(k) => len += k,
+                                    None => {
+                                        parse_err = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if parse_err {
+                                n = 0;
+                                continue;
+                            }
+                            if len == 0 {
+                                put_str(&uart, "ERR need >=1 data byte\r\n");
+                                n = 0;
+                                continue;
+                            }
+                            let frame = Frame { id, len: len as u8, data };
+                            if can0.send(&frame) {
+                                put_str(&uart, "OK sent\r\n");
+                            } else {
+                                put_str(&uart, "ERR send-timeout\r\n");
+                            }
+                        } else {
+                            put_str(&uart, "ERR usage: can0 send <id> <bytes..>\r\n");
                         }
                     } else {
                         put_str(&uart, "ERR unknown cmd\r\n");
