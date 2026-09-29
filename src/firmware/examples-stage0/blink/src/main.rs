@@ -6,13 +6,10 @@
 
 use core::ptr::{read_volatile, write_volatile};
 
-const PERIPH_BASE: u32 = 0x4000_0000;
-const AHB1_BASE: u32 = PERIPH_BASE + 0x0002_0000;
-
-const RCU_BASE: u32 = PERIPH_BASE + 0x0002_8000 + 0x0000_0000; // GD32F4 RCU @ 0x40023800
+const RCU_BASE: u32 = 0x4002_3800; // RCU @ 0x40023800（固件库 AHB1_BUS_BASE+0x3800 定案；AHB1EN=+0x30）
 const RCU_AHB1EN: *mut u32 = (RCU_BASE + 0x30) as *mut u32;
 
-const GPIOD_BASE: u32 = AHB1_BASE + 0x0C00; // GPIOD @ 0x40020C00
+const GPIOD_BASE: u32 = 0x4002_0C00; // GPIOD @ 0x40020C00（SVD 定案）
 const GPIOD_MODER: *mut u32 = (GPIOD_BASE + 0x00) as *mut u32;
 const GPIOD_OTYPER: *mut u32 = (GPIOD_BASE + 0x04) as *mut u32;
 const GPIOD_OSPEEDR: *mut u32 = (GPIOD_BASE + 0x08) as *mut u32;
