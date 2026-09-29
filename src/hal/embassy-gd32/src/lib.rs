@@ -19,5 +19,5 @@ pub mod usart;
 pub use time_driver::init_time_driver;
 
 pub use gpio::{Pin, PinMode, Port};
-pub use usart::Uart;
+pub use usart::{Uart, Usart};
 pub use rcc::Rcc;

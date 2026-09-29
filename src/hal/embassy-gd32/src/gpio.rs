@@ -10,6 +10,31 @@ use core::convert::Infallible;
 use embedded_hal::digital::{ErrorType, InputPin, OutputPin};
 use gd32f470::gpioc;
 
+/// GPIO 端口寄存器块统一访问（Pin 构造函数接受任何端口引用）。
+///
+/// unsafe 依据（本 trait 各 impl 的 cast）：SVD 逐寄存器 diff 实证
+/// GPIOA/GPIOB/GPIOC 三者 RegisterBlock 完全一致（12 寄存器同名同偏移
+/// 同宽度），GPIOD/GPIOE 本就是 GPIOC 的 derivedFrom 别名；cast 仅生成
+/// 别名引用，不产生额外写路径。
+pub trait GpioRef<'a> {
+    fn port_regs(self) -> &'a gpioc::RegisterBlock;
+}
+
+macro_rules! impl_gpio_ref {
+    ($t:ident) => {
+        impl<'a> GpioRef<'a> for &'a gd32f470::$t {
+            fn port_regs(self) -> &'a gpioc::RegisterBlock {
+                unsafe { &*(gd32f470::$t::PTR as *const gpioc::RegisterBlock) }
+            }
+        }
+    };
+}
+impl_gpio_ref!(Gpioa);
+impl_gpio_ref!(Gpiob);
+impl_gpio_ref!(Gpioc);
+impl_gpio_ref!(Gpiod);
+impl_gpio_ref!(Gpioe);
+
 /// GPIO 端口（GD32F470VGT6 实有 A-I）
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Port {
@@ -124,30 +149,30 @@ pub struct Pin<'a> {
 
 impl<'a> Pin<'a> {
     /// 输入模式（复位默认态，显式构造以自证时钟已开）
-    pub fn input(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn input(port: impl GpioRef<'a>, n: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Input);
         pin
     }
 
     /// 输出模式
-    pub fn output(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn output(port: impl GpioRef<'a>, n: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Output);
         pin
     }
 
     /// 复用功能模式（UART/SPI/CAN 等外设引脚），同时写 AF 编号
-    pub fn alternate(rb: &'a gpioc::RegisterBlock, n: u8, af: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn alternate(port: impl GpioRef<'a>, n: u8, af: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Alternate);
         pin.set_af(af);
         pin
     }
 
     /// 模拟模式（ADC/DAC）
-    pub fn analog(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
-        let mut pin = Self { rb, n };
+    pub fn analog(port: impl GpioRef<'a>, n: u8) -> Self {
+        let mut pin = Self { rb: port.port_regs(), n };
         pin.set_mode(PinMode::Analog);
         pin
     }
