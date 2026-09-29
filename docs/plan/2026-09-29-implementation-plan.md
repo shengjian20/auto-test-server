@@ -167,3 +167,22 @@ auto_test_server/
   电气回读验收需外部 jumper/meter）
 - 踩坑沉淀：UART6 引脚配置遗漏导致 console 静默（flash-identify/dms-io-test
   两度踩中，已加注释固化）；CPLD 应答为全双工内嵌时序（非命令后附加字节）
+
+### SRAM 地图定案（2026-09-29，openocd 逐段探针板上实证）
+- 主 SRAM 448KB 连续 @ 0x20000000（SRAM0 112K + SRAM1 16K + SRAM2 64K +
+  ADDSRAM 256K；0x20070000 起总线错误实测边界）
+- TCMSRAM 64KB @ 0x10000000：仅内核 DBUS（DMA 禁入），适合关键任务栈/
+  executor 热结构/RTT 缓冲；DMA 缓冲禁止放置
+- 宣传 512K = 448K 主 SRAM + 64K TCM（社区帖"512K 含备份区 64K"即此意）
+- memory.x 已定案 448K；ram-probe 全量测试进行中
+- 优化待办：TCP 服务器稳定后，将中断栈 + embassy executor 热结构迁 TCM
+
+### 阶段 4 前置（2026-09-29 完成，feat/stage4-protocol-uart 分支）
+- UART6 串行控制协议（文本行协议，传输层可替换为 TCP）：
+  - v1：ping/cpld mux/out/in/ctrl——CONTROL PASS（c682e50）
+  - v2：can0 send 接入——CONTROL_V2 PASS（9e50905，CAN 总线 ACK 实证 TJA1050 活动）
+  - v3：flash jedec/read + can0 recv——V3 CHECK PASS（cc8f80e）
+- 修复合集：out/ctrl 3-token 条件、can0 双分支合并（recv 2-token 命令被
+  nt>=3 守卫挡住的 token 计数 bug）、read_byte 手册推荐流（STAT0→DATA）
+- 板上定案数据：W25Q128 addr0 遗留 "carrier_" 数据（carrier-box 历史）；
+  can0 send OK sent（TJA1050 活动、总线 ACK 存在）

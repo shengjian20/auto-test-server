@@ -13,6 +13,11 @@ members = [
     "src/firmware/can-loopback",
     "src/firmware/cpld-test",
     "src/firmware/dms-io-test",
+    "src/firmware/ram-probe",
+    "src/firmware/enet-phy-probe",
+    "src/firmware/enet-link-test",
+    "src/firmware/control-server",
+    "src/firmware/enet-dma-test",
 ]
 # stage0 裸寄存器版 blink 独立构建（自带 .cargo/config + memory.x），不并入 workspace
 exclude = ["src/firmware/examples-stage0"]

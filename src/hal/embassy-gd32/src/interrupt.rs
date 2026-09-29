@@ -45,9 +45,8 @@ impl InterruptExt for Interrupt {}
 macro_rules! typelevel_interrupts {
     ($($name:ident),* $(,)?) => {
         pub mod typelevel {
-            use cortex_m::interrupt::InterruptNumber;
-
-            trait Sealed {}
+            /// Sealed 封锁 trait（模块外不可命名，阻止外部实现 Irq）
+            pub trait Sealed {}
             $(impl Sealed for $name {})*
 
             /// Type-level interrupt：零大小类型，IRQ 回链 PAC 枚举

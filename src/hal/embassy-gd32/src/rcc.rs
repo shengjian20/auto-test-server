@@ -41,6 +41,18 @@ impl<'a> Rcc<'a> {
         self.rb.apb1en().modify(|_, w| w.spi2en().set_bit());
     }
 
+    /// 使能 SYSCFG 时钟（RCU_APB2EN.SYSCFGEN）
+    pub fn enable_syscfg(&self) {
+        self.rb.apb2en().modify(|_, w| w.syscfgen().set_bit());
+    }
+
+    /// 使能 ENET 全部时钟（RCU_AHB1EN：ENETTXE/ENETRXE/ENETPTPE/ENETE）
+    pub fn enable_enet(&self) {
+        self.rb.ahb1en().modify(|_, w| {
+            w.enettxen().set_bit().enetrxen().set_bit().enetptpen().set_bit().eneten().set_bit()
+        });
+    }
+
     /// 使能 GPIO 端口时钟（RCU_AHB1EN.PxEN）。
     /// modify() 为读改写，天然满足 GD32 手册"写后读回同步"要求。
     pub fn enable_gpio_port(&self, port: Port) {

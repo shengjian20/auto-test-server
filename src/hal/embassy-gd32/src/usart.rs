@@ -37,8 +37,10 @@ macro_rules! uart_device {
                 rb.ctl0().modify(|_, w| w.uen().clear_bit());
 
                 let reg = (pclk_hz / baud) as u16;
-                rb.baud().write(|w| {
-                    w.intdiv().set(reg >> 4).fradiv().set((reg & 0xF) as u8)
+                // unsafe 依据（bits() x2）：BAUD.INTDIV 12b + FRADIV 4b =
+                // 16b 全值域无保留位（手册 oversample16 公式直接编码）
+                rb.baud().write(|w| unsafe {
+                    w.intdiv().bits(reg >> 4).fradiv().bits((reg & 0xF) as u8)
                 });
 
                 // CTL0：8 位字长（WL=0 复位默认）、无校验（PCEN=0）、使能 TX/RX/外设
@@ -52,7 +54,9 @@ macro_rules! uart_device {
                 while !self.rb.stat0().read().tbe().bit_is_set() {
                     core::hint::spin_loop();
                 }
-                self.rb.data().write(|w| w.data().set(b as u16));
+                // unsafe 依据（bits()）：DATA 9b 字段全值域 0-511（含第 9
+                // 数据位），u8 入参天然界内；读侧自动清 RBNE
+                self.rb.data().write(|w| unsafe { w.data().bits(b as u16) });
             }
 
             /// 等最后一字节移位完成（STAT0.TC）
@@ -70,35 +74,31 @@ macro_rules! uart_device {
                 self.flush();
             }
 
-            /// 非阻塞读：RBNE 置位时返回接收字节（读 DATA 自动清 RBNE）。
-            /// 帧错误/溢出等错误态按手册顺序清 flags（读 STAT0 后读 DATA）
+            /// 非阻塞读：手册推荐顺序（读 STAT0 后读 DATA）自动清 RBNE/ORE/
+            /// 帧错误标志。RBNE=0 或错误态返回 None（错误字节丢弃）。
             pub fn read_byte(&self) -> Option<u8> {
                 let st = self.rb.stat0().read();
-                if st.orerr().bit_is_set() || st.ferr().bit_is_set()
-                    || st.nerr().bit_is_set() || st.perr().bit_is_set()
-                {
-                    let _ = self.rb.stat0().read();
-                    let _ = self.rb.data().read();
+                if !st.rbne().bit_is_set() {
+                    // 无数据。若错误标志挂起（ORE 等），读 DATA 一次清除
+                    if st.orerr().bit_is_set() {
+                        let _ = self.rb.data().read();
+                    }
                     return None;
                 }
-                if st.rbne().bit_is_set() {
-                    Some(self.rb.data().read().data().bits() as u8)
-                } else {
-                    None
-                }
+                Some(self.rb.data().read().data().bits() as u8)
             }
         }
     };
 }
 
-/// UART3/UART6 类布局（UART6 = PC_RS232_1）
+// UART3/UART6 类布局（UART6 = PC_RS232_1）
 uart_device!(
     Uart,
     uart3::RegisterBlock,
     "UART 类串口（UART6 = PC_RS232_1，PE7/PE8；UART6 复用 uart3 布局）"
 );
 
-/// USART0/1/2/5 类布局（USART1 = RS485_1，PA2/PA3）
+// USART0/1/2/5 类布局（USART1 = RS485_1，PA2/PA3）
 uart_device!(
     Usart,
     usart0::RegisterBlock,

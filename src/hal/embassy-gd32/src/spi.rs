@@ -34,11 +34,13 @@ impl<'a> Spi<'a> {
             psc += 1;
         }
 
-        rb.ctl0().modify(|_, w| {
+        // unsafe 依据（bits()）：SPI CTL0.PSC 3bit 分频档 0-7 全部为合法
+        // 值（PCLK/2^(n+1) 逐档定义），psc 变量 0..=7 由上方循环边界保证
+        rb.ctl0().modify(|_, w| unsafe {
             w.mstmod()
                 .set_bit() // 主模式
                 .psc()
-                .set(psc)
+                .bits(psc)
                 .swnssen()
                 .set_bit() // NSS 软件管理（SSI 置高防 MODF）
                 .swnss()
@@ -53,7 +55,8 @@ impl<'a> Spi<'a> {
         while !self.rb.stat().read().tbe().bit_is_set() {
             core::hint::spin_loop();
         }
-        self.rb.data().write(|w| w.spi_data().set(b as u16));
+        // unsafe 依据（bits()）：SPI DATA 16b 全宽无保留位（手册 SPI 章节）
+        self.rb.data().write(|w| unsafe { w.spi_data().bits(b as u16) });
         while !self.rb.stat().read().rbne().bit_is_set() {
             core::hint::spin_loop();
         }
