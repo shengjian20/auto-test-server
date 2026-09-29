@@ -73,6 +73,9 @@ impl TcpLine {
     pub fn open(addr: &str) -> io::Result<Self> {
         let stream = TcpStream::connect(addr)?;
         stream.set_read_timeout(Some(Duration::from_millis(200)))?;
+        // NODELAY：命令行单包发送——Nagle 会把 cmd 与 "\n" 合并延迟达
+        // 40ms，配合板侧按拍轮询造成分段撕裂/事务超时抖动
+        stream.set_nodelay(true)?;
         Ok(Self { stream })
     }
 
@@ -88,9 +91,13 @@ impl TcpLine {
     }
 
     pub fn transact(&mut self, cmd: &str) -> Result<String, String> {
+        // 命令行含换行单包发送（分次 write 在 Nagle 下拆段，板侧残尾
+        // 拼接虽可续齐，单包更稳）
+        let mut pkt = String::with_capacity(cmd.len() + 1);
+        pkt.push_str(cmd);
+        pkt.push('\n');
         self.stream
-            .write_all(cmd.as_bytes())
-            .and_then(|_| self.stream.write_all(b"\n"))
+            .write_all(pkt.as_bytes())
             .and_then(|_| self.stream.flush())
             .map_err(|e| format!("write: {e}"))?;
 
