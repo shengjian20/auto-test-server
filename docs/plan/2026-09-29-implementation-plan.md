@@ -261,3 +261,18 @@ auto_test_server/
      IpListenEndpoint::from(port) 让栈自动选源
 - 待续：MCP server 切 TCP 传输层（协议复用，control-server TCP 变体）+
   接网线实测模式（MAC_LBM=0 重构建）
+
+### 阶段 6b（2026-09-30 完成，feat/stage6b-tcp-transfer 分支，TCP_PROTO_SELFTEST PASS）
+- 协议-over-TCP 传输层替换（a1716f9）：
+  app.rs 重构为 AppDeps::dispatch(out, toks, nt)——命令分发与传输层
+  解耦（输出汇参数化），UART/TCP 变体共享单一协议主体；
+  control-server-tcp bin：TCP 监听 :9000 → 行组装 → deps.dispatch →
+  send_slice；内置自测 client 经 MAC LBM 全栈（ARP+SYN+DATA）发
+  "ping" 验证 "OK pong"——TCP_PROTO_SELFTEST: PASS
+- UART 变体重构后回归 CONTROL_V2: PASS（无行为漂移）
+- 架构定案：periph::Peripherals 'static 寄存器块引用字段（PTR 派生，
+  子句柄自动获得 'static，E0515 根治）；Cpld/W25q 持有 Spi 值（所有权
+  转移）；HAL enet_smoltcp 模块（smoltcp-device feature 门控，Device
+  适配层 + TBU/RBU 挂起恢复收编单一来源）
+- MCP server 切 TCP：mcp-server --port 已参数化，串口/TCP 传输层同一
+  协议（host 侧无改动即兼容，切换仅需 --tcp 参数，见 tools/mcp-server）
