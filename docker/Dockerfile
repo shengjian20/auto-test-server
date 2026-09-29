@@ -43,6 +43,8 @@ RUN curl -sSf https://rsproxy.cn/rustup-init.sh | sh -s -- -y \
     && rustup target add ${TARGET} \
     && rustup component add rustfmt clippy llvm-tools-preview \
     && cargo install cargo-binutils \
+    && cargo install svd2rust --locked \
+    && cargo install form --locked \
     && rm -rf /usr/local/cargo/registry/src
 
 # probe-rs：官方二进制 vendor 进仓库（docker/vendor/，经 gh-proxy 加速预下载），
