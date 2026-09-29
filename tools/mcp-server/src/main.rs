@@ -15,12 +15,14 @@ use serde_json::{json, Value};
 use std::io::{BufRead, Write};
 
 mod serial;
-use serial::SerialLine;
+use serial::{AnyLine, SerialLine};
 
 fn main() {
-    // 参数解析（--port / --baud）
+    // 参数解析（--port / --baud / --tcp；--tcp 优先，传输层二选一）
     let mut port_path = String::from("/dev/ttyUSB0");
     let mut baud: u32 = 115_200;
+    let mut tcp_addr = String::from("172.22.0.50:9000");
+    let mut use_tcp = false;
     let mut args = std::env::args().skip(1);
     while let Some(a) = args.next() {
         match a.as_str() {
@@ -34,15 +36,27 @@ fn main() {
                     baud = v.parse().unwrap_or(115_200);
                 }
             }
+            "--tcp" => {
+                use_tcp = true;
+                if let Some(v) = args.next() {
+                    tcp_addr = v;
+                }
+            }
             _ => {}
         }
     }
 
-    let mut ser = SerialLine::open(&port_path, baud)
-        .unwrap_or_else(|e| {
+    let mut ser = if use_tcp {
+        AnyLine::Tcp(serial::TcpLine::open(&tcp_addr).unwrap_or_else(|e| {
+            eprintln!("tcp connect {tcp_addr}: {e}");
+            std::process::exit(1);
+        }))
+    } else {
+        AnyLine::Serial(SerialLine::open(&port_path, baud).unwrap_or_else(|e| {
             eprintln!("serial open {port_path}: {e}");
             std::process::exit(1);
-        });
+        }))
+    };
     // 握手：control-server 的 banner（可选）
     let _ = ser.flush_input();
 
@@ -104,7 +118,7 @@ fn main() {
 }
 
 /// 工具执行分发：MCP 参数 -> 线协议命令 -> control-server 响应文本
-fn dispatch_tool(ser: &mut SerialLine, name: &str, args: &Value) -> String {
+fn dispatch_tool(ser: &mut AnyLine, name: &str, args: &Value) -> String {
     let cmd = match name {
         "ping" => "ping".to_string(),
         "cpld_mux_get" => "cpld mux get".to_string(),

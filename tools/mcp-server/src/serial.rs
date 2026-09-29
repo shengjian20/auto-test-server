@@ -60,3 +60,83 @@ impl SerialLine {
         }
     }
 }
+
+// ---- TCP 传输（control-server-tcp :9000，协议同一来源）----
+
+use std::net::TcpStream;
+
+pub struct TcpLine {
+    stream: TcpStream,
+}
+
+impl TcpLine {
+    pub fn open(addr: &str) -> io::Result<Self> {
+        let stream = TcpStream::connect(addr)?;
+        stream.set_read_timeout(Some(Duration::from_millis(200)))?;
+        Ok(Self { stream })
+    }
+
+    pub fn flush_input(&mut self) -> io::Result<()> {
+        // TCP 无输入缓冲清空概念：丢弃既达数据（非阻塞读至空）
+        self.stream.set_nonblocking(true)?;
+        let mut sink = [0u8; 512];
+        while let Ok(n @ 1..) = self.stream.read(&mut sink) {
+            let _ = n;
+        }
+        self.stream.set_nonblocking(false)?;
+        Ok(())
+    }
+
+    pub fn transact(&mut self, cmd: &str) -> Result<String, String> {
+        self.stream
+            .write_all(cmd.as_bytes())
+            .and_then(|_| self.stream.write_all(b"\n"))
+            .and_then(|_| self.stream.flush())
+            .map_err(|e| format!("write: {e}"))?;
+
+        let mut buf = String::new();
+        let start = Instant::now();
+        let timeout = Duration::from_millis(1500);
+        let mut byte = [0u8; 1];
+        while start.elapsed() < timeout {
+            match self.stream.read(&mut byte) {
+                Ok(1) => {
+                    if byte[0] == b'\n' {
+                        return Ok(buf.trim_end().to_string());
+                    }
+                    buf.push(byte[0] as char);
+                }
+                Ok(_) => {}
+                Err(e) if e.kind() == io::ErrorKind::WouldBlock || e.kind() == io::ErrorKind::TimedOut => {}
+                Err(e) => return Err(format!("read: {e}")),
+            }
+        }
+        if buf.is_empty() {
+            Err("timeout: no response".into())
+        } else {
+            Ok(buf.trim_end().to_string())
+        }
+    }
+}
+
+/// 传输抽象（串口/TCP 双形态；协议同一来源，dispatch_tool 不感知差异）
+pub enum AnyLine {
+    Serial(SerialLine),
+    Tcp(TcpLine),
+}
+
+impl AnyLine {
+    pub fn flush_input(&mut self) -> io::Result<()> {
+        match self {
+            AnyLine::Serial(s) => s.flush_input(),
+            AnyLine::Tcp(t) => t.flush_input(),
+        }
+    }
+
+    pub fn transact(&mut self, cmd: &str) -> Result<String, String> {
+        match self {
+            AnyLine::Serial(s) => s.transact(cmd),
+            AnyLine::Tcp(t) => t.transact(cmd),
+        }
+    }
+}

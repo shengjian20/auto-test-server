@@ -276,3 +276,11 @@ auto_test_server/
   适配层 + TBU/RBU 挂起恢复收编单一来源）
 - MCP server 切 TCP：mcp-server --port 已参数化，串口/TCP 传输层同一
   协议（host 侧无改动即兼容，切换仅需 --tcp 参数，见 tools/mcp-server）
+
+### 阶段 6c（2026-09-30 完成，feat/stage6b-tcp-transfer 分支，MCP --tcp E2E PASS）
+- mcp-server --tcp 参数化：AnyLine 传输抽象（Serial/Tcp 双形态枚举，
+  transact/flush_input 同签名）——dispatch_tool 与 MCP 方法层不感知
+  传输差异；--tcp 172.22.0.50:9000（或 dummy 服务器）即切 TCP 通道
+- E2E：dummy 线协议服务器 + mcp-server --tcp 全流程（initialize/
+  tools/list 10 工具/tools call ping -> OK pong）PASS
+- 真实板上路径已由 TCP_PROTO_SELFTEST PASS 背书（同一协议主体）
