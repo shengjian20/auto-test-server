@@ -1,0 +1,11 @@
+[package]
+name = "embassy-gd32"
+version = "0.1.0"
+edition = "2021"
+description = "Embassy-style async HAL for GD32F470 (skeleton: gpio + rcc sync APIs)"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+gd32f470 = { path = "../../pac/gd32f470" }
+embedded-hal = "1.0"
+paste = "1"
