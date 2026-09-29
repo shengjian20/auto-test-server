@@ -29,8 +29,12 @@ const PCLK_HZ: u32 = 16_000_000;
 const LOCAL_IP: [u8; 4] = [172, 22, 0, 50];
 const LOCAL_MAC: [u8; 6] = [0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C];
 const PORT: u16 = 9000;
-/// MAC LBM 自测模式（无网线）；接网线实测时改 0
+/// MAC LBM 自测模式：lbm feature 开启时启用（无网线全栈自环自测）；
+/// 缺省=normal（接网线实测，PC 侧 `nc 172.22.0.50 9000` 发协议命令）
+#[cfg(feature = "lbm")]
 const MAC_LBM: bool = true;
+#[cfg(not(feature = "lbm"))]
+const MAC_LBM: bool = false;
 
 // ---- 堆（smoltcp alloc；DMA 可达性约束：TCM 禁 DMA，堆必须在主 SRAM）----
 static mut HEAP_MEM: [u8; 65536] = [0; 65536];
@@ -186,9 +190,14 @@ async fn main(_sp: embassy_executor::Spawner) {
         interface.poll(Instant::from_millis(t_ms), &mut device, &mut sockets);
         t_ms += 2;
 
-        // server：行组装 -> deps.dispatch（协议主体单一来源；输出汇=套接字）
+        // server：CloseWait 回收（PC 断开后 socket 滞留 CLOSE_WAIT 且
+        // is_open()==true 永不重听——后续连接全部 refused，板上实测
+        // 15 次尝试仅首次成功即此）+ 行组装 -> deps.dispatch
         {
             let mut s = sockets.get_mut::<tcp::Socket>(server_h);
+            if s.state() == tcp::State::CloseWait {
+                s.close();
+            }
             if !s.is_open() {
                 let _ = s.listen(PORT);
             }
@@ -216,7 +225,9 @@ async fn main(_sp: embassy_executor::Spawner) {
         }
         drop_sockets(&mut sockets);
 
-        // client 状态机（协议自测）
+        // client 状态机（仅 MAC_LBM 自测模式；normal 模式下连本机 IP：
+        // SYN 经交换机有去无回 -> 重传死循环持续置 TBU 干扰 server）
+        if MAC_LBM {
         {
             let mut c = sockets.get_mut::<tcp::Socket>(client_h);
             match phase {
@@ -271,6 +282,7 @@ async fn main(_sp: embassy_executor::Spawner) {
                 }
                 _ => {}
             }
+        }
         }
 
         // RX/TX 挂起恢复（TBU 无恢复则帧滞留描述符永不发出——ARP 永不解析）

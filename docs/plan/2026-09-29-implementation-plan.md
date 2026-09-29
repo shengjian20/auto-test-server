@@ -284,3 +284,18 @@ auto_test_server/
 - E2E：dummy 线协议服务器 + mcp-server --tcp 全流程（initialize/
   tools/list 10 工具/tools call ping -> OK pong）PASS
 - 真实板上路径已由 TCP_PROTO_SELFTEST PASS 背书（同一协议主体）
+
+### 阶段 3c（2026-09-30 完成，feat/enet-cable-ready 分支，真实网线 E2E PASS）
+- 真实网线实测（bd9243b）：13/13 连接 + 39/39 协议命令全过
+  （ping/in/flash jedec × 13 轮建连-断开完整循环，直接考验 CloseWait
+  回收路径）；串口心跳双时间线确认 normal 模式 + link=UP 稳定 +
+  自测 client 门控生效（phase=0 无干扰）
+- 两个板上实证修复：
+  1. server CloseWait 滞留：PC 断开后 socket 滞留 CLOSE_WAIT 且
+     is_open()==true 永不重听——后续连接全部 refused（板上实测 15 次
+     尝试仅首次成功）→ state()==CloseWait 时 close()+重听
+  2. 自测 client 门控：normal 模式下连本机 IP 的 SYN 经交换机有去无回
+     → 重传死循环持续置 TBU 干扰 server → client 状态机仅 MAC_LBM
+     模式运行（lbm feature 门控，MAC_LBM 常量 feature 化）
+- MCP server `--tcp 172.22.0.50:9000` 即经真实网线控制全外设
+  （host 侧 AnyLine 抽象已就绪，6c 已验收）
