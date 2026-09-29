@@ -10,6 +10,7 @@ members = [
     "src/firmware/rs485-echo",
     "src/firmware/flash-identify",
     "src/firmware/flash-rw",
+    "src/firmware/flash-self-prog",
     "src/firmware/can-loopback",
     "src/firmware/cpld-test",
     "src/firmware/dms-io-test",

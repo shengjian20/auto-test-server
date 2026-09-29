@@ -132,6 +132,15 @@ impl Flash {
         Ok(())
     }
 
+    /// 读回一个字（volatile；固件侧读 flash 内容的安全入口）
+    /// unsafe 依据：仅地址范围检查后的一次 volatile 读，无别名写
+    pub fn read_word(&self, addr: u32) -> Result<u32, FlashError> {
+        if addr % 4 != 0 || addr < SECTOR_BASE[0] || addr > SECTOR_BASE[11] + 128 * 1024 {
+            return Err(FlashError::OutOfRange);
+        }
+        Ok(unsafe { core::ptr::read_volatile(addr as *const u32) })
+    }
+
     /// 批量编程
     pub fn program_buf(&self, addr: u32, data: &[u32]) -> Result<(), FlashError> {
         for (i, w) in data.iter().enumerate() {
