@@ -14,6 +14,7 @@ members = [
     "src/firmware/cpld-test",
     "src/firmware/dms-io-test",
     "src/firmware/ram-probe",
+    "src/firmware/usart-async-test",
     "src/firmware/enet-phy-probe",
     "src/firmware/enet-link-test",
     "src/firmware/control-server",
