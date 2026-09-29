@@ -282,3 +282,32 @@ pub fn tx_poll(dma: &gd32f470::EnetDma) {
         dma.dma_tpen().write(|w| w.tpe().bits(1));
     }
 }
+
+/// RX poll-demand（RX DMA 挂起态（RP=4/RBU）恢复：写任意值重读 RX 描述符）
+pub fn rx_poll(dma: &gd32f470::EnetDma) {
+    unsafe {
+        dma.dma_rpen().write(|w| w.rpe().bits(1));
+    }
+}
+
+impl TDesRing {
+    /// 零拷贝提交：数据已由调用方写入 buf[index]（smoltcp TxToken 路径），
+    /// 本方法仅填长度 + 放所有权（submit() 是先拷贝后提交的两步式，不适合
+    /// TxToken 的闭包借用形态）
+    pub fn tx_commit(&mut self, len: usize) -> bool {
+        if len == 0 || len > BUF_SIZE {
+            return false;
+        }
+        if !self.available() {
+            return false;
+        }
+        let i = self.index;
+        self.desc[i].control = len as u32; // TDES1 = TBS1 纯长度
+        fence(Ordering::Release);
+        compiler_fence(Ordering::Release);
+        self.desc[i].status |= TXDESC_OWN;
+        fence(Ordering::SeqCst);
+        self.index = (self.index + 1) % RING_LEN;
+        true
+    }
+}
