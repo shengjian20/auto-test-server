@@ -242,3 +242,22 @@ auto_test_server/
   4. RP=3 误判：手册 RP 表 RP=3=Running/Waiting（健康），0x4 才 Suspended
   5. rx.index 不由硬件推进 → HAL first_valid() 扫描法
 - 待续：TCP 传输层（smoltcp over enet_dma rings + PHY BMCR 回环或实网线）
+
+### 阶段 6 TCP（2026-09-30 完成，feat/stage6-tcp 分支，TCP_SELFTEST PASS）
+- smoltcp 0.11 全栈对接 enet_dma 描述符环（880c523）：
+  Device trait 适配层（first_valid() 扫描 RX / 剥 FCS / scratch 拷贝
+  consume 立即归还描述符 / tx_commit 零拷贝提交）→ MAC LBM 自测形态
+  （server :9000 + client 连本机 IP，256B 模式串经 ARP+SYN+DATA 全栈
+  往返逐位一致）
+- alloc 路线：smoltcp 0.11 的套接字缓冲仅 From<ManagedSlice>（无
+  From<&mut [u8]>），经 managed::ManagedSlice::Owned + LockedHeap
+  （堆在主 SRAM——TCM 禁 DMA 板上定案，DMA 收发缓冲禁入堆）
+- 三个板上实证 bug 修复：
+  1. TX TBU 停等无恢复：smoltcp 提交的帧滞留描述符永不发出（ARP 永不
+     解析，connect 挂 phase=0）→ 主循环 TBU 清除 + tx_poll
+  2. 本地端口 0 被拒：smoltcp 无临时端口自动分配 → connect 立即
+     Unaddressable → 显式 49152
+  3. Some(0.0.0.0) 走显式未指定分支被拒（tcp.rs:846-850）→
+     IpListenEndpoint::from(port) 让栈自动选源
+- 待续：MCP server 切 TCP 传输层（协议复用，control-server TCP 变体）+
+  接网线实测模式（MAC_LBM=0 重构建）

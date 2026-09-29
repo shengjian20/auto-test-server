@@ -33,3 +33,6 @@ docker/data/
 
 # 参考源码快照（临时，不入库）
 .ref/
+
+# 容器持久 cargo 缓存（rsproxy 抖动防护）
+.cargo-home/
