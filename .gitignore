@@ -30,3 +30,6 @@ docker/data/
 
 # OpenCode session cache
 .omo/
+
+# 参考源码快照（临时，不入库）
+.ref/
