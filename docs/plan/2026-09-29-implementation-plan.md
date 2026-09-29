@@ -159,3 +159,11 @@ auto_test_server/
   必须显式清零（GD32 与 ST bxCAN 行为差异）
 - tools/patch-svd.py 定稿：access/name 清洗 + GPIO CTL 枚举 + 全值域
   writeConstraint（TIMER/UART/SPI/CAN/GPIO AFSEL），Safe writer 全覆盖
+
+### 阶段 2 续（2026-09-29，feat/stage2-usart / feat/stage2-dms-io 分支）
+- CPLD 协议驱动：SPI2 + V1.0 协议（0x55AA 应答全双工内嵌）——CPLD_TEST PASS
+  （uart_mux 写读往返 MATCH、EXIO 写应答 OK；688f7d8）
+- DMS IO：OUT×8 走位 + IN×8 状态流 + CTRL×2 翻转——固件级 RUNNING（23e2207，
+  电气回读验收需外部 jumper/meter）
+- 踩坑沉淀：UART6 引脚配置遗漏导致 console 静默（flash-identify/dms-io-test
+  两度踩中，已加注释固化）；CPLD 应答为全双工内嵌时序（非命令后附加字节）

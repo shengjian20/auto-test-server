@@ -202,6 +202,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "dms-io-test"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-gd32",
+ "gd32f470",
+ "panic-halt",
+]
+
+[[package]]
 name = "document-features"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
