@@ -167,3 +167,12 @@ auto_test_server/
   电气回读验收需外部 jumper/meter）
 - 踩坑沉淀：UART6 引脚配置遗漏导致 console 静默（flash-identify/dms-io-test
   两度踩中，已加注释固化）；CPLD 应答为全双工内嵌时序（非命令后附加字节）
+
+### SRAM 地图定案（2026-09-29，openocd 逐段探针板上实证）
+- 主 SRAM 448KB 连续 @ 0x20000000（SRAM0 112K + SRAM1 16K + SRAM2 64K +
+  ADDSRAM 256K；0x20070000 起总线错误实测边界）
+- TCMSRAM 64KB @ 0x10000000：仅内核 DBUS（DMA 禁入），适合关键任务栈/
+  executor 热结构/RTT 缓冲；DMA 缓冲禁止放置
+- 宣传 512K = 448K 主 SRAM + 64K TCM（社区帖"512K 含备份区 64K"即此意）
+- memory.x 已定案 448K；ram-probe 全量测试进行中
+- 优化待办：TCP 服务器稳定后，将中断栈 + embassy executor 热结构迁 TCM
