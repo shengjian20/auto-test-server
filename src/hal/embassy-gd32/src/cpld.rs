@@ -37,13 +37,15 @@ pub enum CpldError {
 
 /// CPLD 设备：SPI 传输 + 软件 CS（Pin 类型复用，零 unsafe）
 pub struct Cpld<'a> {
-    spi: &'a Spi<'a>,
-    cs: &'a mut Pin<'a>,
+    spi: Spi<'a>,
+    pub cs: Pin<'a>,
 }
 
 impl<'a> Cpld<'a> {
-    /// 构造（SPI 已 enable_master、CS 已配输出且空闲高）
-    pub fn new(spi: &'a Spi<'a>, cs: &'a mut Pin<'a>) -> Self {
+    /// 构造（SPI 已 enable_master、CS 已配输出且空闲高）。
+    /// 持有 Spi 值（'static 引用字段可移动）——init_deps 整体返回
+    /// AppDeps<'static> 的前提（借用形态 E0515，编译实证）
+    pub fn new(spi: Spi<'a>, cs: Pin<'a>) -> Self {
         Self { spi, cs }
     }
 

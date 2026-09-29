@@ -16,6 +16,8 @@ pub mod crc32;
 pub mod enet;
 pub mod flash;
 pub mod enet_dma;
+#[cfg(feature = "smoltcp-device")]
+pub mod enet_smoltcp;
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
