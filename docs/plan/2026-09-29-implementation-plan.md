@@ -203,3 +203,32 @@ auto_test_server/
   之前 255/256 为探针字节串扰的测试时序问题，非固件缺陷）
 - 流程教训：改 memory.x 后 touch 强制重链；openocd cfg 结尾 reset run；
   构建统一用户（root/ubuntu 交替致 target 权限混乱需 --user root 清理）
+
+### 阶段 5 前置（2026-09-29 完成，feat/stage5-bootloader 分支）
+- bootloader 跳转链验证——LED 慢闪经 app@0x08008000 实证（d2b1d6d）：
+  - bootloader @0x08000000（32K 区）：合法性检查（SP∈448K SRAM 界 + reset
+    thumb 位）-> VTOR 重定向 -> MSP 重载 -> 跳转（cortex-m-rt 官方序列）
+  - app-at-offset @0x08008000：独立 workspace，build.rs 提供 memory.x 搜索
+    路径（根配置 rustflags 叠加致 -Tlink.x 双份 -> FLASH 重复定义的修复）
+  - delay 修复：spin_loop 循环被 O1 优化空转 -> volatile 递减确定性 delay
+  - 烧录：openocd 双镜像（bl@0x08000000 + app@0x08008000，各自 verify）
+- 待续：W25Q 升级通道（控制协议写镜像到 W25Q -> bootloader 校验签名/
+  CRC -> 搬运到应用区 -> 跳转）
+
+### 阶段 5（2026-09-30 完成，feat/stage5-bootloader 分支，E2E PASS）
+- W25Q OTA 升级通道全链验证（2a7a6bf）：
+  PC 打包（GDOTA001+size+crc32 头）→ control-server v4 `flash se/wr/crc`
+  写入 W25Q 槽位（328/328 命令，板端区间 CRC==PC 侧 zlib 逐位一致）→
+  bootloader v2 槽位头校验 + 应用区搬运（扇区2-3 擦除 + FMC 字编程 +
+  搬运后 CRC 复算）→ 跳转 → OTA 变体 banner + `ping→OK pong` 全活
+- 三个板上实证 bug 修复（全部有异常帧/寄存器证据）：
+  1. PRIMASK 残留：jump() 的 cpsid i 无恢复 → 中断依赖应用首个 await
+     永挂 → 补 cpsie i
+  2. UART6 时钟门：bootloader 漏 enable_uart6 → 寄存器写入静默丢弃，
+     console 全程静默 → 补时钟使能
+  3. thumb 位误清（根本性）：jump(sp, rv & !1) 清 LSB → bx 偶地址 →
+     INVSTATE → HardFault → 应用向量表 handler 自环（v1 跳转"成功"系
+     gdb 读到应用 HardFault handler 地址的误判）→ jump(sp, rv) 保留
+- 架构变更：control-server lib 化（app.rs 双变体共享单一来源）、
+  periph::steal()（跳转链上 take() 因 DEVICE_PERIPHERALS 残留必失效）、
+  每拍整排 RX 环（OTA 写入吞吐）、flash se/wr/crc + ota boot 命令

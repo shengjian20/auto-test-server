@@ -12,13 +12,16 @@
 
 pub mod can;
 pub mod cpld;
+pub mod crc32;
 pub mod enet;
+pub mod flash;
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
 pub mod spi;
 pub mod time_driver;
 pub mod usart;
+pub mod w25q;
 
 pub use time_driver::init_time_driver;
 
