@@ -1,0 +1,8 @@
+/* GD32F470VGT6 memory map（按 GigaDevice DFP 3.5.0 官方定义）
+ * IRAM1: 128KB @ 0x20000000, IRAM2: 64KB @ 0x10000000 (TCM RAM)
+ * 注意：主 SRAM 不是 512KB 连续——栈顶越过 0x20020000 即 HardFault（实测踩坑） */
+MEMORY
+{
+  FLASH : ORIGIN = 0x08000000, LENGTH = 1024K
+  RAM   : ORIGIN = 0x20000000, LENGTH = 128K
+}
