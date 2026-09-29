@@ -146,3 +146,16 @@ auto_test_server/
   外设时钟未开时寄存器写丢弃；svd2rust 0.37 不生成 pub mod interrupt
   （cortex-m-rt #[interrupt] 需 HAL 提供作用域模块）
 - 约束执行：固件零 unsafe；HAL 仅 2 处注释过的 unsafe 收敛点
+
+### 阶段 2（2026-09-29 完成，feat/stage2-usart 分支）
+- 串口：UART6 (PC_RS232_1, PE7/PE8 AF8) 轮询回显——PC 环回 PASS（dc484f8）
+- RS485_1：USART1 缓冲回显——PC 环回 PASS（c44197c）。实测定案：
+  USART1 在 PD5/PD6（原理图网络名 UART4_TX/RX 系设计者笔误）、
+  DIR1=PD4 低=发送（板级反相）、隔离光耦需 4 字节时间换向窗
+- SPI Flash：SPI3 @ PE2/5/6 + CS=PE4——JEDEC EF 40 18 = W25Q128（51af182，
+  原理图网络名 W25Q256 系预留误标）+ 读写擦验收 FLASH_RW PASS（251f190）
+- bxCAN：CAN0 内部回环自检 3/3 帧匹配 PASS（6253511）。实测定案：
+  bxCAN 复位自动进睡眠（先清 SLPWMOD 再 IWMOD）；F0DATA0/1 上电随机值
+  必须显式清零（GD32 与 ST bxCAN 行为差异）
+- tools/patch-svd.py 定稿：access/name 清洗 + GPIO CTL 枚举 + 全值域
+  writeConstraint（TIMER/UART/SPI/CAN/GPIO AFSEL），Safe writer 全覆盖
