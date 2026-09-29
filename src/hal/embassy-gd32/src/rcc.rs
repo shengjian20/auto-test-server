@@ -36,6 +36,11 @@ impl<'a> Rcc<'a> {
         self.rb.apb1en().modify(|_, w| w.can0en().set_bit());
     }
 
+    /// 使能 SPI2 外设时钟（RCU_APB1EN.SPI2EN，CPLD 总线，APB1）
+    pub fn enable_spi2(&self) {
+        self.rb.apb1en().modify(|_, w| w.spi2en().set_bit());
+    }
+
     /// 使能 GPIO 端口时钟（RCU_AHB1EN.PxEN）。
     /// modify() 为读改写，天然满足 GD32 手册"写后读回同步"要求。
     pub fn enable_gpio_port(&self, port: Port) {

@@ -11,6 +11,7 @@
 #![no_std]
 
 pub mod can;
+pub mod cpld;
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
