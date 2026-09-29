@@ -19,6 +19,10 @@ path = "src/bin/control_server_tcp.rs"
 test = false
 bench = false
 
+[features]
+# MAC_LBM=1 自测模式（无网线全栈自环）；缺省=normal（接网线实测）
+lbm = []
+
 [dependencies]
 embassy-gd32 = { path = "../../hal/embassy-gd32", features = ["smoltcp-device"] }
 gd32f470 = { path = "../../pac/gd32f470" }
