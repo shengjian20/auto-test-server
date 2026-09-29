@@ -22685,38 +22685,454 @@
 #[doc = "GPIO port control register"] pub mod ctl {
 #[doc = "Register `CTL` reader"] pub type R = crate :: R < CtlSpec > ;
 #[doc = "Register `CTL` writer"] pub type W = crate :: W < CtlSpec > ;
-#[doc = "Field `CTL0` reader - Port x configuration bits (x = 0)"] pub type Ctl0R = crate :: FieldReader ;
-#[doc = "Field `CTL0` writer - Port x configuration bits (x = 0)"] pub type Ctl0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL1` reader - Port x configuration bits (x = 1)"] pub type Ctl1R = crate :: FieldReader ;
-#[doc = "Field `CTL1` writer - Port x configuration bits (x = 1)"] pub type Ctl1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL2` reader - Port x configuration bits (x = 2)"] pub type Ctl2R = crate :: FieldReader ;
-#[doc = "Field `CTL2` writer - Port x configuration bits (x = 2)"] pub type Ctl2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL3` reader - Port x configuration bits (x = 3)"] pub type Ctl3R = crate :: FieldReader ;
-#[doc = "Field `CTL3` writer - Port x configuration bits (x = 3)"] pub type Ctl3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL4` reader - Port x configuration bits (x = 4 )"] pub type Ctl4R = crate :: FieldReader ;
-#[doc = "Field `CTL4` writer - Port x configuration bits (x = 4 )"] pub type Ctl4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL5` reader - Port x configuration bits (x = 5)"] pub type Ctl5R = crate :: FieldReader ;
-#[doc = "Field `CTL5` writer - Port x configuration bits (x = 5)"] pub type Ctl5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL6` reader - Port x configuration bits (x = 6 )"] pub type Ctl6R = crate :: FieldReader ;
-#[doc = "Field `CTL6` writer - Port x configuration bits (x = 6 )"] pub type Ctl6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL7` reader - Port x configuration bits (x = 7)"] pub type Ctl7R = crate :: FieldReader ;
-#[doc = "Field `CTL7` writer - Port x configuration bits (x = 7)"] pub type Ctl7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL8` reader - Port x configuration bits (x = 8)"] pub type Ctl8R = crate :: FieldReader ;
-#[doc = "Field `CTL8` writer - Port x configuration bits (x = 8)"] pub type Ctl8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL9` reader - Port x configuration bits (x = 9)"] pub type Ctl9R = crate :: FieldReader ;
-#[doc = "Field `CTL9` writer - Port x configuration bits (x = 9)"] pub type Ctl9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL10` reader - Port x configuration bits (x = 10)"] pub type Ctl10R = crate :: FieldReader ;
-#[doc = "Field `CTL10` writer - Port x configuration bits (x = 10)"] pub type Ctl10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL11` reader - Port x configuration bits (x = 11)"] pub type Ctl11R = crate :: FieldReader ;
-#[doc = "Field `CTL11` writer - Port x configuration bits (x = 11)"] pub type Ctl11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL12` reader - Port x configuration bits (x = 12)"] pub type Ctl12R = crate :: FieldReader ;
-#[doc = "Field `CTL12` writer - Port x configuration bits (x = 12)"] pub type Ctl12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL13` reader - Port x configuration bits (x = 13)"] pub type Ctl13R = crate :: FieldReader ;
-#[doc = "Field `CTL13` writer - Port x configuration bits (x = 13)"] pub type Ctl13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL14` reader - Port x configuration bits (x = 14)"] pub type Ctl14R = crate :: FieldReader ;
-#[doc = "Field `CTL14` writer - Port x configuration bits (x = 14)"] pub type Ctl14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL15` reader - Port x configuration bits (x = 15)"] pub type Ctl15R = crate :: FieldReader ;
-#[doc = "Field `CTL15` writer - Port x configuration bits (x = 15)"] pub type Ctl15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ; impl R {
+#[doc = "Port x configuration bits (x = 0)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl0 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl0 > for u8 {
+#[inline (always)] fn from (variant : Ctl0) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl0 { type Ux = u8 ; } impl crate :: IsEnum for Ctl0 { }
+#[doc = "Field `CTL0` reader - Port x configuration bits (x = 0)"] pub type Ctl0R = crate :: FieldReader < Ctl0 > ; impl Ctl0R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl0 { match self . bits { 0 => Ctl0 :: Input , 1 => Ctl0 :: Output , 2 => Ctl0 :: Alternate , 3 => Ctl0 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl0 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl0 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl0 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl0 :: Analog } }
+#[doc = "Field `CTL0` writer - Port x configuration bits (x = 0)"] pub type Ctl0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl0 , crate :: Safe > ; impl < 'a , REG > Ctl0W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Analog) } }
+#[doc = "Port x configuration bits (x = 1)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl1 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl1 > for u8 {
+#[inline (always)] fn from (variant : Ctl1) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl1 { type Ux = u8 ; } impl crate :: IsEnum for Ctl1 { }
+#[doc = "Field `CTL1` reader - Port x configuration bits (x = 1)"] pub type Ctl1R = crate :: FieldReader < Ctl1 > ; impl Ctl1R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl1 { match self . bits { 0 => Ctl1 :: Input , 1 => Ctl1 :: Output , 2 => Ctl1 :: Alternate , 3 => Ctl1 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl1 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl1 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl1 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl1 :: Analog } }
+#[doc = "Field `CTL1` writer - Port x configuration bits (x = 1)"] pub type Ctl1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl1 , crate :: Safe > ; impl < 'a , REG > Ctl1W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Analog) } }
+#[doc = "Port x configuration bits (x = 2)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl2 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl2 > for u8 {
+#[inline (always)] fn from (variant : Ctl2) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl2 { type Ux = u8 ; } impl crate :: IsEnum for Ctl2 { }
+#[doc = "Field `CTL2` reader - Port x configuration bits (x = 2)"] pub type Ctl2R = crate :: FieldReader < Ctl2 > ; impl Ctl2R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl2 { match self . bits { 0 => Ctl2 :: Input , 1 => Ctl2 :: Output , 2 => Ctl2 :: Alternate , 3 => Ctl2 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl2 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl2 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl2 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl2 :: Analog } }
+#[doc = "Field `CTL2` writer - Port x configuration bits (x = 2)"] pub type Ctl2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl2 , crate :: Safe > ; impl < 'a , REG > Ctl2W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Analog) } }
+#[doc = "Port x configuration bits (x = 3)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl3 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl3 > for u8 {
+#[inline (always)] fn from (variant : Ctl3) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl3 { type Ux = u8 ; } impl crate :: IsEnum for Ctl3 { }
+#[doc = "Field `CTL3` reader - Port x configuration bits (x = 3)"] pub type Ctl3R = crate :: FieldReader < Ctl3 > ; impl Ctl3R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl3 { match self . bits { 0 => Ctl3 :: Input , 1 => Ctl3 :: Output , 2 => Ctl3 :: Alternate , 3 => Ctl3 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl3 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl3 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl3 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl3 :: Analog } }
+#[doc = "Field `CTL3` writer - Port x configuration bits (x = 3)"] pub type Ctl3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl3 , crate :: Safe > ; impl < 'a , REG > Ctl3W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Analog) } }
+#[doc = "Port x configuration bits (x = 4 )\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl4 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl4 > for u8 {
+#[inline (always)] fn from (variant : Ctl4) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl4 { type Ux = u8 ; } impl crate :: IsEnum for Ctl4 { }
+#[doc = "Field `CTL4` reader - Port x configuration bits (x = 4 )"] pub type Ctl4R = crate :: FieldReader < Ctl4 > ; impl Ctl4R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl4 { match self . bits { 0 => Ctl4 :: Input , 1 => Ctl4 :: Output , 2 => Ctl4 :: Alternate , 3 => Ctl4 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl4 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl4 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl4 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl4 :: Analog } }
+#[doc = "Field `CTL4` writer - Port x configuration bits (x = 4 )"] pub type Ctl4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl4 , crate :: Safe > ; impl < 'a , REG > Ctl4W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Analog) } }
+#[doc = "Port x configuration bits (x = 5)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl5 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl5 > for u8 {
+#[inline (always)] fn from (variant : Ctl5) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl5 { type Ux = u8 ; } impl crate :: IsEnum for Ctl5 { }
+#[doc = "Field `CTL5` reader - Port x configuration bits (x = 5)"] pub type Ctl5R = crate :: FieldReader < Ctl5 > ; impl Ctl5R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl5 { match self . bits { 0 => Ctl5 :: Input , 1 => Ctl5 :: Output , 2 => Ctl5 :: Alternate , 3 => Ctl5 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl5 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl5 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl5 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl5 :: Analog } }
+#[doc = "Field `CTL5` writer - Port x configuration bits (x = 5)"] pub type Ctl5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl5 , crate :: Safe > ; impl < 'a , REG > Ctl5W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Analog) } }
+#[doc = "Port x configuration bits (x = 6 )\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl6 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl6 > for u8 {
+#[inline (always)] fn from (variant : Ctl6) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl6 { type Ux = u8 ; } impl crate :: IsEnum for Ctl6 { }
+#[doc = "Field `CTL6` reader - Port x configuration bits (x = 6 )"] pub type Ctl6R = crate :: FieldReader < Ctl6 > ; impl Ctl6R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl6 { match self . bits { 0 => Ctl6 :: Input , 1 => Ctl6 :: Output , 2 => Ctl6 :: Alternate , 3 => Ctl6 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl6 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl6 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl6 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl6 :: Analog } }
+#[doc = "Field `CTL6` writer - Port x configuration bits (x = 6 )"] pub type Ctl6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl6 , crate :: Safe > ; impl < 'a , REG > Ctl6W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Analog) } }
+#[doc = "Port x configuration bits (x = 7)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl7 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl7 > for u8 {
+#[inline (always)] fn from (variant : Ctl7) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl7 { type Ux = u8 ; } impl crate :: IsEnum for Ctl7 { }
+#[doc = "Field `CTL7` reader - Port x configuration bits (x = 7)"] pub type Ctl7R = crate :: FieldReader < Ctl7 > ; impl Ctl7R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl7 { match self . bits { 0 => Ctl7 :: Input , 1 => Ctl7 :: Output , 2 => Ctl7 :: Alternate , 3 => Ctl7 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl7 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl7 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl7 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl7 :: Analog } }
+#[doc = "Field `CTL7` writer - Port x configuration bits (x = 7)"] pub type Ctl7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl7 , crate :: Safe > ; impl < 'a , REG > Ctl7W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Analog) } }
+#[doc = "Port x configuration bits (x = 8)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl8 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl8 > for u8 {
+#[inline (always)] fn from (variant : Ctl8) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl8 { type Ux = u8 ; } impl crate :: IsEnum for Ctl8 { }
+#[doc = "Field `CTL8` reader - Port x configuration bits (x = 8)"] pub type Ctl8R = crate :: FieldReader < Ctl8 > ; impl Ctl8R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl8 { match self . bits { 0 => Ctl8 :: Input , 1 => Ctl8 :: Output , 2 => Ctl8 :: Alternate , 3 => Ctl8 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl8 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl8 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl8 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl8 :: Analog } }
+#[doc = "Field `CTL8` writer - Port x configuration bits (x = 8)"] pub type Ctl8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl8 , crate :: Safe > ; impl < 'a , REG > Ctl8W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Analog) } }
+#[doc = "Port x configuration bits (x = 9)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl9 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl9 > for u8 {
+#[inline (always)] fn from (variant : Ctl9) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl9 { type Ux = u8 ; } impl crate :: IsEnum for Ctl9 { }
+#[doc = "Field `CTL9` reader - Port x configuration bits (x = 9)"] pub type Ctl9R = crate :: FieldReader < Ctl9 > ; impl Ctl9R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl9 { match self . bits { 0 => Ctl9 :: Input , 1 => Ctl9 :: Output , 2 => Ctl9 :: Alternate , 3 => Ctl9 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl9 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl9 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl9 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl9 :: Analog } }
+#[doc = "Field `CTL9` writer - Port x configuration bits (x = 9)"] pub type Ctl9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl9 , crate :: Safe > ; impl < 'a , REG > Ctl9W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Analog) } }
+#[doc = "Port x configuration bits (x = 10)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl10 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl10 > for u8 {
+#[inline (always)] fn from (variant : Ctl10) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl10 { type Ux = u8 ; } impl crate :: IsEnum for Ctl10 { }
+#[doc = "Field `CTL10` reader - Port x configuration bits (x = 10)"] pub type Ctl10R = crate :: FieldReader < Ctl10 > ; impl Ctl10R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl10 { match self . bits { 0 => Ctl10 :: Input , 1 => Ctl10 :: Output , 2 => Ctl10 :: Alternate , 3 => Ctl10 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl10 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl10 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl10 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl10 :: Analog } }
+#[doc = "Field `CTL10` writer - Port x configuration bits (x = 10)"] pub type Ctl10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl10 , crate :: Safe > ; impl < 'a , REG > Ctl10W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Analog) } }
+#[doc = "Port x configuration bits (x = 11)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl11 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl11 > for u8 {
+#[inline (always)] fn from (variant : Ctl11) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl11 { type Ux = u8 ; } impl crate :: IsEnum for Ctl11 { }
+#[doc = "Field `CTL11` reader - Port x configuration bits (x = 11)"] pub type Ctl11R = crate :: FieldReader < Ctl11 > ; impl Ctl11R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl11 { match self . bits { 0 => Ctl11 :: Input , 1 => Ctl11 :: Output , 2 => Ctl11 :: Alternate , 3 => Ctl11 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl11 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl11 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl11 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl11 :: Analog } }
+#[doc = "Field `CTL11` writer - Port x configuration bits (x = 11)"] pub type Ctl11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl11 , crate :: Safe > ; impl < 'a , REG > Ctl11W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Analog) } }
+#[doc = "Port x configuration bits (x = 12)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl12 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl12 > for u8 {
+#[inline (always)] fn from (variant : Ctl12) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl12 { type Ux = u8 ; } impl crate :: IsEnum for Ctl12 { }
+#[doc = "Field `CTL12` reader - Port x configuration bits (x = 12)"] pub type Ctl12R = crate :: FieldReader < Ctl12 > ; impl Ctl12R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl12 { match self . bits { 0 => Ctl12 :: Input , 1 => Ctl12 :: Output , 2 => Ctl12 :: Alternate , 3 => Ctl12 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl12 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl12 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl12 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl12 :: Analog } }
+#[doc = "Field `CTL12` writer - Port x configuration bits (x = 12)"] pub type Ctl12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl12 , crate :: Safe > ; impl < 'a , REG > Ctl12W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Analog) } }
+#[doc = "Port x configuration bits (x = 13)\n\nValue on reset: 2"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl13 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl13 > for u8 {
+#[inline (always)] fn from (variant : Ctl13) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl13 { type Ux = u8 ; } impl crate :: IsEnum for Ctl13 { }
+#[doc = "Field `CTL13` reader - Port x configuration bits (x = 13)"] pub type Ctl13R = crate :: FieldReader < Ctl13 > ; impl Ctl13R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl13 { match self . bits { 0 => Ctl13 :: Input , 1 => Ctl13 :: Output , 2 => Ctl13 :: Alternate , 3 => Ctl13 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl13 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl13 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl13 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl13 :: Analog } }
+#[doc = "Field `CTL13` writer - Port x configuration bits (x = 13)"] pub type Ctl13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl13 , crate :: Safe > ; impl < 'a , REG > Ctl13W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Analog) } }
+#[doc = "Port x configuration bits (x = 14)\n\nValue on reset: 2"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl14 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl14 > for u8 {
+#[inline (always)] fn from (variant : Ctl14) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl14 { type Ux = u8 ; } impl crate :: IsEnum for Ctl14 { }
+#[doc = "Field `CTL14` reader - Port x configuration bits (x = 14)"] pub type Ctl14R = crate :: FieldReader < Ctl14 > ; impl Ctl14R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl14 { match self . bits { 0 => Ctl14 :: Input , 1 => Ctl14 :: Output , 2 => Ctl14 :: Alternate , 3 => Ctl14 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl14 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl14 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl14 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl14 :: Analog } }
+#[doc = "Field `CTL14` writer - Port x configuration bits (x = 14)"] pub type Ctl14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl14 , crate :: Safe > ; impl < 'a , REG > Ctl14W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Analog) } }
+#[doc = "Port x configuration bits (x = 15)\n\nValue on reset: 2"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl15 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl15 > for u8 {
+#[inline (always)] fn from (variant : Ctl15) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl15 { type Ux = u8 ; } impl crate :: IsEnum for Ctl15 { }
+#[doc = "Field `CTL15` reader - Port x configuration bits (x = 15)"] pub type Ctl15R = crate :: FieldReader < Ctl15 > ; impl Ctl15R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl15 { match self . bits { 0 => Ctl15 :: Input , 1 => Ctl15 :: Output , 2 => Ctl15 :: Alternate , 3 => Ctl15 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl15 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl15 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl15 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl15 :: Analog } }
+#[doc = "Field `CTL15` writer - Port x configuration bits (x = 15)"] pub type Ctl15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl15 , crate :: Safe > ; impl < 'a , REG > Ctl15W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Analog) } } impl R {
 #[doc = "Bits 0:1 - Port x configuration bits (x = 0)"]
 #[inline (always)] pub fn ctl0 (& self) -> Ctl0R { Ctl0R :: new ((self . bits & 3) as u8) }
 #[doc = "Bits 2:3 - Port x configuration bits (x = 1)"]
@@ -23731,38 +24147,454 @@
 #[doc = "GPIO port control register"] pub mod ctl {
 #[doc = "Register `CTL` reader"] pub type R = crate :: R < CtlSpec > ;
 #[doc = "Register `CTL` writer"] pub type W = crate :: W < CtlSpec > ;
-#[doc = "Field `CTL0` reader - Port x configuration bits (x = 0)"] pub type Ctl0R = crate :: FieldReader ;
-#[doc = "Field `CTL0` writer - Port x configuration bits (x = 0)"] pub type Ctl0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL1` reader - Port x configuration bits (x = 1)"] pub type Ctl1R = crate :: FieldReader ;
-#[doc = "Field `CTL1` writer - Port x configuration bits (x = 1)"] pub type Ctl1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL2` reader - Port x configuration bits (x = 2)"] pub type Ctl2R = crate :: FieldReader ;
-#[doc = "Field `CTL2` writer - Port x configuration bits (x = 2)"] pub type Ctl2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL3` reader - Port x configuration bits (x = 3)"] pub type Ctl3R = crate :: FieldReader ;
-#[doc = "Field `CTL3` writer - Port x configuration bits (x = 3)"] pub type Ctl3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL4` reader - Port x configuration bits (x = 4 )"] pub type Ctl4R = crate :: FieldReader ;
-#[doc = "Field `CTL4` writer - Port x configuration bits (x = 4 )"] pub type Ctl4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL5` reader - Port x configuration bits (x = 5)"] pub type Ctl5R = crate :: FieldReader ;
-#[doc = "Field `CTL5` writer - Port x configuration bits (x = 5)"] pub type Ctl5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL6` reader - Port x configuration bits (x = 6 )"] pub type Ctl6R = crate :: FieldReader ;
-#[doc = "Field `CTL6` writer - Port x configuration bits (x = 6 )"] pub type Ctl6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL7` reader - Port x configuration bits (x = 7)"] pub type Ctl7R = crate :: FieldReader ;
-#[doc = "Field `CTL7` writer - Port x configuration bits (x = 7)"] pub type Ctl7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL8` reader - Port x configuration bits (x = 8)"] pub type Ctl8R = crate :: FieldReader ;
-#[doc = "Field `CTL8` writer - Port x configuration bits (x = 8)"] pub type Ctl8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL9` reader - Port x configuration bits (x = 9)"] pub type Ctl9R = crate :: FieldReader ;
-#[doc = "Field `CTL9` writer - Port x configuration bits (x = 9)"] pub type Ctl9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL10` reader - Port x configuration bits (x = 10)"] pub type Ctl10R = crate :: FieldReader ;
-#[doc = "Field `CTL10` writer - Port x configuration bits (x = 10)"] pub type Ctl10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL11` reader - Port x configuration bits (x = 11)"] pub type Ctl11R = crate :: FieldReader ;
-#[doc = "Field `CTL11` writer - Port x configuration bits (x = 11)"] pub type Ctl11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL12` reader - Port x configuration bits (x = 12)"] pub type Ctl12R = crate :: FieldReader ;
-#[doc = "Field `CTL12` writer - Port x configuration bits (x = 12)"] pub type Ctl12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL13` reader - Port x configuration bits (x = 13)"] pub type Ctl13R = crate :: FieldReader ;
-#[doc = "Field `CTL13` writer - Port x configuration bits (x = 13)"] pub type Ctl13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL14` reader - Port x configuration bits (x = 14)"] pub type Ctl14R = crate :: FieldReader ;
-#[doc = "Field `CTL14` writer - Port x configuration bits (x = 14)"] pub type Ctl14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL15` reader - Port x configuration bits (x = 15)"] pub type Ctl15R = crate :: FieldReader ;
-#[doc = "Field `CTL15` writer - Port x configuration bits (x = 15)"] pub type Ctl15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ; impl R {
+#[doc = "Port x configuration bits (x = 0)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl0 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl0 > for u8 {
+#[inline (always)] fn from (variant : Ctl0) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl0 { type Ux = u8 ; } impl crate :: IsEnum for Ctl0 { }
+#[doc = "Field `CTL0` reader - Port x configuration bits (x = 0)"] pub type Ctl0R = crate :: FieldReader < Ctl0 > ; impl Ctl0R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl0 { match self . bits { 0 => Ctl0 :: Input , 1 => Ctl0 :: Output , 2 => Ctl0 :: Alternate , 3 => Ctl0 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl0 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl0 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl0 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl0 :: Analog } }
+#[doc = "Field `CTL0` writer - Port x configuration bits (x = 0)"] pub type Ctl0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl0 , crate :: Safe > ; impl < 'a , REG > Ctl0W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Analog) } }
+#[doc = "Port x configuration bits (x = 1)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl1 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl1 > for u8 {
+#[inline (always)] fn from (variant : Ctl1) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl1 { type Ux = u8 ; } impl crate :: IsEnum for Ctl1 { }
+#[doc = "Field `CTL1` reader - Port x configuration bits (x = 1)"] pub type Ctl1R = crate :: FieldReader < Ctl1 > ; impl Ctl1R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl1 { match self . bits { 0 => Ctl1 :: Input , 1 => Ctl1 :: Output , 2 => Ctl1 :: Alternate , 3 => Ctl1 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl1 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl1 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl1 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl1 :: Analog } }
+#[doc = "Field `CTL1` writer - Port x configuration bits (x = 1)"] pub type Ctl1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl1 , crate :: Safe > ; impl < 'a , REG > Ctl1W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Analog) } }
+#[doc = "Port x configuration bits (x = 2)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl2 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl2 > for u8 {
+#[inline (always)] fn from (variant : Ctl2) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl2 { type Ux = u8 ; } impl crate :: IsEnum for Ctl2 { }
+#[doc = "Field `CTL2` reader - Port x configuration bits (x = 2)"] pub type Ctl2R = crate :: FieldReader < Ctl2 > ; impl Ctl2R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl2 { match self . bits { 0 => Ctl2 :: Input , 1 => Ctl2 :: Output , 2 => Ctl2 :: Alternate , 3 => Ctl2 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl2 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl2 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl2 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl2 :: Analog } }
+#[doc = "Field `CTL2` writer - Port x configuration bits (x = 2)"] pub type Ctl2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl2 , crate :: Safe > ; impl < 'a , REG > Ctl2W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Analog) } }
+#[doc = "Port x configuration bits (x = 3)\n\nValue on reset: 2"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl3 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl3 > for u8 {
+#[inline (always)] fn from (variant : Ctl3) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl3 { type Ux = u8 ; } impl crate :: IsEnum for Ctl3 { }
+#[doc = "Field `CTL3` reader - Port x configuration bits (x = 3)"] pub type Ctl3R = crate :: FieldReader < Ctl3 > ; impl Ctl3R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl3 { match self . bits { 0 => Ctl3 :: Input , 1 => Ctl3 :: Output , 2 => Ctl3 :: Alternate , 3 => Ctl3 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl3 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl3 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl3 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl3 :: Analog } }
+#[doc = "Field `CTL3` writer - Port x configuration bits (x = 3)"] pub type Ctl3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl3 , crate :: Safe > ; impl < 'a , REG > Ctl3W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Analog) } }
+#[doc = "Port x configuration bits (x = 4 )\n\nValue on reset: 2"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl4 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl4 > for u8 {
+#[inline (always)] fn from (variant : Ctl4) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl4 { type Ux = u8 ; } impl crate :: IsEnum for Ctl4 { }
+#[doc = "Field `CTL4` reader - Port x configuration bits (x = 4 )"] pub type Ctl4R = crate :: FieldReader < Ctl4 > ; impl Ctl4R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl4 { match self . bits { 0 => Ctl4 :: Input , 1 => Ctl4 :: Output , 2 => Ctl4 :: Alternate , 3 => Ctl4 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl4 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl4 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl4 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl4 :: Analog } }
+#[doc = "Field `CTL4` writer - Port x configuration bits (x = 4 )"] pub type Ctl4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl4 , crate :: Safe > ; impl < 'a , REG > Ctl4W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Analog) } }
+#[doc = "Port x configuration bits (x = 5)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl5 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl5 > for u8 {
+#[inline (always)] fn from (variant : Ctl5) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl5 { type Ux = u8 ; } impl crate :: IsEnum for Ctl5 { }
+#[doc = "Field `CTL5` reader - Port x configuration bits (x = 5)"] pub type Ctl5R = crate :: FieldReader < Ctl5 > ; impl Ctl5R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl5 { match self . bits { 0 => Ctl5 :: Input , 1 => Ctl5 :: Output , 2 => Ctl5 :: Alternate , 3 => Ctl5 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl5 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl5 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl5 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl5 :: Analog } }
+#[doc = "Field `CTL5` writer - Port x configuration bits (x = 5)"] pub type Ctl5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl5 , crate :: Safe > ; impl < 'a , REG > Ctl5W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Analog) } }
+#[doc = "Port x configuration bits (x = 6 )\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl6 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl6 > for u8 {
+#[inline (always)] fn from (variant : Ctl6) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl6 { type Ux = u8 ; } impl crate :: IsEnum for Ctl6 { }
+#[doc = "Field `CTL6` reader - Port x configuration bits (x = 6 )"] pub type Ctl6R = crate :: FieldReader < Ctl6 > ; impl Ctl6R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl6 { match self . bits { 0 => Ctl6 :: Input , 1 => Ctl6 :: Output , 2 => Ctl6 :: Alternate , 3 => Ctl6 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl6 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl6 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl6 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl6 :: Analog } }
+#[doc = "Field `CTL6` writer - Port x configuration bits (x = 6 )"] pub type Ctl6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl6 , crate :: Safe > ; impl < 'a , REG > Ctl6W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Analog) } }
+#[doc = "Port x configuration bits (x = 7)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl7 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl7 > for u8 {
+#[inline (always)] fn from (variant : Ctl7) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl7 { type Ux = u8 ; } impl crate :: IsEnum for Ctl7 { }
+#[doc = "Field `CTL7` reader - Port x configuration bits (x = 7)"] pub type Ctl7R = crate :: FieldReader < Ctl7 > ; impl Ctl7R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl7 { match self . bits { 0 => Ctl7 :: Input , 1 => Ctl7 :: Output , 2 => Ctl7 :: Alternate , 3 => Ctl7 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl7 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl7 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl7 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl7 :: Analog } }
+#[doc = "Field `CTL7` writer - Port x configuration bits (x = 7)"] pub type Ctl7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl7 , crate :: Safe > ; impl < 'a , REG > Ctl7W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Analog) } }
+#[doc = "Port x configuration bits (x = 8)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl8 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl8 > for u8 {
+#[inline (always)] fn from (variant : Ctl8) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl8 { type Ux = u8 ; } impl crate :: IsEnum for Ctl8 { }
+#[doc = "Field `CTL8` reader - Port x configuration bits (x = 8)"] pub type Ctl8R = crate :: FieldReader < Ctl8 > ; impl Ctl8R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl8 { match self . bits { 0 => Ctl8 :: Input , 1 => Ctl8 :: Output , 2 => Ctl8 :: Alternate , 3 => Ctl8 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl8 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl8 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl8 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl8 :: Analog } }
+#[doc = "Field `CTL8` writer - Port x configuration bits (x = 8)"] pub type Ctl8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl8 , crate :: Safe > ; impl < 'a , REG > Ctl8W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Analog) } }
+#[doc = "Port x configuration bits (x = 9)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl9 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl9 > for u8 {
+#[inline (always)] fn from (variant : Ctl9) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl9 { type Ux = u8 ; } impl crate :: IsEnum for Ctl9 { }
+#[doc = "Field `CTL9` reader - Port x configuration bits (x = 9)"] pub type Ctl9R = crate :: FieldReader < Ctl9 > ; impl Ctl9R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl9 { match self . bits { 0 => Ctl9 :: Input , 1 => Ctl9 :: Output , 2 => Ctl9 :: Alternate , 3 => Ctl9 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl9 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl9 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl9 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl9 :: Analog } }
+#[doc = "Field `CTL9` writer - Port x configuration bits (x = 9)"] pub type Ctl9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl9 , crate :: Safe > ; impl < 'a , REG > Ctl9W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Analog) } }
+#[doc = "Port x configuration bits (x = 10)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl10 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl10 > for u8 {
+#[inline (always)] fn from (variant : Ctl10) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl10 { type Ux = u8 ; } impl crate :: IsEnum for Ctl10 { }
+#[doc = "Field `CTL10` reader - Port x configuration bits (x = 10)"] pub type Ctl10R = crate :: FieldReader < Ctl10 > ; impl Ctl10R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl10 { match self . bits { 0 => Ctl10 :: Input , 1 => Ctl10 :: Output , 2 => Ctl10 :: Alternate , 3 => Ctl10 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl10 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl10 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl10 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl10 :: Analog } }
+#[doc = "Field `CTL10` writer - Port x configuration bits (x = 10)"] pub type Ctl10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl10 , crate :: Safe > ; impl < 'a , REG > Ctl10W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Analog) } }
+#[doc = "Port x configuration bits (x = 11)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl11 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl11 > for u8 {
+#[inline (always)] fn from (variant : Ctl11) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl11 { type Ux = u8 ; } impl crate :: IsEnum for Ctl11 { }
+#[doc = "Field `CTL11` reader - Port x configuration bits (x = 11)"] pub type Ctl11R = crate :: FieldReader < Ctl11 > ; impl Ctl11R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl11 { match self . bits { 0 => Ctl11 :: Input , 1 => Ctl11 :: Output , 2 => Ctl11 :: Alternate , 3 => Ctl11 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl11 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl11 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl11 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl11 :: Analog } }
+#[doc = "Field `CTL11` writer - Port x configuration bits (x = 11)"] pub type Ctl11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl11 , crate :: Safe > ; impl < 'a , REG > Ctl11W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Analog) } }
+#[doc = "Port x configuration bits (x = 12)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl12 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl12 > for u8 {
+#[inline (always)] fn from (variant : Ctl12) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl12 { type Ux = u8 ; } impl crate :: IsEnum for Ctl12 { }
+#[doc = "Field `CTL12` reader - Port x configuration bits (x = 12)"] pub type Ctl12R = crate :: FieldReader < Ctl12 > ; impl Ctl12R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl12 { match self . bits { 0 => Ctl12 :: Input , 1 => Ctl12 :: Output , 2 => Ctl12 :: Alternate , 3 => Ctl12 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl12 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl12 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl12 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl12 :: Analog } }
+#[doc = "Field `CTL12` writer - Port x configuration bits (x = 12)"] pub type Ctl12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl12 , crate :: Safe > ; impl < 'a , REG > Ctl12W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Analog) } }
+#[doc = "Port x configuration bits (x = 13)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl13 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl13 > for u8 {
+#[inline (always)] fn from (variant : Ctl13) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl13 { type Ux = u8 ; } impl crate :: IsEnum for Ctl13 { }
+#[doc = "Field `CTL13` reader - Port x configuration bits (x = 13)"] pub type Ctl13R = crate :: FieldReader < Ctl13 > ; impl Ctl13R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl13 { match self . bits { 0 => Ctl13 :: Input , 1 => Ctl13 :: Output , 2 => Ctl13 :: Alternate , 3 => Ctl13 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl13 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl13 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl13 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl13 :: Analog } }
+#[doc = "Field `CTL13` writer - Port x configuration bits (x = 13)"] pub type Ctl13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl13 , crate :: Safe > ; impl < 'a , REG > Ctl13W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Analog) } }
+#[doc = "Port x configuration bits (x = 14)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl14 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl14 > for u8 {
+#[inline (always)] fn from (variant : Ctl14) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl14 { type Ux = u8 ; } impl crate :: IsEnum for Ctl14 { }
+#[doc = "Field `CTL14` reader - Port x configuration bits (x = 14)"] pub type Ctl14R = crate :: FieldReader < Ctl14 > ; impl Ctl14R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl14 { match self . bits { 0 => Ctl14 :: Input , 1 => Ctl14 :: Output , 2 => Ctl14 :: Alternate , 3 => Ctl14 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl14 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl14 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl14 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl14 :: Analog } }
+#[doc = "Field `CTL14` writer - Port x configuration bits (x = 14)"] pub type Ctl14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl14 , crate :: Safe > ; impl < 'a , REG > Ctl14W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Analog) } }
+#[doc = "Port x configuration bits (x = 15)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl15 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl15 > for u8 {
+#[inline (always)] fn from (variant : Ctl15) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl15 { type Ux = u8 ; } impl crate :: IsEnum for Ctl15 { }
+#[doc = "Field `CTL15` reader - Port x configuration bits (x = 15)"] pub type Ctl15R = crate :: FieldReader < Ctl15 > ; impl Ctl15R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl15 { match self . bits { 0 => Ctl15 :: Input , 1 => Ctl15 :: Output , 2 => Ctl15 :: Alternate , 3 => Ctl15 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl15 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl15 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl15 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl15 :: Analog } }
+#[doc = "Field `CTL15` writer - Port x configuration bits (x = 15)"] pub type Ctl15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl15 , crate :: Safe > ; impl < 'a , REG > Ctl15W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Analog) } } impl R {
 #[doc = "Bits 0:1 - Port x configuration bits (x = 0)"]
 #[inline (always)] pub fn ctl0 (& self) -> Ctl0R { Ctl0R :: new ((self . bits & 3) as u8) }
 #[doc = "Bits 2:3 - Port x configuration bits (x = 1)"]
@@ -24777,38 +25609,454 @@
 #[doc = "GPIO port control register"] pub mod ctl {
 #[doc = "Register `CTL` reader"] pub type R = crate :: R < CtlSpec > ;
 #[doc = "Register `CTL` writer"] pub type W = crate :: W < CtlSpec > ;
-#[doc = "Field `CTL0` reader - Port x configuration bits (x = 0)"] pub type Ctl0R = crate :: FieldReader ;
-#[doc = "Field `CTL0` writer - Port x configuration bits (x = 0)"] pub type Ctl0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL1` reader - Port x configuration bits (x = 1)"] pub type Ctl1R = crate :: FieldReader ;
-#[doc = "Field `CTL1` writer - Port x configuration bits (x = 1)"] pub type Ctl1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL2` reader - Port x configuration bits (x = 2)"] pub type Ctl2R = crate :: FieldReader ;
-#[doc = "Field `CTL2` writer - Port x configuration bits (x = 2)"] pub type Ctl2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL3` reader - Port x configuration bits (x = 3)"] pub type Ctl3R = crate :: FieldReader ;
-#[doc = "Field `CTL3` writer - Port x configuration bits (x = 3)"] pub type Ctl3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL4` reader - Port x configuration bits (x = 4 )"] pub type Ctl4R = crate :: FieldReader ;
-#[doc = "Field `CTL4` writer - Port x configuration bits (x = 4 )"] pub type Ctl4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL5` reader - Port x configuration bits (x = 5)"] pub type Ctl5R = crate :: FieldReader ;
-#[doc = "Field `CTL5` writer - Port x configuration bits (x = 5)"] pub type Ctl5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL6` reader - Port x configuration bits (x = 6 )"] pub type Ctl6R = crate :: FieldReader ;
-#[doc = "Field `CTL6` writer - Port x configuration bits (x = 6 )"] pub type Ctl6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL7` reader - Port x configuration bits (x = 7)"] pub type Ctl7R = crate :: FieldReader ;
-#[doc = "Field `CTL7` writer - Port x configuration bits (x = 7)"] pub type Ctl7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL8` reader - Port x configuration bits (x = 8)"] pub type Ctl8R = crate :: FieldReader ;
-#[doc = "Field `CTL8` writer - Port x configuration bits (x = 8)"] pub type Ctl8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL9` reader - Port x configuration bits (x = 9)"] pub type Ctl9R = crate :: FieldReader ;
-#[doc = "Field `CTL9` writer - Port x configuration bits (x = 9)"] pub type Ctl9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL10` reader - Port x configuration bits (x = 10)"] pub type Ctl10R = crate :: FieldReader ;
-#[doc = "Field `CTL10` writer - Port x configuration bits (x = 10)"] pub type Ctl10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL11` reader - Port x configuration bits (x = 11)"] pub type Ctl11R = crate :: FieldReader ;
-#[doc = "Field `CTL11` writer - Port x configuration bits (x = 11)"] pub type Ctl11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL12` reader - Port x configuration bits (x = 12)"] pub type Ctl12R = crate :: FieldReader ;
-#[doc = "Field `CTL12` writer - Port x configuration bits (x = 12)"] pub type Ctl12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL13` reader - Port x configuration bits (x = 13)"] pub type Ctl13R = crate :: FieldReader ;
-#[doc = "Field `CTL13` writer - Port x configuration bits (x = 13)"] pub type Ctl13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL14` reader - Port x configuration bits (x = 14)"] pub type Ctl14R = crate :: FieldReader ;
-#[doc = "Field `CTL14` writer - Port x configuration bits (x = 14)"] pub type Ctl14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ;
-#[doc = "Field `CTL15` reader - Port x configuration bits (x = 15)"] pub type Ctl15R = crate :: FieldReader ;
-#[doc = "Field `CTL15` writer - Port x configuration bits (x = 15)"] pub type Ctl15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 > ; impl R {
+#[doc = "Port x configuration bits (x = 0)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl0 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl0 > for u8 {
+#[inline (always)] fn from (variant : Ctl0) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl0 { type Ux = u8 ; } impl crate :: IsEnum for Ctl0 { }
+#[doc = "Field `CTL0` reader - Port x configuration bits (x = 0)"] pub type Ctl0R = crate :: FieldReader < Ctl0 > ; impl Ctl0R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl0 { match self . bits { 0 => Ctl0 :: Input , 1 => Ctl0 :: Output , 2 => Ctl0 :: Alternate , 3 => Ctl0 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl0 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl0 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl0 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl0 :: Analog } }
+#[doc = "Field `CTL0` writer - Port x configuration bits (x = 0)"] pub type Ctl0W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl0 , crate :: Safe > ; impl < 'a , REG > Ctl0W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl0 :: Analog) } }
+#[doc = "Port x configuration bits (x = 1)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl1 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl1 > for u8 {
+#[inline (always)] fn from (variant : Ctl1) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl1 { type Ux = u8 ; } impl crate :: IsEnum for Ctl1 { }
+#[doc = "Field `CTL1` reader - Port x configuration bits (x = 1)"] pub type Ctl1R = crate :: FieldReader < Ctl1 > ; impl Ctl1R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl1 { match self . bits { 0 => Ctl1 :: Input , 1 => Ctl1 :: Output , 2 => Ctl1 :: Alternate , 3 => Ctl1 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl1 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl1 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl1 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl1 :: Analog } }
+#[doc = "Field `CTL1` writer - Port x configuration bits (x = 1)"] pub type Ctl1W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl1 , crate :: Safe > ; impl < 'a , REG > Ctl1W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl1 :: Analog) } }
+#[doc = "Port x configuration bits (x = 2)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl2 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl2 > for u8 {
+#[inline (always)] fn from (variant : Ctl2) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl2 { type Ux = u8 ; } impl crate :: IsEnum for Ctl2 { }
+#[doc = "Field `CTL2` reader - Port x configuration bits (x = 2)"] pub type Ctl2R = crate :: FieldReader < Ctl2 > ; impl Ctl2R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl2 { match self . bits { 0 => Ctl2 :: Input , 1 => Ctl2 :: Output , 2 => Ctl2 :: Alternate , 3 => Ctl2 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl2 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl2 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl2 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl2 :: Analog } }
+#[doc = "Field `CTL2` writer - Port x configuration bits (x = 2)"] pub type Ctl2W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl2 , crate :: Safe > ; impl < 'a , REG > Ctl2W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl2 :: Analog) } }
+#[doc = "Port x configuration bits (x = 3)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl3 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl3 > for u8 {
+#[inline (always)] fn from (variant : Ctl3) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl3 { type Ux = u8 ; } impl crate :: IsEnum for Ctl3 { }
+#[doc = "Field `CTL3` reader - Port x configuration bits (x = 3)"] pub type Ctl3R = crate :: FieldReader < Ctl3 > ; impl Ctl3R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl3 { match self . bits { 0 => Ctl3 :: Input , 1 => Ctl3 :: Output , 2 => Ctl3 :: Alternate , 3 => Ctl3 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl3 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl3 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl3 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl3 :: Analog } }
+#[doc = "Field `CTL3` writer - Port x configuration bits (x = 3)"] pub type Ctl3W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl3 , crate :: Safe > ; impl < 'a , REG > Ctl3W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl3 :: Analog) } }
+#[doc = "Port x configuration bits (x = 4 )\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl4 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl4 > for u8 {
+#[inline (always)] fn from (variant : Ctl4) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl4 { type Ux = u8 ; } impl crate :: IsEnum for Ctl4 { }
+#[doc = "Field `CTL4` reader - Port x configuration bits (x = 4 )"] pub type Ctl4R = crate :: FieldReader < Ctl4 > ; impl Ctl4R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl4 { match self . bits { 0 => Ctl4 :: Input , 1 => Ctl4 :: Output , 2 => Ctl4 :: Alternate , 3 => Ctl4 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl4 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl4 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl4 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl4 :: Analog } }
+#[doc = "Field `CTL4` writer - Port x configuration bits (x = 4 )"] pub type Ctl4W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl4 , crate :: Safe > ; impl < 'a , REG > Ctl4W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl4 :: Analog) } }
+#[doc = "Port x configuration bits (x = 5)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl5 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl5 > for u8 {
+#[inline (always)] fn from (variant : Ctl5) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl5 { type Ux = u8 ; } impl crate :: IsEnum for Ctl5 { }
+#[doc = "Field `CTL5` reader - Port x configuration bits (x = 5)"] pub type Ctl5R = crate :: FieldReader < Ctl5 > ; impl Ctl5R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl5 { match self . bits { 0 => Ctl5 :: Input , 1 => Ctl5 :: Output , 2 => Ctl5 :: Alternate , 3 => Ctl5 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl5 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl5 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl5 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl5 :: Analog } }
+#[doc = "Field `CTL5` writer - Port x configuration bits (x = 5)"] pub type Ctl5W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl5 , crate :: Safe > ; impl < 'a , REG > Ctl5W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl5 :: Analog) } }
+#[doc = "Port x configuration bits (x = 6 )\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl6 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl6 > for u8 {
+#[inline (always)] fn from (variant : Ctl6) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl6 { type Ux = u8 ; } impl crate :: IsEnum for Ctl6 { }
+#[doc = "Field `CTL6` reader - Port x configuration bits (x = 6 )"] pub type Ctl6R = crate :: FieldReader < Ctl6 > ; impl Ctl6R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl6 { match self . bits { 0 => Ctl6 :: Input , 1 => Ctl6 :: Output , 2 => Ctl6 :: Alternate , 3 => Ctl6 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl6 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl6 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl6 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl6 :: Analog } }
+#[doc = "Field `CTL6` writer - Port x configuration bits (x = 6 )"] pub type Ctl6W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl6 , crate :: Safe > ; impl < 'a , REG > Ctl6W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl6 :: Analog) } }
+#[doc = "Port x configuration bits (x = 7)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl7 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl7 > for u8 {
+#[inline (always)] fn from (variant : Ctl7) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl7 { type Ux = u8 ; } impl crate :: IsEnum for Ctl7 { }
+#[doc = "Field `CTL7` reader - Port x configuration bits (x = 7)"] pub type Ctl7R = crate :: FieldReader < Ctl7 > ; impl Ctl7R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl7 { match self . bits { 0 => Ctl7 :: Input , 1 => Ctl7 :: Output , 2 => Ctl7 :: Alternate , 3 => Ctl7 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl7 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl7 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl7 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl7 :: Analog } }
+#[doc = "Field `CTL7` writer - Port x configuration bits (x = 7)"] pub type Ctl7W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl7 , crate :: Safe > ; impl < 'a , REG > Ctl7W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl7 :: Analog) } }
+#[doc = "Port x configuration bits (x = 8)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl8 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl8 > for u8 {
+#[inline (always)] fn from (variant : Ctl8) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl8 { type Ux = u8 ; } impl crate :: IsEnum for Ctl8 { }
+#[doc = "Field `CTL8` reader - Port x configuration bits (x = 8)"] pub type Ctl8R = crate :: FieldReader < Ctl8 > ; impl Ctl8R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl8 { match self . bits { 0 => Ctl8 :: Input , 1 => Ctl8 :: Output , 2 => Ctl8 :: Alternate , 3 => Ctl8 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl8 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl8 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl8 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl8 :: Analog } }
+#[doc = "Field `CTL8` writer - Port x configuration bits (x = 8)"] pub type Ctl8W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl8 , crate :: Safe > ; impl < 'a , REG > Ctl8W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl8 :: Analog) } }
+#[doc = "Port x configuration bits (x = 9)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl9 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl9 > for u8 {
+#[inline (always)] fn from (variant : Ctl9) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl9 { type Ux = u8 ; } impl crate :: IsEnum for Ctl9 { }
+#[doc = "Field `CTL9` reader - Port x configuration bits (x = 9)"] pub type Ctl9R = crate :: FieldReader < Ctl9 > ; impl Ctl9R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl9 { match self . bits { 0 => Ctl9 :: Input , 1 => Ctl9 :: Output , 2 => Ctl9 :: Alternate , 3 => Ctl9 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl9 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl9 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl9 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl9 :: Analog } }
+#[doc = "Field `CTL9` writer - Port x configuration bits (x = 9)"] pub type Ctl9W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl9 , crate :: Safe > ; impl < 'a , REG > Ctl9W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl9 :: Analog) } }
+#[doc = "Port x configuration bits (x = 10)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl10 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl10 > for u8 {
+#[inline (always)] fn from (variant : Ctl10) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl10 { type Ux = u8 ; } impl crate :: IsEnum for Ctl10 { }
+#[doc = "Field `CTL10` reader - Port x configuration bits (x = 10)"] pub type Ctl10R = crate :: FieldReader < Ctl10 > ; impl Ctl10R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl10 { match self . bits { 0 => Ctl10 :: Input , 1 => Ctl10 :: Output , 2 => Ctl10 :: Alternate , 3 => Ctl10 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl10 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl10 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl10 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl10 :: Analog } }
+#[doc = "Field `CTL10` writer - Port x configuration bits (x = 10)"] pub type Ctl10W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl10 , crate :: Safe > ; impl < 'a , REG > Ctl10W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl10 :: Analog) } }
+#[doc = "Port x configuration bits (x = 11)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl11 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl11 > for u8 {
+#[inline (always)] fn from (variant : Ctl11) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl11 { type Ux = u8 ; } impl crate :: IsEnum for Ctl11 { }
+#[doc = "Field `CTL11` reader - Port x configuration bits (x = 11)"] pub type Ctl11R = crate :: FieldReader < Ctl11 > ; impl Ctl11R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl11 { match self . bits { 0 => Ctl11 :: Input , 1 => Ctl11 :: Output , 2 => Ctl11 :: Alternate , 3 => Ctl11 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl11 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl11 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl11 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl11 :: Analog } }
+#[doc = "Field `CTL11` writer - Port x configuration bits (x = 11)"] pub type Ctl11W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl11 , crate :: Safe > ; impl < 'a , REG > Ctl11W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl11 :: Analog) } }
+#[doc = "Port x configuration bits (x = 12)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl12 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl12 > for u8 {
+#[inline (always)] fn from (variant : Ctl12) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl12 { type Ux = u8 ; } impl crate :: IsEnum for Ctl12 { }
+#[doc = "Field `CTL12` reader - Port x configuration bits (x = 12)"] pub type Ctl12R = crate :: FieldReader < Ctl12 > ; impl Ctl12R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl12 { match self . bits { 0 => Ctl12 :: Input , 1 => Ctl12 :: Output , 2 => Ctl12 :: Alternate , 3 => Ctl12 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl12 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl12 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl12 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl12 :: Analog } }
+#[doc = "Field `CTL12` writer - Port x configuration bits (x = 12)"] pub type Ctl12W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl12 , crate :: Safe > ; impl < 'a , REG > Ctl12W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl12 :: Analog) } }
+#[doc = "Port x configuration bits (x = 13)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl13 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl13 > for u8 {
+#[inline (always)] fn from (variant : Ctl13) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl13 { type Ux = u8 ; } impl crate :: IsEnum for Ctl13 { }
+#[doc = "Field `CTL13` reader - Port x configuration bits (x = 13)"] pub type Ctl13R = crate :: FieldReader < Ctl13 > ; impl Ctl13R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl13 { match self . bits { 0 => Ctl13 :: Input , 1 => Ctl13 :: Output , 2 => Ctl13 :: Alternate , 3 => Ctl13 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl13 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl13 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl13 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl13 :: Analog } }
+#[doc = "Field `CTL13` writer - Port x configuration bits (x = 13)"] pub type Ctl13W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl13 , crate :: Safe > ; impl < 'a , REG > Ctl13W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl13 :: Analog) } }
+#[doc = "Port x configuration bits (x = 14)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl14 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl14 > for u8 {
+#[inline (always)] fn from (variant : Ctl14) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl14 { type Ux = u8 ; } impl crate :: IsEnum for Ctl14 { }
+#[doc = "Field `CTL14` reader - Port x configuration bits (x = 14)"] pub type Ctl14R = crate :: FieldReader < Ctl14 > ; impl Ctl14R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl14 { match self . bits { 0 => Ctl14 :: Input , 1 => Ctl14 :: Output , 2 => Ctl14 :: Alternate , 3 => Ctl14 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl14 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl14 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl14 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl14 :: Analog } }
+#[doc = "Field `CTL14` writer - Port x configuration bits (x = 14)"] pub type Ctl14W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl14 , crate :: Safe > ; impl < 'a , REG > Ctl14W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl14 :: Analog) } }
+#[doc = "Port x configuration bits (x = 15)\n\nValue on reset: 0"]
+#[derive (Clone , Copy , Debug , PartialEq , Eq)]
+#[repr (u8)] pub enum Ctl15 {
+#[doc = "0: Floating/pull input mode (reset state)"] Input = 0 ,
+#[doc = "1: General purpose output mode"] Output = 1 ,
+#[doc = "2: Alternate function mode"] Alternate = 2 ,
+#[doc = "3: Analog mode"] Analog = 3 , } impl From < Ctl15 > for u8 {
+#[inline (always)] fn from (variant : Ctl15) -> Self { variant as _ } } impl crate :: FieldSpec for Ctl15 { type Ux = u8 ; } impl crate :: IsEnum for Ctl15 { }
+#[doc = "Field `CTL15` reader - Port x configuration bits (x = 15)"] pub type Ctl15R = crate :: FieldReader < Ctl15 > ; impl Ctl15R {
+#[doc = "Get enumerated values variant"]
+#[inline (always)] pub const fn variant (& self) -> Ctl15 { match self . bits { 0 => Ctl15 :: Input , 1 => Ctl15 :: Output , 2 => Ctl15 :: Alternate , 3 => Ctl15 :: Analog , _ => unreachable ! () , } }
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn is_input (& self) -> bool { * self == Ctl15 :: Input }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn is_output (& self) -> bool { * self == Ctl15 :: Output }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn is_alternate (& self) -> bool { * self == Ctl15 :: Alternate }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn is_analog (& self) -> bool { * self == Ctl15 :: Analog } }
+#[doc = "Field `CTL15` writer - Port x configuration bits (x = 15)"] pub type Ctl15W < 'a , REG > = crate :: FieldWriter < 'a , REG , 2 , Ctl15 , crate :: Safe > ; impl < 'a , REG > Ctl15W < 'a , REG > where REG : crate :: Writable + crate :: RegisterSpec , REG :: Ux : From < u8 > {
+#[doc = "Floating/pull input mode (reset state)"]
+#[inline (always)] pub fn input (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Input) }
+#[doc = "General purpose output mode"]
+#[inline (always)] pub fn output (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Output) }
+#[doc = "Alternate function mode"]
+#[inline (always)] pub fn alternate (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Alternate) }
+#[doc = "Analog mode"]
+#[inline (always)] pub fn analog (self) -> & 'a mut crate :: W < REG > { self . variant (Ctl15 :: Analog) } } impl R {
 #[doc = "Bits 0:1 - Port x configuration bits (x = 0)"]
 #[inline (always)] pub fn ctl0 (& self) -> Ctl0R { Ctl0R :: new ((self . bits & 3) as u8) }
 #[doc = "Bits 2:3 - Port x configuration bits (x = 1)"]

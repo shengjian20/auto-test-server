@@ -8,13 +8,13 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 cortex-m = "0.7"
 vcell = "0.1"
+critical-section = "1"
 
 [features]
-default = []
+default = ["critical-section"]
+critical-section = []
 rt = ["cortex-m-rt/device"]
 
 [dependencies.cortex-m-rt]
 optional = true
 version = "0.7"
-
-# 生成代码内部含必要的 unsafe（steal/寄存器指针），使用方 crate 用 deny(unsafe_code) 收口

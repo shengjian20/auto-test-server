@@ -1,0 +1,9 @@
+[build]
+target = "thumbv7em-none-eabihf"
+
+[target.thumbv7em-none-eabihf]
+runner = "probe-rs run --chip GD32F470VG"
+rustflags = [
+    "-C", "link-arg=-Tlink.x",
+    "-C", "link-arg=-L.",
+]
