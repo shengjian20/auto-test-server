@@ -137,10 +137,11 @@ impl<'a> Pin<'a> {
         pin
     }
 
-    /// 复用功能模式（UART/SPI/CAN 等外设引脚）
-    pub fn alternate(rb: &'a gpioc::RegisterBlock, n: u8) -> Self {
+    /// 复用功能模式（UART/SPI/CAN 等外设引脚），同时写 AF 编号
+    pub fn alternate(rb: &'a gpioc::RegisterBlock, n: u8, af: u8) -> Self {
         let mut pin = Self { rb, n };
         pin.set_mode(PinMode::Alternate);
+        pin.set_af(af);
         pin
     }
 
@@ -153,6 +154,30 @@ impl<'a> Pin<'a> {
 
     pub fn pin_number(&self) -> u8 {
         self.n
+    }
+
+    /// 设置复用功能编号（AFSEL0/AFSEL1 的 SELx 4bit 字段，0-15）
+    /// AF8=UART6/7、AF7=USART0/1/2（GD32F470 手册 AF 表）
+    pub fn set_af(&mut self, af: u8) {
+        match self.n {
+            0 => self.rb.afsel0().modify(|_, w| w.sel0().set(af)),
+            1 => self.rb.afsel0().modify(|_, w| w.sel1().set(af)),
+            2 => self.rb.afsel0().modify(|_, w| w.sel2().set(af)),
+            3 => self.rb.afsel0().modify(|_, w| w.sel3().set(af)),
+            4 => self.rb.afsel0().modify(|_, w| w.sel4().set(af)),
+            5 => self.rb.afsel0().modify(|_, w| w.sel5().set(af)),
+            6 => self.rb.afsel0().modify(|_, w| w.sel6().set(af)),
+            7 => self.rb.afsel0().modify(|_, w| w.sel7().set(af)),
+            8 => self.rb.afsel1().modify(|_, w| w.sel8().set(af)),
+            9 => self.rb.afsel1().modify(|_, w| w.sel9().set(af)),
+            10 => self.rb.afsel1().modify(|_, w| w.sel10().set(af)),
+            11 => self.rb.afsel1().modify(|_, w| w.sel11().set(af)),
+            12 => self.rb.afsel1().modify(|_, w| w.sel12().set(af)),
+            13 => self.rb.afsel1().modify(|_, w| w.sel13().set(af)),
+            14 => self.rb.afsel1().modify(|_, w| w.sel14().set(af)),
+            15 => self.rb.afsel1().modify(|_, w| w.sel15().set(af)),
+            _ => unreachable!("pin number is 0-15"),
+        }; // svd2rust 0.37 modify() 返回 u32，语句位置丢弃
     }
 
     /// 切换工作模式

@@ -16,6 +16,11 @@ impl<'a> Rcc<'a> {
         Self { rb }
     }
 
+    /// 使能 UART6 外设时钟（RCU_APB1EN.UART6EN，PC_RS232_1 接口）
+    pub fn enable_uart6(&self) {
+        self.rb.apb1en().modify(|_, w| w.uart6en().set_bit());
+    }
+
     /// 使能 GPIO 端口时钟（RCU_AHB1EN.PxEN）。
     /// modify() 为读改写，天然满足 GD32 手册"写后读回同步"要求。
     pub fn enable_gpio_port(&self, port: Port) {

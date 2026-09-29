@@ -76,5 +76,40 @@ for peri in root.iter("peripheral"):
             ET.SubElement(rng, "maximum").text = str((1 << fw) - 1)
             n_enum += 1
 
+# UART BAUD/DATA、GPIO AFSEL SEL：补全值域 writeConstraint（同 TIMER 逻辑——
+# 无约束时 svd2rust 0.37 只给 unsafe bits()；这些字段手册定义为全值域）
+UART_FULLRANGE = ("BAUD", "DATA")
+GPIO_AFSEL = ("AFSEL0", "AFSEL1")
+for peri in root.iter("peripheral"):
+    pname = peri.findtext("name") or ""
+    for reg in peri.iter("register"):
+        rn = reg.findtext("name") or ""
+        if pname.startswith("USART") or pname.startswith("UART"):
+            if rn in UART_FULLRANGE:
+                for field in reg.iter("field"):
+                    if field.find("writeConstraint") is not None:
+                        continue
+                    fw = int(field.findtext("bitWidth") or "0")
+                    if fw == 0:
+                        continue
+                    wc = ET.SubElement(field, "writeConstraint")
+                    rng = ET.SubElement(wc, "range")
+                    ET.SubElement(rng, "minimum").text = "0"
+                    ET.SubElement(rng, "maximum").text = str((1 << fw) - 1)
+                    n_enum += 1
+        elif pname.startswith("GPIO"):
+            if rn in GPIO_AFSEL:
+                for field in reg.iter("field"):
+                    if field.find("writeConstraint") is not None:
+                        continue
+                    fw = int(field.findtext("bitWidth") or "0")
+                    if fw == 0:
+                        continue
+                    wc = ET.SubElement(field, "writeConstraint")
+                    rng = ET.SubElement(wc, "range")
+                    ET.SubElement(rng, "minimum").text = "0"
+                    ET.SubElement(rng, "maximum").text = str((1 << fw) - 1)
+                    n_enum += 1
+
 tree.write(dst, encoding="utf-8", xml_declaration=True)
 print(f"patched: {n_acc} access, {n_name} names, {n_enum} GPIO CTL enums -> {dst}")
