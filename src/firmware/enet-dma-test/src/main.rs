@@ -209,14 +209,16 @@ fn main() -> ! {
             continue;
         }
 
-        // 比对：RX 环 index-1 是刚收的（环回从 0 顺序收）
-        let rx_idx = (rings.rx.index + enet_dma::RING_LEN - 1) % enet_dma::RING_LEN;
-        if !rings.rx.frame_valid(rx_idx) {
-            uart.write(b"frame");
-            put_hex4(&uart, i as u16);
-            uart.write(b": RX invalid desc\r\n");
-            continue;
-        }
+        // 比对：HAL 扫描法定位首个完整接收描述符（rx.index 不由硬件推进）
+        let rx_idx = match rings.rx.first_valid() {
+            Some(d) => d,
+            None => {
+                uart.write(b"frame");
+                put_hex4(&uart, i as u16);
+                uart.write(b": RX invalid desc\r\n");
+                continue;
+            }
+        };
         let rx_len = rings.rx.frame_len(rx_idx);
         let rx_ok = rx_len >= frame.len()
             && rings.rx.buf[rx_idx][..frame.len()] == *frame;

@@ -13,6 +13,7 @@
 pub mod can;
 pub mod cpld;
 pub mod enet;
+pub mod enet_dma;
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
