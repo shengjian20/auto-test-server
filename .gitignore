@@ -27,3 +27,6 @@ docker/data/
 
 # 日志
 *.log
+
+# OpenCode session cache
+.omo/
