@@ -66,6 +66,42 @@ fn eq(t: &[u8], s: &str) -> bool {
     t == s.as_bytes()
 }
 
+// ---- W25Q 命令层（阶段 2d flash-rw 已验证命令集）----
+const CMD_JEDEC_ID: u8 = 0x9F;
+const CMD_READ_DATA: u8 = 0x03;
+
+fn flash_jedec(spi: &Spi, cs: &mut Pin) -> [u8; 3] {
+    cs.set_low();
+    spi.write(&[CMD_JEDEC_ID]);
+    let mut id = [0u8; 3];
+    for slot in id.iter_mut() {
+        *slot = spi.transfer(0xFF);
+    }
+    cs.set_high();
+    id
+}
+
+fn flash_read(spi: &Spi, cs: &mut Pin, addr: u32, buf: &mut [u8]) {
+    cs.set_low();
+    spi.write(&[
+        CMD_READ_DATA,
+        (addr >> 16) as u8,
+        (addr >> 8) as u8,
+        addr as u8,
+    ]);
+    for slot in buf.iter_mut() {
+        *slot = spi.transfer(0xFF);
+    }
+    cs.set_high();
+}
+
+fn put_hex4(uart: &Uart, v: u16) {
+    const HEX: &[u8; 16] = b"0123456789ABCDEF";
+    for shift in [12, 8, 4, 0] {
+        uart.write_byte(HEX[((v >> shift) & 0xF) as usize]);
+    }
+}
+
 fn parse_u16_hex(t: &[u8]) -> Option<u16> {
     if t.len() < 3 || t.len() > 4 {
         return None;
@@ -161,6 +197,16 @@ fn main() -> ! {
         put_str(&uart, "can0 init failed (continuing without CAN)\r\n");
     }
 
+    // SPI3 Flash（W25Q128：SCK=PE2/MOSI=PE5/MISO=PE6 AF5，CS=PE4）
+    rcc.enable_spi3();
+    let _fsck = Pin::alternate(&p.gpioe, 2, 5);
+    let _fmosi = Pin::alternate(&p.gpioe, 5, 5);
+    let _fmiso = Pin::alternate(&p.gpioe, 6, 5);
+    let mut fcs = Pin::output(&p.gpioe, 4);
+    fcs.set_high();
+    let fspi = Spi::new(&p.spi3);
+    fspi.enable_master(PCLK1_HZ, 2_000_000);
+
     // DMS OUT×8（OUT1-7=PE9-15，OUT8=PB10）、CTRL1-2=PB3/PB4
     let mut outs_e: [Pin; 7] = [
         Pin::output(&p.gpioe, 9),
@@ -185,7 +231,7 @@ fn main() -> ! {
     ];
     let ins_c: [Pin; 2] = [Pin::input(&p.gpioc, 6), Pin::input(&p.gpioc, 7)];
 
-    put_str(&uart, "control-server ready\r\n");
+    put_str(&uart, "control-server v3 ready\r\n");
 
     let mut line = [0u8; LINE_MAX];
     let mut n = 0usize;
@@ -293,8 +339,60 @@ fn main() -> ! {
                         } else {
                             put_str(&uart, "ERR usage: ctrl <1|2> <0|1>\r\n");
                         }
+                    } else if nt >= 2 && eq(toks[0], "flash") {
+                        if nt >= 2 && eq(toks[1], "jedec") {
+                            let id = flash_jedec(&fspi, &mut fcs);
+                            put_str(&uart, "OK ");
+                            put_hex4(&uart, u16::from(id[0]) << 8 | u16::from(id[1]));
+                            uart.write_byte(b' ');
+                            put_hex4(&uart, u16::from(id[2]));
+                            uart.write(b"\r\n");
+                        } else if nt >= 4 && eq(toks[1], "read") {
+                            // flash read <addr_hex> <len_dec(1-256)>
+                            let addr = match parse_u16_hex(toks[2]) {
+                                Some(v) => u32::from(v) << 8, // 高 16 位形态；低 8 位固定 0
+                                None => {
+                                    put_str(&uart, "ERR addr\r\n");
+                                    n = 0;
+                                    continue;
+                                }
+                            };
+                            let cnt = match parse_u8(toks[3]) {
+                                Some(v) if (1..=128).contains(&v) => v as usize,
+                                _ => {
+                                    put_str(&uart, "ERR len (1-128)\r\n");
+                                    n = 0;
+                                    continue;
+                                }
+                            };
+                            let mut buf = [0u8; 128];
+                            flash_read(&fspi, &mut fcs, addr, &mut buf[..cnt]);
+                            put_str(&uart, "OK");
+                            for &b in buf[..cnt].iter() {
+                                uart.write_byte(b' ');
+                                put_u8(&uart, b);
+                            }
+                            put_str(&uart, "\r\n");
+                        } else {
+                            put_str(&uart, "ERR usage: flash jedec|read <addr> <len>\r\n");
+                        }
                     } else if nt >= 2 && eq(toks[0], "can0") {
-                        if nt >= 3 && eq(toks[1], "send") {
+                        if eq(toks[1], "recv") {
+                            match can0.recv() {
+                                Some(f) => {
+                                    put_str(&uart, "OK 0x");
+                                    put_hex4(&uart, f.id);
+                                    uart.write_byte(b' ');
+                                    put_u8(&uart, f.len);
+                                    for &b in f.data[..f.len as usize].iter() {
+                                        uart.write_byte(b' ');
+                                        put_u8(&uart, b);
+                                    }
+                                    put_str(&uart, "\r\n");
+                                }
+                                None => put_str(&uart, "OK empty\r\n"),
+                            }
+                        } else if nt >= 3 && eq(toks[1], "send") {
                             // can0 send <id> <db0> [db1..db7]（全部 hex）
                             let id = match parse_u16_hex(toks[2]) {
                                 Some(v) if v <= 0x7FF => v,
