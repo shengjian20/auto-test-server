@@ -116,12 +116,17 @@ impl TDesRing {
             } else {
                 &self.desc[i + 1] as *const TDes as u32
             };
-            self.desc[i].control = TXDESC_TCH | TXDESC_IOC | TXDESC_FS | TXDESC_LS;
-            self.desc[i].buf1 = &self.buf[i] as *const [u8; BUF_SIZE] as u32;
-            self.desc[i].next = next_addr;
+            // 字序勘误（GD32 固件库 TDES0 位定义实证）：TDES0=状态+控制混合
+            // （FS28|LS29|TCH20|IOC30|TER21），TDES1=纯长度 TBS[12:0]。
+            // 曾把 FS/LS/TCH/IOC 写进 TDES1——高位污染长度字段、TDES0 缺
+            // FS/LS，DMA 取到畸形描述符（TBU 假象/零长帧），MAC LBM 全断
+            self.desc[i].status = TXDESC_TCH | TXDESC_IOC | TXDESC_FS | TXDESC_LS;
             if i == RING_LEN - 1 {
                 self.desc[i].status |= TXDESC_TER;
             }
+            self.desc[i].control = 0; // TBS1 长度在 submit 时填
+            self.desc[i].buf1 = &self.buf[i] as *const [u8; BUF_SIZE] as u32;
+            self.desc[i].next = next_addr;
         }
         self.index = 0;
     }
@@ -141,7 +146,7 @@ impl TDesRing {
         }
         let i = self.index;
         self.buf[i][..frame.len()].copy_from_slice(frame);
-        self.desc[i].control = (self.desc[i].control & !TXDESC_TBS_MASK) | frame.len() as u32;
+        self.desc[i].control = frame.len() as u32; // TDES1 = TBS1 纯长度
         // 提交前用数据填充，之后才放所有权
         fence(Ordering::Release);
         compiler_fence(Ordering::Release);
@@ -180,6 +185,15 @@ impl RDesRing {
             fence(Ordering::SeqCst);
         }
         self.index = 0;
+    }
+
+    /// 扫描环找首个"OWN=0 且 FS|LS 完整"的描述符（接收完成后定位用）。
+    /// rx.index 不由硬件推进（硬件按描述符链顺序写回 OWN），不能用
+    /// index-1 推断刚收的帧——扫描式查找（板上踩坑：恒指 desc4 误报）
+    pub fn first_valid(&self) -> Option<usize> {
+        (0..RING_LEN).find(|&d| {
+            self.desc[d].status & RXDESC_OWN == 0 && self.frame_valid(d)
+        })
     }
 
     /// 可收帧数（OWN=0 的连续段）
@@ -242,11 +256,13 @@ pub fn start_dma(dma: &gd32f470::EnetDma, rings: &Rings) {
     let base_rx = &rings.rx.desc as *const _ as u32;
     let base_tx = &rings.tx.desc as *const _ as u32;
     // unsafe 依据（bits x3）：DMA_RDTADDR/STT 32 位环基地址指针全值域；
-    // DMA_BCTL.DPSL 5bit 突发长度 N-1 编码（0-31 全部为合法档位），
-    // 32 beat 为 GD32 固件库 enet_initpara 推荐值——未配置时 DMA 传输
-    // 异常（TBU），板上实测。
+    // DMA_BCTL.PGBL 6bit 突发长度（1-32 beat 全部为合法档位，32 beat 为
+    // GD32 固件库 ENET_PGBL_32BEAT 推荐值——未配置时 DMA 传输异常 TBU，
+    // 板上实测）。注意 DPSL(bits2-6) 是描述符跳隔字数（TCH/RCH 链表
+    // 模式下相邻描述符间的跳过字数），非增强 4 字描述符保持 0——
+    // 曾误把突发长度写进 DPSL(31)（板上实测踩坑）。
     unsafe {
-        dma.dma_bctl().modify(|_, w| w.dpsl().bits(31));
+        dma.dma_bctl().modify(|_, w| w.pgbl().bits(32));
         dma.dma_rdtaddr().write(|w| w.srt().bits(base_rx));
         dma.dma_tdtaddr().write(|w| w.stt().bits(base_tx));
     }

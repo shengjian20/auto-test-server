@@ -187,3 +187,23 @@ pub fn sw_reset(dma: &enet_dma::RegisterBlock) -> bool {
     }
     true
 }
+
+/// 写 MAC 地址 0（ADDR0L 低 4 字节 / ADDR0H 高 2 字节 + MO 位）。
+///
+/// unsafe 收敛点：ADDR0H/ADDR0L 为 32 位全宽字段（原生 PAC 仅 unsafe
+/// `bits()`——用户拍板 PAC 禁语义增强）。值域语义由本封装保证：MAC 地址
+/// 6 字节按 OUI 形态拆分，非任意值。
+pub fn set_mac_addr0(mac: &enet_mac::RegisterBlock, addr: [u8; 6]) {
+    let l = u32::from(addr[0])
+        | u32::from(addr[1]) << 8
+        | u32::from(addr[2]) << 16
+        | u32::from(addr[3]) << 24;
+    let h = u32::from(addr[4]) | u32::from(addr[5]) << 8;
+    // unsafe 依据：ADDR0L/ADDR0H 为芯片协议定义的 MAC 地址寄存器全宽字段
+    unsafe {
+        mac.mac_addr0l()
+            .write(|w| w.addr0l().bits(l));
+        mac.mac_addr0h()
+            .write(|w| w.addr0h().bits(h as u16).mo().clear_bit());
+    }
+}

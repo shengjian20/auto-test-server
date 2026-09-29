@@ -15,6 +15,7 @@ pub mod cpld;
 pub mod crc32;
 pub mod enet;
 pub mod flash;
+pub mod enet_dma;
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
