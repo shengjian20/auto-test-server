@@ -11,7 +11,7 @@ vcell = "0.1"
 critical-section = "1"
 
 [features]
-default = ["critical-section"]
+default = ["critical-section", "rt"]
 critical-section = []
 rt = ["cortex-m-rt/device"]
 

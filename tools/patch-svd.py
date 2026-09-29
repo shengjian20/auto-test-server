@@ -51,5 +51,30 @@ for peri in root.iter("peripheral"):
                 ET.SubElement(ev, "value").text = str(val)
             n_enum += 1
 
+# TIMER1 数值寄存器字段补 writeConstraint 全值域 -> svd2rust 0.37 生成
+# Safety=Safe 的 FieldWriter（.set() 安全方法）。否则默认 Unsafe 只给
+# unsafe bits()，违背项目"少 unsafe"约束。语义依据：PSC/CAR/CNT/CH0CV
+# 均为无保留位的全宽计数字段（GD32F470 UM TIMER 章节）。
+TIMER_FULLRANGE = ("PSC", "CAR", "CNT", "CH0CV", "CH1CV")
+for peri in root.iter("peripheral"):
+    if (peri.findtext("name") or "") != "TIMER1":
+        continue
+    for reg in peri.iter("register"):
+        rn = reg.findtext("name") or ""
+        if rn not in TIMER_FULLRANGE:
+            continue
+        rsize_bits = int((reg.findtext("size") or "0x20"), 16) * 8
+        for field in reg.iter("field"):
+            if field.find("writeConstraint") is not None:
+                continue
+            fw = int(field.findtext("bitWidth") or "0")
+            if fw == 0:
+                continue
+            wc = ET.SubElement(field, "writeConstraint")
+            rng = ET.SubElement(wc, "range")
+            ET.SubElement(rng, "minimum").text = "0"
+            ET.SubElement(rng, "maximum").text = str((1 << fw) - 1)
+            n_enum += 1
+
 tree.write(dst, encoding="utf-8", xml_declaration=True)
 print(f"patched: {n_acc} access, {n_name} names, {n_enum} GPIO CTL enums -> {dst}")

@@ -34869,14 +34869,14 @@
 #[doc = "Register `CNT` reader"] pub type R = crate :: R < CntSpec > ;
 #[doc = "Register `CNT` writer"] pub type W = crate :: W < CntSpec > ;
 #[doc = "Field `CNT` reader - counter value"] pub type CntR = crate :: FieldReader < u32 > ;
-#[doc = "Field `CNT` writer - counter value"] pub type CntW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 > ; impl R {
+#[doc = "Field `CNT` writer - counter value"] pub type CntW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:31 - counter value"]
 #[inline (always)] pub fn cnt (& self) -> CntR { CntR :: new (self . bits) } } impl W {
 #[doc = "Bits 0:31 - counter value"]
 #[inline (always)] pub fn cnt (& mut self) -> CntW < '_ , CntSpec > { CntW :: new (self , 0) } }
 #[doc = "Counter register\n\nYou can [`read`](crate::Reg::read) this register and get [`cnt::R`](R). You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`cnt::W`](W). You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."] pub struct CntSpec ; impl crate :: RegisterSpec for CntSpec { type Ux = u32 ; }
 #[doc = "`read()` method returns [`cnt::R`](R) reader structure"] impl crate :: Readable for CntSpec { }
-#[doc = "`write(|w| ..)` method takes [`cnt::W`](W) writer structure"] impl crate :: Writable for CntSpec { type Safety = crate :: Unsafe ; }
+#[doc = "`write(|w| ..)` method takes [`cnt::W`](W) writer structure"] impl crate :: Writable for CntSpec { type Safety = crate :: Safe ; }
 #[doc = "`reset()` method sets CNT to value 0"] impl crate :: Resettable for CntSpec { } }
 #[doc = "PSC (rw) register accessor: Prescaler register\n\nYou can [`read`](crate::Reg::read) this register and get [`psc::R`]. You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`psc::W`]. You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@psc`] module"]
 #[doc (alias = "PSC")] pub type Psc = crate :: Reg < psc :: PscSpec > ;
@@ -34884,7 +34884,7 @@
 #[doc = "Register `PSC` reader"] pub type R = crate :: R < PscSpec > ;
 #[doc = "Register `PSC` writer"] pub type W = crate :: W < PscSpec > ;
 #[doc = "Field `PSC` reader - Prescaler value of the counter clock"] pub type PscR = crate :: FieldReader < u16 > ;
-#[doc = "Field `PSC` writer - Prescaler value of the counter clock"] pub type PscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `PSC` writer - Prescaler value of the counter clock"] pub type PscW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:15 - Prescaler value of the counter clock"]
 #[inline (always)] pub fn psc (& self) -> PscR { PscR :: new ((self . bits & 0xffff) as u16) } } impl W {
 #[doc = "Bits 0:15 - Prescaler value of the counter clock"]
@@ -34899,14 +34899,14 @@
 #[doc = "Register `CAR` reader"] pub type R = crate :: R < CarSpec > ;
 #[doc = "Register `CAR` writer"] pub type W = crate :: W < CarSpec > ;
 #[doc = "Field `CARL` reader - Counter auto reload value"] pub type CarlR = crate :: FieldReader < u32 > ;
-#[doc = "Field `CARL` writer - Counter auto reload value"] pub type CarlW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 > ; impl R {
+#[doc = "Field `CARL` writer - Counter auto reload value"] pub type CarlW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:31 - Counter auto reload value"]
 #[inline (always)] pub fn carl (& self) -> CarlR { CarlR :: new (self . bits) } } impl W {
 #[doc = "Bits 0:31 - Counter auto reload value"]
 #[inline (always)] pub fn carl (& mut self) -> CarlW < '_ , CarSpec > { CarlW :: new (self , 0) } }
 #[doc = "Counter auto reload register\n\nYou can [`read`](crate::Reg::read) this register and get [`car::R`](R). You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`car::W`](W). You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."] pub struct CarSpec ; impl crate :: RegisterSpec for CarSpec { type Ux = u32 ; }
 #[doc = "`read()` method returns [`car::R`](R) reader structure"] impl crate :: Readable for CarSpec { }
-#[doc = "`write(|w| ..)` method takes [`car::W`](W) writer structure"] impl crate :: Writable for CarSpec { type Safety = crate :: Unsafe ; }
+#[doc = "`write(|w| ..)` method takes [`car::W`](W) writer structure"] impl crate :: Writable for CarSpec { type Safety = crate :: Safe ; }
 #[doc = "`reset()` method sets CAR to value 0"] impl crate :: Resettable for CarSpec { } }
 #[doc = "CH0CV (rw) register accessor: Channel 0 capture/compare value register\n\nYou can [`read`](crate::Reg::read) this register and get [`ch0cv::R`]. You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`ch0cv::W`]. You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@ch0cv`] module"]
 #[doc (alias = "CH0CV")] pub type Ch0cv = crate :: Reg < ch0cv :: Ch0cvSpec > ;
@@ -34914,14 +34914,14 @@
 #[doc = "Register `CH0CV` reader"] pub type R = crate :: R < Ch0cvSpec > ;
 #[doc = "Register `CH0CV` writer"] pub type W = crate :: W < Ch0cvSpec > ;
 #[doc = "Field `CH0VAL` reader - Capture or compare value of channel 0"] pub type Ch0valR = crate :: FieldReader < u32 > ;
-#[doc = "Field `CH0VAL` writer - Capture or compare value of channel 0"] pub type Ch0valW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 > ; impl R {
+#[doc = "Field `CH0VAL` writer - Capture or compare value of channel 0"] pub type Ch0valW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:31 - Capture or compare value of channel 0"]
 #[inline (always)] pub fn ch0val (& self) -> Ch0valR { Ch0valR :: new (self . bits) } } impl W {
 #[doc = "Bits 0:31 - Capture or compare value of channel 0"]
 #[inline (always)] pub fn ch0val (& mut self) -> Ch0valW < '_ , Ch0cvSpec > { Ch0valW :: new (self , 0) } }
 #[doc = "Channel 0 capture/compare value register\n\nYou can [`read`](crate::Reg::read) this register and get [`ch0cv::R`](R). You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`ch0cv::W`](W). You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."] pub struct Ch0cvSpec ; impl crate :: RegisterSpec for Ch0cvSpec { type Ux = u32 ; }
 #[doc = "`read()` method returns [`ch0cv::R`](R) reader structure"] impl crate :: Readable for Ch0cvSpec { }
-#[doc = "`write(|w| ..)` method takes [`ch0cv::W`](W) writer structure"] impl crate :: Writable for Ch0cvSpec { type Safety = crate :: Unsafe ; }
+#[doc = "`write(|w| ..)` method takes [`ch0cv::W`](W) writer structure"] impl crate :: Writable for Ch0cvSpec { type Safety = crate :: Safe ; }
 #[doc = "`reset()` method sets CH0CV to value 0"] impl crate :: Resettable for Ch0cvSpec { } }
 #[doc = "CH1CV (rw) register accessor: Channel 1 capture/compare value register\n\nYou can [`read`](crate::Reg::read) this register and get [`ch1cv::R`]. You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`ch1cv::W`]. You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@ch1cv`] module"]
 #[doc (alias = "CH1CV")] pub type Ch1cv = crate :: Reg < ch1cv :: Ch1cvSpec > ;
@@ -34929,14 +34929,14 @@
 #[doc = "Register `CH1CV` reader"] pub type R = crate :: R < Ch1cvSpec > ;
 #[doc = "Register `CH1CV` writer"] pub type W = crate :: W < Ch1cvSpec > ;
 #[doc = "Field `CH1VAL` reader - Capture or compare value of channel1"] pub type Ch1valR = crate :: FieldReader < u32 > ;
-#[doc = "Field `CH1VAL` writer - Capture or compare value of channel1"] pub type Ch1valW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 > ; impl R {
+#[doc = "Field `CH1VAL` writer - Capture or compare value of channel1"] pub type Ch1valW < 'a , REG > = crate :: FieldWriter < 'a , REG , 32 , u32 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:31 - Capture or compare value of channel1"]
 #[inline (always)] pub fn ch1val (& self) -> Ch1valR { Ch1valR :: new (self . bits) } } impl W {
 #[doc = "Bits 0:31 - Capture or compare value of channel1"]
 #[inline (always)] pub fn ch1val (& mut self) -> Ch1valW < '_ , Ch1cvSpec > { Ch1valW :: new (self , 0) } }
 #[doc = "Channel 1 capture/compare value register\n\nYou can [`read`](crate::Reg::read) this register and get [`ch1cv::R`](R). You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`ch1cv::W`](W). You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."] pub struct Ch1cvSpec ; impl crate :: RegisterSpec for Ch1cvSpec { type Ux = u32 ; }
 #[doc = "`read()` method returns [`ch1cv::R`](R) reader structure"] impl crate :: Readable for Ch1cvSpec { }
-#[doc = "`write(|w| ..)` method takes [`ch1cv::W`](W) writer structure"] impl crate :: Writable for Ch1cvSpec { type Safety = crate :: Unsafe ; }
+#[doc = "`write(|w| ..)` method takes [`ch1cv::W`](W) writer structure"] impl crate :: Writable for Ch1cvSpec { type Safety = crate :: Safe ; }
 #[doc = "`reset()` method sets CH1CV to value 0"] impl crate :: Resettable for Ch1cvSpec { } }
 #[doc = "CH2CV (rw) register accessor: Channel 2 capture/compare value register\n\nYou can [`read`](crate::Reg::read) this register and get [`ch2cv::R`]. You can [`reset`](crate::Reg::reset), [`write`](crate::Reg::write), [`write_with_zero`](crate::Reg::write_with_zero) this register using [`ch2cv::W`]. You can also [`modify`](crate::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [`mod@ch2cv`] module"]
 #[doc (alias = "CH2CV")] pub type Ch2cv = crate :: Reg < ch2cv :: Ch2cvSpec > ;
@@ -49606,3 +49606,18 @@
 #[doc = r""]
 #[doc = r" Each of the returned peripherals must be used at most once."]
 #[inline] pub unsafe fn steal () -> Self { DEVICE_PERIPHERALS = true ; Peripherals { adc0 : Adc0 :: steal () , adc1 : Adc1 :: steal () , adc2 : Adc2 :: steal () , adc_common : AdcCommon :: steal () , can0 : Can0 :: steal () , can1 : Can1 :: steal () , crc : Crc :: steal () , ctc : Ctc :: steal () , dac : Dac :: steal () , dbg : Dbg :: steal () , dci : Dci :: steal () , dma0 : Dma0 :: steal () , dma1 : Dma1 :: steal () , enet_dma : EnetDma :: steal () , enet_mac_fcth : EnetMacFcth :: steal () , enet_mac : EnetMac :: steal () , enet_msc : EnetMsc :: steal () , enet_ptp : EnetPtp :: steal () , exmc : Exmc :: steal () , exti : Exti :: steal () , fmc : Fmc :: steal () , fwdgt : Fwdgt :: steal () , gpioa : Gpioa :: steal () , gpiob : Gpiob :: steal () , gpioc : Gpioc :: steal () , gpiod : Gpiod :: steal () , gpioe : Gpioe :: steal () , gpiof : Gpiof :: steal () , gpiog : Gpiog :: steal () , gpioh : Gpioh :: steal () , gpioi : Gpioi :: steal () , i2c0 : I2c0 :: steal () , i2c1 : I2c1 :: steal () , i2c2 : I2c2 :: steal () , ipa : Ipa :: steal () , iref : Iref :: steal () , pmu : Pmu :: steal () , rcu : Rcu :: steal () , rtc : Rtc :: steal () , sdio : Sdio :: steal () , spi0 : Spi0 :: steal () , spi1 : Spi1 :: steal () , spi2 : Spi2 :: steal () , spi3 : Spi3 :: steal () , spi4 : Spi4 :: steal () , spi5 : Spi5 :: steal () , i2s1_add : I2s1Add :: steal () , i2s2_add : I2s2Add :: steal () , syscfg : Syscfg :: steal () , timer0 : Timer0 :: steal () , timer1 : Timer1 :: steal () , timer2 : Timer2 :: steal () , timer3 : Timer3 :: steal () , timer4 : Timer4 :: steal () , timer5 : Timer5 :: steal () , timer6 : Timer6 :: steal () , timer7 : Timer7 :: steal () , timer8 : Timer8 :: steal () , timer9 : Timer9 :: steal () , timer10 : Timer10 :: steal () , timer11 : Timer11 :: steal () , timer12 : Timer12 :: steal () , timer13 : Timer13 :: steal () , tli : Tli :: steal () , trng : Trng :: steal () , usart0 : Usart0 :: steal () , usart1 : Usart1 :: steal () , usart2 : Usart2 :: steal () , usart5 : Usart5 :: steal () , uart3 : Uart3 :: steal () , uart4 : Uart4 :: steal () , uart6 : Uart6 :: steal () , uart7 : Uart7 :: steal () , fs_global : FsGlobal :: steal () , fs_host : FsHost :: steal () , fs_device : FsDevice :: steal () , fs_pwrclk : FsPwrclk :: steal () , hs_global : HsGlobal :: steal () , hs_host : HsHost :: steal () , hs_device : HsDevice :: steal () , hs_pwrclk : HsPwrclk :: steal () , wwdgt : Wwdgt :: steal () , } } }
+/// cortex-m-rt #[interrupt] 兼容层（手工维护，见 interrupt_shim.rs）
+#[cfg(feature = "rt")]
+pub mod interrupt_shim;
+
+#[cfg(feature = "rt")]
+#[allow(non_snake_case)]
+pub mod interrupt {
+    pub use crate::interrupt_shim::consts::*;
+}
+
+#[allow(unused)]
+const _PAC_SCOPE_TEST: () = {
+    let _ = crate::Interrupt::TIMER1;
+    let _ = crate::interrupt::TIMER1;
+};

@@ -17,4 +17,10 @@ cp "$GEN/lib.rs" "$OUT/src/lib.rs"
 cp "$GEN/build.rs" "$OUT/build.rs"
 cp "$GEN/device.x" "$OUT/device.x"
 
+# 追加 cortex-m-rt 兼容 shim（文件手工维护，生成不覆盖）
+if ! grep -q "interrupt_shim" "$OUT/src/lib.rs"; then
+    printf '\n/// cortex-m-rt #[interrupt] 兼容层（手工维护，见 interrupt_shim.rs）\n#[cfg(feature = "rt")]\npub mod interrupt_shim;\n' >> "$OUT/src/lib.rs"
+    printf '\n#[cfg(feature = "rt")]\n#[allow(non_snake_case)]\npub mod interrupt {\n    pub use crate::interrupt_shim::consts::*;\n}\n' >> "$OUT/src/lib.rs"
+fi
+
 echo "PAC generated into $OUT"
