@@ -111,6 +111,7 @@ fn main() -> ! {
 
     let rcc = Rcc::new(&p.rcu);
     rcc.enable_gpio_port(Port::E);
+    rcc.enable_uart6(); // UART6 APB1 时钟门——缺失则寄存器写入静默丢弃（console 全静默的根因，与 TIMER1 时钟同款坑）
     let _utx = Pin::alternate(&p.gpioe, 7, 8);
     let _urx = Pin::alternate(&p.gpioe, 8, 8);
     let uart = Uart::new(&p.uart6);
@@ -207,7 +208,11 @@ fn main() -> ! {
     uart.write(b" -> jumping\r\n");
     delay_ms(100);
 
-    jump(sp, rv & !1)
+    // bx 消费目标的 LSB 作为 T 位（thumb 状态）——必须保留原始 thumb 位。
+    // 曾误写 rv & !1（清位）-> bx 偶地址 -> INVSTATE -> HardFault -> 应用
+    // 向量表的 HardFault handler 自环（VTOR 已先重定向）-> 全静默（板上
+    // 实证：异常帧 fault PC=0x080028F2 即 bx 指令）
+    jump(sp, rv)
 }
 
 /// 错误停机：console 提示 + 停机循环（LED_1 常亮=低电平，可目视区分）
@@ -236,7 +241,12 @@ fn jump(sp: u32, reset: u32) -> ! {
             "msr msp, {sp}",
             sp = in(reg) sp,
         );
-        // 4. 清流水线后跳转（BX 带 thumb 位）
+        // 4. 恢复中断（PRIMASK=0）——跳转不是复位，硬件不会自动清 PRIMASK；
+        //    应用（embassy Ticker/UART6 RXNE 环）依赖中断，PRIMASK 残留 =
+        //    应用首个 await 永挂（实测踩坑：OTA 应用跳转后 ping 无响应、
+        //    全静默）
+        core::arch::asm!("cpsie i");
+        // 5. 清流水线后跳转（BX 带 thumb 位）
         core::arch::asm!("dsb", "isb", "bx {r}", r = in(reg) reset, options(noreturn));
     }
 }
