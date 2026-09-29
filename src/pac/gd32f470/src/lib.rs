@@ -18549,7 +18549,7 @@
 #[doc = "Register `MAC_PHY_DATA` reader"] pub type R = crate :: R < MacPhyDataSpec > ;
 #[doc = "Register `MAC_PHY_DATA` writer"] pub type W = crate :: W < MacPhyDataSpec > ;
 #[doc = "Field `PD` reader - PHY data"] pub type PdR = crate :: FieldReader < u16 > ;
-#[doc = "Field `PD` writer - PHY data"] pub type PdW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 > ; impl R {
+#[doc = "Field `PD` writer - PHY data"] pub type PdW < 'a , REG > = crate :: FieldWriter < 'a , REG , 16 , u16 , crate :: Safe > ; impl R {
 #[doc = "Bits 0:15 - PHY data"]
 #[inline (always)] pub fn pd (& self) -> PdR { PdR :: new ((self . bits & 0xffff) as u16) } } impl W {
 #[doc = "Bits 0:15 - PHY data"]

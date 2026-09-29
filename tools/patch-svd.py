@@ -42,6 +42,8 @@ CAN_ID_REGS = ("TMI0", "TMI1", "TMI2", "TMP0", "TMP1", "TMP2",
 # PA 5bit PHY 地址 0-31、PR 5bit PHY 寄存器 0-31——均为全值域
 ENET_PHY_FULLRANGE = ("CLR", "PA", "PR")
 ENET_PHY_REG = "MAC_PHY_CTL"
+# MAC_PHY_DATA 的 PD 字段（16 位 MDIO 数据全值域）
+ENET_PHY_DATA_REG = "MAC_PHY_DATA"
 # BT 位时序字段：SJW 2b/BS1 4b/BS2 3b/BAUDPSC 10b 全部为无保留位全值域
 # （手册位时序章节：字段值为 N-1 编码，全范围合法）
 CAN_BT_FIELDS = ("SJW", "BS1", "BS2", "BAUDPSC")
@@ -135,12 +137,17 @@ for peri in root.iter("peripheral"):
                         add_range_constraint(field)
         continue
 
-    # 4d2: ENET MAC PHY_CTL 全值域
+    # 4d2: ENET MAC PHY_CTL 全值域 + MAC_PHY_DATA PD 全宽
     if pname == "ENET_MAC":
         for reg in peri.iter("register"):
-            if (reg.findtext("name") or "") == ENET_PHY_REG:
+            rn = reg.findtext("name") or ""
+            if rn == ENET_PHY_REG:
                 for field in reg.iter("field"):
                     if (field.findtext("name") or "") in ENET_PHY_FULLRANGE:
+                        add_range_constraint(field)
+            elif rn == ENET_PHY_DATA_REG:
+                for field in reg.iter("field"):
+                    if (field.findtext("name") or "") == "PD":
                         add_range_constraint(field)
         continue
 
