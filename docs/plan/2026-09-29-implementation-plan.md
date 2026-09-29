@@ -60,9 +60,9 @@ auto_test_server/
 - **验收**：容器内 `probe-rs list` 看到 DAPLink；hello-blink 固件（临时裸 PAC）烧录成功，LED 闪烁，全程 git 记录
 
 ### 阶段 1：embassy-gd32 核心（1 周）
-- PAC：**gd32-rs gd32f4**（gd32-rs-nightlies v0.9.2+，活跃维护）vendor 进仓库；
-  DFP SVD（carrier-box 自带 GigaDevice 官方 pack 3.5.0，含 ENET/GD专有寄存器建模）作权威对照，
-  F470 特有部分缺失时用 DFP SVD svd2rust 补丁
+- PAC：**svd2rust 0.37 从 DFP SVD 生成**（用户拍板；tools/gen-pac.sh 可复现，已 vendor 进 src/pac/gd32f470，
+  编译通过）。DFP SVD = carrier-box 自带 GigaDevice 官方 pack 3.5.0，ENET/GD 专有寄存器建模齐全。
+  项目约束：尽量少 unsafe——PAC 用生成安全 API，HAL 公共接口安全，业务层 deny(unsafe_code)
 - rcc：GD32F470 时钟树（240MHz PLL、CK48M、APB1=60M/APB2=120M），按用户手册寄存器位域实现
 - gpio：含 AF 表（GD32F470 手册为准，不用 ST 表）
 - timer：embassy-time driver（SysTick 或 TIM）
