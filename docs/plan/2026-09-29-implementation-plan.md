@@ -176,3 +176,14 @@ auto_test_server/
 - 宣传 512K = 448K 主 SRAM + 64K TCM（社区帖"512K 含备份区 64K"即此意）
 - memory.x 已定案 448K；ram-probe 全量测试进行中
 - 优化待办：TCP 服务器稳定后，将中断栈 + embassy executor 热结构迁 TCM
+
+### 阶段 3（2026-09-30 数据通路打通，feat/stage3-enet 分支，MAC LBM PASS）
+- ENET_MAC_TEST: PASS（2d61800）——三帧 MAC LBM 回环全 MATCH（len=0x44=64B+4B CRC）：
+  MDIO 闸门（PHY probe/link PASS）→ MAC LBM + DMA 描述符收发 → 数据通路打通
+- 五项根因（全部板上/SVD/手册实证，见 2d61800 commit message）：
+  1. TX 描述符字序颠倒（根本性）：TDES0=状态+控制混合，TDES1=纯长度
+  2. 手工序列时钟门缺失：ENETTXE/ENETRXE 未开（对照实验自始无效）
+  3. PGBL/DPSL 错位：突发长度在 BCTL bits8-13，DPSL 是描述符跳隔
+  4. RP=3 误判：手册 RP 表 RP=3=Running/Waiting（健康），0x4 才 Suspended
+  5. rx.index 不由硬件推进 → HAL first_valid() 扫描法
+- 待续：TCP 传输层（smoltcp over enet_dma rings + PHY BMCR 回环或实网线）
