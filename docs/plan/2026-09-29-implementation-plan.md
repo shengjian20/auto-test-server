@@ -299,3 +299,11 @@ auto_test_server/
      模式运行（lbm feature 门控，MAC_LBM 常量 feature 化）
 - MCP server `--tcp 172.22.0.50:9000` 即经真实网线控制全外设
   （host 侧 AnyLine 抽象已就绪，6c 已验收）
+
+### 阶段 3c 补充（2026-09-30，真实网线 MCP E2E PASS + mcp 单包修复）
+- 真实板上 MCP --tcp E2E PASS（99e4301）：initialize/tools/list +
+  ping -> OK pong + flash_jedec -> OK EF40 0018 + in_read -> OK 0x00
+  （物理链路抖动 ~40% ICMP 丢包窗口内经重试全过）
+- mcp 单包+NODELAY 修复保留；板侧 v2 行拼接尝试回退（引入
+  critical-section 自旋挂死：ldrex/strex 循环 PC=0x080002F4，与 UART6
+  RXNE ISR 同临界区高频重入相关）——保留已验证 13/13 的 v1 行处理
