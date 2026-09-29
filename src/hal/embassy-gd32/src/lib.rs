@@ -10,6 +10,7 @@
 //!   无 const 泛型索引手段；类型级引脚唯一性留待 async 阶段设计）
 #![no_std]
 
+pub mod can;
 pub mod gpio;
 pub mod interrupt;
 pub mod rcc;
@@ -20,6 +21,7 @@ pub mod usart;
 pub use time_driver::init_time_driver;
 
 pub use gpio::{Pin, PinMode, Port};
+pub use can::Can;
 pub use spi::Spi;
 pub use usart::{Uart, Usart};
 pub use rcc::Rcc;
