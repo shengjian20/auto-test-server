@@ -13,7 +13,8 @@
 //! - BAUD@0x08 = INTDIV[15:4] + FRADIV[3:0]，组合值 = PCLK/baud（oversample16）
 //! - BAUD/DATA/AFSEL 字段经 SVD writeConstraint 补丁为 Safe writer
 
-use gd32f470::{uart3, usart0};
+use crate::interrupt;
+use gd32f470::{timer3, uart3, usart0, Interrupt};
 
 /// 生成同类布局的串口 newtype（UART 类与 USART 类寄存器块类型不同，
 /// 但 stat0/data/baud/ctl0 四个访问器签名一致，宏去重公共方法）
@@ -104,3 +105,73 @@ uart_device!(
     usart0::RegisterBlock,
     "USART 类串口（USART1 = RS485_1，PA2/PA3 + DE 方向脚）"
 );
+
+/// UART6 中断驱动接收环（RXNE ISR 生产，任意上下文消费）。
+///
+/// 用法：`uart6_ring_init()` 装载外设句柄 -> `uart6_ring_enable()` 开
+/// RBNEIE+NVIC -> 任务侧 `uart6_ring_pop()` 消费。
+///
+/// unsafe 收敛：ISR 内 steal（UART6 由 take 分配后不再变，ISR 触发时
+/// 外设已就绪）；NVIC unmask（vector 由 #[interrupt] 独占接线）。
+use core::cell::RefCell;
+use critical_section::Mutex;
+
+static UART6_RX_RING: Mutex<RefCell<UartRing>> =
+    Mutex::new(RefCell::new(UartRing::new()));
+
+pub struct UartRing {
+    buf: [u8; 256],
+    head: usize,
+    tail: usize,
+}
+
+impl UartRing {
+    const fn new() -> Self {
+        Self { buf: [0; 256], head: 0, tail: 0 }
+    }
+    fn push(&mut self, b: u8) {
+        let next = (self.head + 1) % self.buf.len();
+        if next != self.tail {
+            self.buf[self.head] = b;
+            self.head = next;
+        }
+    }
+    fn pop(&mut self) -> Option<u8> {
+        if self.tail == self.head {
+            return None;
+        }
+        let b = self.buf[self.tail];
+        self.tail = (self.tail + 1) % self.buf.len();
+        Some(b)
+    }
+}
+
+/// 使能 UART6 RXNE 中断并接管接收（此后 read_byte 不再可用——字节进环）
+pub fn uart6_ring_enable(uart: &uart3::RegisterBlock) {
+    uart.ctl0().modify(|_, w| w.rbneie().set_bit());
+    // unsafe 依据：UART6 vector 由 usart 模块 #[interrupt] 函数独占接线
+    unsafe {
+        cortex_m::peripheral::NVIC::unmask(Interrupt::UART6);
+    }
+}
+
+/// 消费接收环（任意上下文）
+pub fn uart6_ring_pop() -> Option<u8> {
+    critical_section::with(|cs| UART6_RX_RING.borrow(cs).borrow_mut().pop())
+}
+
+/// UART6 ISR：读 STAT0 后读 DATA（手册推荐流），推入接收环
+#[cortex_m_rt::interrupt]
+#[allow(unsafe_code)]
+unsafe fn UART6() {
+    // unsafe 依据（steal）：UART6 由 Peripherals::take 分配后地址不变，
+    // ISR 只读其 STAT0/DATA 寄存器（外设已由调用方初始化）
+    let uart = unsafe { &*gd32f470::Uart6::PTR };
+    let st = uart.stat0().read();
+    if st.rbne().bit_is_set() {
+        let b = uart.data().read().data().bits() as u8;
+        critical_section::with(|cs| UART6_RX_RING.borrow(cs).borrow_mut().push(b));
+    } else if st.orerr().bit_is_set() {
+        let _ = uart.data().read();
+    }
+}

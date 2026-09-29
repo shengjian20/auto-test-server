@@ -15,6 +15,7 @@
 #![no_main]
 #![deny(unsafe_code)]
 
+use embassy_executor::Spawner;
 use embassy_gd32::can::{Can, Frame};
 use embassy_gd32::{cpld, Pin, Port, Rcc, Spi, Uart};
 use panic_halt as _;
@@ -154,9 +155,12 @@ fn parse_u8(t: &[u8]) -> Option<u8> {
     None
 }
 
-#[cortex_m_rt::entry]
-fn main() -> ! {
+#[embassy_executor::main]
+async fn main(_spawner: Spawner) {
     let p = gd32f470::Peripherals::take().expect("peripherals already taken");
+
+    // 时间驱动初始化（TIMER1@1MHz）——缺失则 Ticker 闹钟永不触发
+    embassy_gd32::init_time_driver();
 
     let rcc = Rcc::new(&p.rcu);
     rcc.enable_gpio_port(Port::A);
@@ -172,6 +176,8 @@ fn main() -> ! {
     let _urx = Pin::alternate(&p.gpioe, 8, 8);
     let uart = Uart::new(&p.uart6);
     uart.enable(PCLK1_HZ, BAUD);
+    // 切换中断驱动接收（RXNE ISR -> 环；此后 read_byte 不可用）
+    embassy_gd32::usart::uart6_ring_enable(&p.uart6);
 
     // CPLD（SPI2 + CS=PA15 + RST=PA4）
     let _sck = Pin::alternate(&p.gpioc, 10, 6);
@@ -235,9 +241,11 @@ fn main() -> ! {
 
     let mut line = [0u8; LINE_MAX];
     let mut n = 0usize;
+    let mut ticker = embassy_time::Ticker::every(embassy_time::Duration::from_millis(10));
 
     loop {
-        match uart.read_byte() {
+        ticker.next().await;
+        match embassy_gd32::usart::uart6_ring_pop() {
             Some(b'\n') | Some(b'\r') => {
                 if n > 0 {
                     let mut copy = [0u8; LINE_MAX];
