@@ -186,3 +186,11 @@ auto_test_server/
   nt>=3 守卫挡住的 token 计数 bug）、read_byte 手册推荐流（STAT0→DATA）
 - 板上定案数据：W25Q128 addr0 遗留 "carrier_" 数据（carrier-box 历史）；
   can0 send OK sent（TJA1050 活动、总线 ACK 存在）
+
+### 阶段 2g（2026-09-29 完成，feat/stage2g-usart-async 分支）
+- USART6 中断驱动接收环 + embassy 异步任务回显——FULL-PASS（f6b058d）
+- 根因：main 未调 init_time_driver()，TIMER1 未初始化 → Ticker 闹钟永不
+  触发 → 任务卡死首次 await（banner 正常但心跳/回显全无）
+- 修复后实测：心跳 'A' 500ms + RX 中断环回显 AXA/AYZA（与心跳交织）
+- 流程教训：改 memory.x 后必须 touch 强制重链（增量构建不重链向量表，
+  曾致"烧录成功"实为旧 ELF）——已固化到 memory

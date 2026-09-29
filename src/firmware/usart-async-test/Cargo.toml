@@ -1,0 +1,19 @@
+[package]
+name = "usart-async-test"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "usart-async-test"
+test = false
+bench = false
+
+[dependencies]
+embassy-gd32 = { path = "../../hal/embassy-gd32" }
+gd32f470 = { path = "../../pac/gd32f470" }
+embassy-executor = { version = "0.10", features = ["platform-cortex-m", "executor-thread"] }
+embassy-time = { version = "0.5", features = ["generic-queue-64"] }
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+panic-halt = "1.0"
+critical-section = "1"
