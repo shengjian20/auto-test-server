@@ -214,3 +214,21 @@ auto_test_server/
   - 烧录：openocd 双镜像（bl@0x08000000 + app@0x08008000，各自 verify）
 - 待续：W25Q 升级通道（控制协议写镜像到 W25Q -> bootloader 校验签名/
   CRC -> 搬运到应用区 -> 跳转）
+
+### 阶段 5（2026-09-30 完成，feat/stage5-bootloader 分支，E2E PASS）
+- W25Q OTA 升级通道全链验证（2a7a6bf）：
+  PC 打包（GDOTA001+size+crc32 头）→ control-server v4 `flash se/wr/crc`
+  写入 W25Q 槽位（328/328 命令，板端区间 CRC==PC 侧 zlib 逐位一致）→
+  bootloader v2 槽位头校验 + 应用区搬运（扇区2-3 擦除 + FMC 字编程 +
+  搬运后 CRC 复算）→ 跳转 → OTA 变体 banner + `ping→OK pong` 全活
+- 三个板上实证 bug 修复（全部有异常帧/寄存器证据）：
+  1. PRIMASK 残留：jump() 的 cpsid i 无恢复 → 中断依赖应用首个 await
+     永挂 → 补 cpsie i
+  2. UART6 时钟门：bootloader 漏 enable_uart6 → 寄存器写入静默丢弃，
+     console 全程静默 → 补时钟使能
+  3. thumb 位误清（根本性）：jump(sp, rv & !1) 清 LSB → bx 偶地址 →
+     INVSTATE → HardFault → 应用向量表 handler 自环（v1 跳转"成功"系
+     gdb 读到应用 HardFault handler 地址的误判）→ jump(sp, rv) 保留
+- 架构变更：control-server lib 化（app.rs 双变体共享单一来源）、
+  periph::steal()（跳转链上 take() 因 DEVICE_PERIPHERALS 残留必失效）、
+  每拍整排 RX 环（OTA 写入吞吐）、flash se/wr/crc + ota boot 命令
