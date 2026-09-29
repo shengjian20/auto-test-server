@@ -15,8 +15,15 @@ else
     useradd -m -u "$USER_UID" -g "$USER_GID" -s /bin/bash "$RUN_USER"
 fi
 
-export CARGO_HOME=/usr/local/cargo
+# rustup 工具链只读共享(/usr/local/rustup)；cargo 注册表/缓存按用户可写(home)
+RUN_HOME=$(getent passwd "$RUN_USER" | cut -d: -f6)
 export RUSTUP_HOME=/usr/local/rustup
-export PATH=/usr/local/cargo/bin:$PATH
+export CARGO_HOME="$RUN_HOME/.cargo"
+export PATH=/usr/local/cargo/bin:"$CARGO_HOME"/bin:$PATH
+
+# 用户级 cargo 沿用镜像内的国内源配置；基础镜像的 /home/ubuntu 属 root，需修正属主
+mkdir -p "$CARGO_HOME"
+cp /usr/local/cargo/config.toml "$CARGO_HOME/config.toml" 2>/dev/null || true
+chown -R "$USER_UID:$USER_GID" "$RUN_HOME" 2>/dev/null || true
 
 exec gosu "$RUN_USER" "$@"
