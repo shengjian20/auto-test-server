@@ -20,6 +20,7 @@ pub mod rcc;
 pub mod spi;
 pub mod time_driver;
 pub mod usart;
+pub mod w25q;
 
 pub use time_driver::init_time_driver;
 
