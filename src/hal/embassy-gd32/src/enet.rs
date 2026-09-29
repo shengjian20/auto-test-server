@@ -25,6 +25,14 @@ pub const REG_BMSR: u8 = 1; // 基本状态：自协商完成/链路
 pub const REG_PHY_ID1: u8 = 2;
 pub const REG_PHY_ID2: u8 = 3;
 
+/// BMCR 位（W25Q 式命名收敛点：全部用位掩码，语义见 LAN8720A 手册）
+pub const BMCR_RESET: u16 = 0x8000;
+pub const BMCR_LOOPBACK: u16 = 0x4000;
+pub const BMCR_SPEED100: u16 = 0x2000;
+pub const BMCR_DUPLEX: u16 = 0x0100;
+pub const BMCR_ANENABLE: u16 = 0x1000;
+pub const BMCR_ANRESTART: u16 = 0x0200;
+
 /// MDIO 控制器封装（MAC_PHY_CTL/DATA）
 pub struct Mdio<'a> {
     mac: &'a enet_mac::RegisterBlock,
@@ -121,6 +129,18 @@ impl<'a> Phy<'a> {
 
     /// 启动自协商（BMCR.ANENABLE|ANRESTART = 0x1200）
     pub fn start_autoneg(&self) -> bool {
+        self.mdio.write(self.addr, REG_BMCR, 0x1200).is_some()
+    }
+
+    /// PHY 内部回环模式（BMCR.LOOPBACK bit14=1）：TX 引脚数据短接回 RX，
+    /// 不依赖网线/对端。100M 全双工固定态（回环下自协商失效，需手动设速）
+    pub fn set_loopback_100m(&self) -> bool {
+        let v = BMCR_SPEED100 | BMCR_DUPLEX | BMCR_LOOPBACK;
+        self.mdio.write(self.addr, REG_BMCR, v).is_some()
+    }
+
+    /// 退出回环，恢复正常（自协商重启动）
+    pub fn clear_loopback(&self) -> bool {
         self.mdio.write(self.addr, REG_BMCR, 0x1200).is_some()
     }
 
