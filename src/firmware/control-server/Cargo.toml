@@ -1,6 +1,6 @@
 [package]
 name = "control-server"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [lib]
@@ -9,14 +9,29 @@ bench = false
 
 [[bin]]
 name = "control-server"
+path = "src/main.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "control-server-tcp"
+path = "src/bin/control_server_tcp.rs"
 test = false
 bench = false
 
 [dependencies]
-embassy-gd32 = { path = "../../hal/embassy-gd32" }
+embassy-gd32 = { path = "../../hal/embassy-gd32", features = ["smoltcp-device"] }
 gd32f470 = { path = "../../pac/gd32f470" }
 embassy-executor = { version = "0.10", features = ["platform-cortex-m", "executor-thread"] }
 embassy-time = { version = "0.5", features = ["generic-queue-64"] }
 cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7"
 panic-halt = "1.0"
+linked_list_allocator = "0.10"
+smoltcp = { version = "0.11", default-features = false, features = [
+    "medium-ethernet",
+    "proto-ipv4",
+    "socket-tcp",
+    "alloc",
+] }
+managed = { version = "0.8", default-features = false, features = ["alloc"] }

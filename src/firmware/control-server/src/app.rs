@@ -21,7 +21,7 @@ use embassy_gd32::{cpld, Pin, Port, Rcc, Spi, Uart};
 
 const PCLK1_HZ: u32 = 16_000_000;
 const BAUD: u32 = 115_200;
-const LINE_MAX: usize = 192;
+pub const LINE_MAX: usize = 192;
 
 fn delay_ms(ms: u32) {
     for _ in 0..ms {
@@ -56,7 +56,7 @@ fn put_hex8(uart: &Uart, v: u32) {
 }
 
 /// 令牌化（空格分隔，原地）
-fn tokenize<'a>(line: &'a [u8], out: &mut [&'a [u8]; 8]) -> usize {
+pub fn tokenize<'a>(line: &'a [u8], out: &mut [&'a [u8]; 8]) -> usize {
     let mut n = 0;
     let mut i = 0;
     while i < line.len() && n < 8 {
@@ -145,59 +145,396 @@ fn parse_hex_bytes(t: &[u8], buf: &mut [u8]) -> Option<usize> {
 /// （bootloader 已 take），二次 take 返回 None -> expect panic ->
 /// panic_halt 静默（板上实证：PC 停在 HardFault_ 0x0800D3DC 自环）。
 /// 改用 PAC 类型别名的 PTR 静态地址直取——安全化封装，固件零 unsafe。
-mod periph {
-    use gd32f470::{Can0, EnetDma, EnetMac, Gpioa, Gpiob, Gpioc, Gpiod, Gpioe, Rcu, Spi2, Spi3, Timer1, Uart6};
+pub mod periph {
+    use gd32f470::{syscfg, Can0, EnetDma, EnetMac, Gpioa, Gpiob, Gpioc, Gpiod, Gpioe, Rcu, Spi2, Spi3, Syscfg, Timer1, Uart6};
 
-    /// 字段为 PAC 值类型（Periph<RB, A> 零大小句柄，Copy 语义）——
-    /// 调用点 `&p.gpioe` 自动形成 `&Periph`，匹配 HAL 的 GpioRef bound
+    /// 字段为 'static 寄存器块引用（PAC Periph::PTR 为 const 物理地址，
+    /// 无分配无别名）——子句柄（Pin/Spi/Uart/Can）据此获得 'static 生命
+    /// 周期，init_deps 可整体返回 AppDeps<'static>（曾用 owned ZST 形态
+    /// + 借用子句柄，E0515 无法返回局部借用，板上/编译双实证）
     pub struct Peripherals {
-        pub rcu: Rcu,
-        pub gpioa: Gpioa,
-        pub gpiob: Gpiob,
-        pub gpioc: Gpioc,
-        pub gpiod: Gpiod,
-        pub gpioe: Gpioe,
-        pub uart6: Uart6,
-        pub spi2: Spi2,
-        pub spi3: Spi3,
-        pub can0: Can0,
-        pub timer1: Timer1,
-        pub enet_mac: EnetMac,
-        pub enet_dma: EnetDma,
+        pub rcu: &'static Rcu,
+        pub gpioa: &'static Gpioa,
+        pub gpiob: &'static Gpiob,
+        pub gpioc: &'static Gpioc,
+        pub gpiod: &'static Gpiod,
+        pub gpioe: &'static Gpioe,
+        pub uart6: &'static Uart6,
+        pub spi2: &'static Spi2,
+        pub spi3: &'static Spi3,
+        pub can0: &'static Can0,
+        pub timer1: &'static Timer1,
+        pub enet_mac: &'static EnetMac,
+        pub enet_dma: &'static EnetDma,
+        pub syscfg: &'static syscfg::RegisterBlock,
     }
 
-    /// unsafe 收敛点：静态外设地址派生引用（PAC Periph::PTR 同源语义），
-    /// 应用生命周期内外设独占（单一任务，无别名写）
+    /// unsafe 收敛点：字段为 PAC 别名引用（'static），ZST 句柄经
+    /// NonNull::dangling 派生引用——Periph<RB, A> 是 PhantomData 零大小
+    /// 结构，ZST 引用永不解引用、悬垂无副作用（svd2rust 0.37 语义）；
+    /// 寄存器块实际访问经 Deref -> PTR 物理地址。应用生命周期内外设
+    /// 独占（单一任务，无别名写）
     #[allow(unsafe_code)]
     pub fn steal() -> Peripherals {
+        unsafe fn zst<T>(v: T) -> &'static T {
+            // T = PAC 外设句柄（PhantomData 零大小）：dangling 引用永不
+            // 解引用，'static 合法
+            unsafe { core::ptr::NonNull::dangling().as_ref() }
+        }
         unsafe {
             Peripherals {
-                rcu: Rcu::steal(),
-                gpioa: Gpioa::steal(),
-                gpiob: Gpiob::steal(),
-                gpioc: Gpioc::steal(),
-                gpiod: Gpiod::steal(),
-                gpioe: Gpioe::steal(),
-                uart6: Uart6::steal(),
-                spi2: Spi2::steal(),
-                spi3: Spi3::steal(),
-                can0: Can0::steal(),
-                timer1: Timer1::steal(),
-                enet_mac: EnetMac::steal(),
-                enet_dma: EnetDma::steal(),
+                rcu: zst(Rcu::steal()),
+                gpioa: zst(Gpioa::steal()),
+                gpiob: zst(Gpiob::steal()),
+                gpioc: zst(Gpioc::steal()),
+                gpiod: zst(Gpiod::steal()),
+                gpioe: zst(Gpioe::steal()),
+                uart6: zst(Uart6::steal()),
+                spi2: zst(Spi2::steal()),
+                spi3: zst(Spi3::steal()),
+                can0: zst(Can0::steal()),
+                timer1: zst(Timer1::steal()),
+                enet_mac: zst(EnetMac::steal()),
+                enet_dma: zst(EnetDma::steal()),
+                syscfg: &*Syscfg::PTR,
             }
         }
     }
 }
 
-/// 应用主体（banner 由 bin 变体注入，控制权永不返回）
-pub async fn run(banner: &'static str) -> ! {
+/// 外设依赖集合（dispatch 的操作对象；UART/TCP 传输层共用）
+pub struct AppDeps<'a> {
+    pub cpld_dev: cpld::Cpld<'a>,
+    pub can0: Can<'a>,
+    pub w25q: W25q<'a>,
+    pub outs_e: [Pin<'a>; 7],
+    pub out8: Pin<'a>,
+    pub ctrl1: Pin<'a>,
+    pub ctrl2: Pin<'a>,
+    pub ins_d: [Pin<'a>; 6],
+    pub ins_c: [Pin<'a>; 2],
+}
+
+/// 输出辅助（dispatch 内统一经 out: &mut FnMut 形态写响应行；
+/// UART/TCP 传输层各自实现 out 闭包，协议主体单一来源）
+fn o_str(out: &mut dyn FnMut(&[u8]), s: &str) {
+    out(s.as_bytes());
+}
+
+fn o_u8(out: &mut dyn FnMut(&[u8]), v: u8) {
+    const HEX: &[u8; 16] = b"0123456789ABCDEF";
+    out(&[HEX[(v >> 4) as usize], HEX[(v & 0xF) as usize]]);
+}
+
+fn o_hex4(out: &mut dyn FnMut(&[u8]), v: u16) {
+    const HEX: &[u8; 16] = b"0123456789ABCDEF";
+    let mut b = [0u8; 4];
+    for (i, sh) in [12, 8, 4, 0].iter().enumerate() {
+        b[i] = HEX[((v >> sh) & 0xF) as usize];
+    }
+    out(&b);
+}
+
+fn o_hex8(out: &mut dyn FnMut(&[u8]), v: u32) {
+    const HEX: &[u8; 16] = b"0123456789ABCDEF";
+    let mut b = [0u8; 8];
+    for (i, sh) in [28, 24, 20, 16, 12, 8, 4, 0].iter().enumerate() {
+        b[i] = HEX[((v >> sh) & 0xF) as usize];
+    }
+    out(&b);
+}
+
+impl<'a> AppDeps<'a> {
+    /// 命令分发主体（UART/TCP 双传输共用；toks 为 tokenize 产物）
+    pub fn dispatch(
+        &mut self,
+        out: &mut dyn FnMut(&[u8]),
+        toks: &[&[u8]],
+        nt: usize,
+    ) {
+        if nt >= 1 && eq(toks[0], "ping") {
+            o_str(out, "OK pong\r\n");
+        } else if nt >= 2 && eq(toks[0], "cpld") && eq(toks[1], "mux") {
+            if nt >= 3 && eq(toks[2], "get") {
+                match self.cpld_dev.get_uart_mux() {
+                    Ok(v) => {
+                        o_str(out, "OK 0x");
+                        o_u8(out, v as u8);
+                        o_str(out, "\r\n");
+                    }
+                    Err(_) => o_str(out, "ERR cpld-bus\r\n"),
+                }
+            } else if nt >= 4 && eq(toks[2], "set") {
+                match parse_u8(toks[3]) {
+                    Some(t) if (0x80..=0x85).contains(&t) => {
+                        match self.cpld_dev.set_uart_mux(t as u16) {
+                            Ok(_) => o_str(out, "OK\r\n"),
+                            Err(_) => o_str(out, "ERR cpld-bus\r\n"),
+                        }
+                    }
+                    _ => o_str(out, "ERR arg (0x80-0x85)\r\n"),
+                }
+            } else {
+                o_str(out, "ERR usage: cpld mux get|set <val>\r\n");
+            }
+        } else if nt >= 2 && eq(toks[0], "out") {
+            // out <n(1-8)> <0|1>（3 token）
+            if nt >= 3 {
+                let idx = match parse_u8(toks[1]) {
+                    Some(v) if (1..=8).contains(&v) => (v - 1) as usize,
+                    _ => {
+                        o_str(out, "ERR arg n(1-8)\r\n");
+                        return;
+                    }
+                };
+                let lvl = eq(toks[2], "1");
+                if idx < 7 {
+                    if lvl {
+                        self.outs_e[idx].set_high();
+                    } else {
+                        self.outs_e[idx].set_low();
+                    }
+                } else if lvl {
+                    self.out8.set_high();
+                } else {
+                    self.out8.set_low();
+                }
+                o_str(out, "OK\r\n");
+            } else {
+                o_str(out, "ERR usage: out <n> <0|1>\r\n");
+            }
+        } else if nt >= 1 && eq(toks[0], "in") {
+            let mut in_byte = 0u8;
+            for (i, pin) in self.ins_d.iter().enumerate() {
+                if pin.input_level() {
+                    in_byte |= 1 << i;
+                }
+            }
+            for (i, pin) in self.ins_c.iter().enumerate() {
+                if pin.input_level() {
+                    in_byte |= 1 << (6 + i);
+                }
+            }
+            o_str(out, "OK 0x");
+            o_u8(out, in_byte);
+            o_str(out, "\r\n");
+        } else if nt >= 2 && eq(toks[0], "ctrl") {
+            // ctrl <1|2> <0|1>（3 token）
+            if nt >= 3 {
+                let which = parse_u8(toks[1]);
+                let lvl = eq(toks[2], "1");
+                match which {
+                    Some(1) => {
+                        if lvl {
+                            self.ctrl1.set_high();
+                        } else {
+                            self.ctrl1.set_low();
+                        }
+                        o_str(out, "OK\r\n");
+                    }
+                    Some(2) => {
+                        if lvl {
+                            self.ctrl2.set_high();
+                        } else {
+                            self.ctrl2.set_low();
+                        }
+                        o_str(out, "OK\r\n");
+                    }
+                    _ => o_str(out, "ERR arg ctrl(1|2)\r\n"),
+                }
+            } else {
+                o_str(out, "ERR usage: ctrl <1|2> <0|1>\r\n");
+            }
+        } else if nt >= 2 && eq(toks[0], "flash") {
+            if nt >= 2 && eq(toks[1], "jedec") {
+                let id = self.w25q.jedec_id();
+                o_str(out, "OK ");
+                o_hex4(out, u16::from(id[0]) << 8 | u16::from(id[1]));
+                out(b" ");
+                o_hex4(out, u16::from(id[2]));
+                out(b"\r\n");
+            } else if nt >= 4 && eq(toks[1], "read") {
+                // flash read <addr6hex> <len_dec(1-128)>
+                let addr = match parse_u32_hex(toks[2]) {
+                    Some(v) => v,
+                    None => {
+                        o_str(out, "ERR addr\r\n");
+                        return;
+                    }
+                };
+                let cnt = match parse_u8(toks[3]) {
+                    Some(v) if (1..=128).contains(&v) => v as usize,
+                    _ => {
+                        o_str(out, "ERR len (1-128)\r\n");
+                        return;
+                    }
+                };
+                let mut buf = [0u8; 128];
+                self.w25q.read(addr, &mut buf[..cnt]);
+                o_str(out, "OK");
+                for &b in buf[..cnt].iter() {
+                    out(b" ");
+                    o_u8(out, b);
+                }
+                o_str(out, "\r\n");
+            } else if nt >= 3 && eq(toks[1], "se") {
+                // flash se <addr6hex>——4K 扇区擦除
+                let addr = match parse_u32_hex(toks[2]) {
+                    Some(v) if v % 4096 == 0 => v,
+                    _ => {
+                        o_str(out, "ERR addr (4K aligned)\r\n");
+                        return;
+                    }
+                };
+                self.w25q.erase_sector(addr);
+                o_str(out, "OK\r\n");
+            } else if nt >= 4 && eq(toks[1], "wr") {
+                // flash wr <addr6hex> <hexbytes..>（须已擦除；≤32B/命令）
+                let addr = match parse_u32_hex(toks[2]) {
+                    Some(v) if (v as usize) < 16 * 1024 * 1024 => v,
+                    _ => {
+                        o_str(out, "ERR addr\r\n");
+                        return;
+                    }
+                };
+                let mut data = [0u8; 80];
+                let mut len = 0usize;
+                let mut parse_err = false;
+                for t in toks[3..nt].iter() {
+                    match parse_hex_bytes(t, &mut data[len..]) {
+                        Some(k) => len += k,
+                        None => {
+                            parse_err = true;
+                            break;
+                        }
+                    }
+                }
+                if parse_err || len == 0 {
+                    o_str(out, "ERR data hex\r\n");
+                    return;
+                }
+                if addr as usize + len > 16 * 1024 * 1024 {
+                    o_str(out, "ERR range\r\n");
+                    return;
+                }
+                self.w25q.write(addr, &data[..len]);
+                o_str(out, "OK ");
+                o_u8(out, len as u8);
+                o_str(out, "\r\n");
+            } else if nt >= 4 && eq(toks[1], "crc") {
+                // flash crc <addr6hex> <len_dec(1-32768)>——区间 CRC-32
+                let addr = match parse_u32_hex(toks[2]) {
+                    Some(v) => v,
+                    _ => {
+                        o_str(out, "ERR addr\r\n");
+                        return;
+                    }
+                };
+                let len = match parse_dec_u32(toks[3]) {
+                    Some(v) if (1..=32768).contains(&v) => v,
+                    _ => {
+                        o_str(out, "ERR len (1-32768)\r\n");
+                        return;
+                    }
+                };
+                if addr as u64 + len as u64 > 16 * 1024 * 1024 {
+                    o_str(out, "ERR range\r\n");
+                    return;
+                }
+                let mut c = Crc32::init();
+                let mut buf = [0u8; PAGE_SIZE];
+                let mut off = 0u32;
+                while off < len {
+                    let k = core::cmp::min(PAGE_SIZE as u32, len - off) as usize;
+                    self.w25q.read(addr + off, &mut buf[..k]);
+                    c.update(&buf[..k]);
+                    off += k as u32;
+                }
+                o_str(out, "OK ");
+                o_hex8(out, c.final_crc());
+                o_str(out, "\r\n");
+            } else {
+                o_str(out, "ERR usage: flash jedec|read|se|wr|crc\r\n");
+            }
+        } else if nt >= 2 && eq(toks[0], "ota") && eq(toks[1], "boot") {
+            // 软复位进 bootloader（升级流程触发点）
+            o_str(out, "OK rebooting\r\n");
+            delay_ms(100); // 等 UART TC
+            SCB::sys_reset();
+        } else if nt >= 2 && eq(toks[0], "can0") {
+            if eq(toks[1], "recv") {
+                match self.can0.recv() {
+                    Some(f) => {
+                        o_str(out, "OK 0x");
+                        o_hex4(out, f.id);
+                        out(b" ");
+                        o_u8(out, f.len);
+                        for &b in f.data[..f.len as usize].iter() {
+                            out(b" ");
+                            o_u8(out, b);
+                        }
+                        o_str(out, "\r\n");
+                    }
+                    None => o_str(out, "OK empty\r\n"),
+                }
+            } else if nt >= 3 && eq(toks[1], "send") {
+                // can0 send <id> <db0> [db1..db7]（全部 hex）
+                let id = match parse_u16_hex(toks[2]) {
+                    Some(v) if v <= 0x7FF => v,
+                    _ => {
+                        o_str(out, "ERR id (0-7FF)\r\n");
+                        return;
+                    }
+                };
+                // 数据 = 各 token 的 hex 串按字节对解析合并
+                let mut data = [0u8; 8];
+                let mut len = 0usize;
+                let mut parse_err = false;
+                for t in toks[3..nt].iter() {
+                    let need = (t.len() + 1) / 2;
+                    if len + need > 8 {
+                        o_str(out, "ERR data >8 bytes\r\n");
+                        parse_err = true;
+                        break;
+                    }
+                    match parse_hex_bytes(t, &mut data[len..]) {
+                        Some(k) => len += k,
+                        None => {
+                            parse_err = true;
+                            break;
+                        }
+                    }
+                }
+                if parse_err {
+                    return;
+                }
+                if len == 0 {
+                    o_str(out, "ERR need >=1 data byte\r\n");
+                    return;
+                }
+                let frame = Frame { id, len: len as u8, data };
+                if self.can0.send(&frame) {
+                    o_str(out, "OK sent\r\n");
+                } else {
+                    o_str(out, "ERR send-timeout\r\n");
+                }
+            } else {
+                o_str(out, "ERR usage: can0 send <id> <bytes..>\r\n");
+            }
+        } else {
+            o_str(out, "ERR unknown cmd\r\n");
+        }
+    }
+}
+
+/// 全外设初始化（UART/TCP 传输变体共用单一来源）。
+///
+/// p 为 steal 的句柄集：periph 字段全是 ZST PAC 句柄（borrow 'static
+/// 寄存器块），ZST 字段引用可活任意生命周期 -> 返回 AppDeps<'static>
+/// 直接成立（曾考虑改 HAL 引用形态，无需）。
+pub fn init_deps() -> (AppDeps<'static>, Uart<'static>) {
     let p = periph::steal();
-
-    // 时间驱动初始化（TIMER1@1MHz）——缺失则 Ticker 闹钟永不触发
-    embassy_gd32::init_time_driver();
-
-    let rcc = Rcc::new(&p.rcu);
+    let rcc = Rcc::new(p.rcu);
     rcc.enable_gpio_port(Port::A);
     rcc.enable_gpio_port(Port::B);
     rcc.enable_gpio_port(Port::C);
@@ -206,72 +543,98 @@ pub async fn run(banner: &'static str) -> ! {
     rcc.enable_spi2();
     rcc.enable_uart6();
 
-    // UART6 console
-    let _utx = Pin::alternate(&p.gpioe, 7, 8);
-    let _urx = Pin::alternate(&p.gpioe, 8, 8);
-    let uart = Uart::new(&p.uart6);
+    // UART6 console（UART 变体的命令通道；TCP 变体降级为日志口）
+    let _utx = Pin::alternate(p.gpioe, 7, 8);
+    let _urx = Pin::alternate(p.gpioe, 8, 8);
+    let uart = Uart::new(p.uart6);
     uart.enable(PCLK1_HZ, BAUD);
     // 切换中断驱动接收（RXNE ISR -> 环；此后 read_byte 不可用）
-    embassy_gd32::usart::uart6_ring_enable(&p.uart6);
+    embassy_gd32::usart::uart6_ring_enable(p.uart6);
 
     // CPLD（SPI2 + CS=PA15 + RST=PA4）
-    let _sck = Pin::alternate(&p.gpioc, 10, 6);
-    let _miso = Pin::alternate(&p.gpioc, 11, 6);
-    let _mosi = Pin::alternate(&p.gpioc, 12, 6);
-    let mut cs = Pin::output(&p.gpioa, 15);
+    let _sck = Pin::alternate(p.gpioc, 10, 6);
+    let _miso = Pin::alternate(p.gpioc, 11, 6);
+    let _mosi = Pin::alternate(p.gpioc, 12, 6);
+    let mut cs = Pin::output(p.gpioa, 15);
     cs.set_high();
-    let mut rst = Pin::output(&p.gpioa, 4);
+    let mut rst = Pin::output(p.gpioa, 4);
     rst.set_high();
     cpld::Cpld::hard_reset(&mut rst);
     delay_ms(5);
-    let spi = Spi::new(&p.spi2);
+    let spi = Spi::new(p.spi2);
     spi.enable_master(PCLK1_HZ, 500_000);
-    let mut cpld_dev = cpld::Cpld::new(&spi, &mut cs);
+    let cpld_dev = cpld::Cpld::new(spi, cs);
 
     // CAN0（PD0=RX / PD1=TX AF9，500k，正常模式）
     rcc.enable_gpio_port(Port::D);
     rcc.enable_can0();
-    let _crx = Pin::alternate(&p.gpiod, 0, 9);
-    let _ctx = Pin::alternate(&p.gpiod, 1, 9);
-    let can0 = Can::new(&p.can0, &p.can0);
+    let _crx = Pin::alternate(p.gpiod, 0, 9);
+    let _ctx = Pin::alternate(p.gpiod, 1, 9);
+    let can0 = Can::new(p.can0, p.can0);
     if can0.init_loopback(&embassy_gd32::can::BitTiming::kbps500()).is_err() {
         put_str(&uart, "can0 init failed (continuing without CAN)\r\n");
     }
 
     // SPI3 Flash（W25Q128：SCK=PE2/MOSI=PE5/MISO=PE6 AF5，CS=PE4）
     rcc.enable_spi3();
-    let _fsck = Pin::alternate(&p.gpioe, 2, 5);
-    let _fmosi = Pin::alternate(&p.gpioe, 5, 5);
-    let _fmiso = Pin::alternate(&p.gpioe, 6, 5);
-    let mut fcs = Pin::output(&p.gpioe, 4);
+    let _fsck = Pin::alternate(p.gpioe, 2, 5);
+    let _fmosi = Pin::alternate(p.gpioe, 5, 5);
+    let _fmiso = Pin::alternate(p.gpioe, 6, 5);
+    let mut fcs = Pin::output(p.gpioe, 4);
     fcs.set_high();
-    let fspi = Spi::new(&p.spi3);
+    let fspi = Spi::new(p.spi3);
     fspi.enable_master(PCLK1_HZ, 2_000_000);
-    let mut w25q = W25q::new(&fspi, &mut fcs);
+    let w25q = W25q::new(fspi, fcs);
 
     // DMS OUT×8（OUT1-7=PE9-15，OUT8=PB10）、CTRL1-2=PB3/PB4
     let mut outs_e: [Pin; 7] = [
-        Pin::output(&p.gpioe, 9),
-        Pin::output(&p.gpioe, 10),
-        Pin::output(&p.gpioe, 11),
-        Pin::output(&p.gpioe, 12),
-        Pin::output(&p.gpioe, 13),
-        Pin::output(&p.gpioe, 14),
-        Pin::output(&p.gpioe, 15),
+        Pin::output(p.gpioe, 9),
+        Pin::output(p.gpioe, 10),
+        Pin::output(p.gpioe, 11),
+        Pin::output(p.gpioe, 12),
+        Pin::output(p.gpioe, 13),
+        Pin::output(p.gpioe, 14),
+        Pin::output(p.gpioe, 15),
     ];
-    let mut out8 = Pin::output(&p.gpiob, 10);
-    let mut ctrl1 = Pin::output(&p.gpiob, 3);
-    let mut ctrl2 = Pin::output(&p.gpiob, 4);
+    let mut out8 = Pin::output(p.gpiob, 10);
+    let mut ctrl1 = Pin::output(p.gpiob, 3);
+    let mut ctrl2 = Pin::output(p.gpiob, 4);
     // DMS IN×8（IN1-6=PD10-15，IN7-8=PC6/7）
     let ins_d: [Pin; 6] = [
-        Pin::input(&p.gpiod, 10),
-        Pin::input(&p.gpiod, 11),
-        Pin::input(&p.gpiod, 12),
-        Pin::input(&p.gpiod, 13),
-        Pin::input(&p.gpiod, 14),
-        Pin::input(&p.gpiod, 15),
+        Pin::input(p.gpiod, 10),
+        Pin::input(p.gpiod, 11),
+        Pin::input(p.gpiod, 12),
+        Pin::input(p.gpiod, 13),
+        Pin::input(p.gpiod, 14),
+        Pin::input(p.gpiod, 15),
     ];
-    let ins_c: [Pin; 2] = [Pin::input(&p.gpioc, 6), Pin::input(&p.gpioc, 7)];
+    let ins_c: [Pin; 2] = [Pin::input(p.gpioc, 6), Pin::input(p.gpioc, 7)];
+
+    let deps = AppDeps {
+        cpld_dev,
+        can0,
+        w25q,
+        outs_e,
+        out8,
+        ctrl1,
+        ctrl2,
+        ins_d,
+        ins_c,
+    };
+    (deps, uart)
+}
+
+/// 应用主体（banner 由 bin 变体注入，控制权永不返回）——UART 传输变体
+pub async fn run(banner: &'static str) -> ! {
+    let p = periph::steal();
+
+    // 时间驱动初始化（TIMER1@1MHz）——缺失则 Ticker 闹钟永不触发
+    embassy_gd32::init_time_driver();
+
+    let (mut deps, uart) = init_deps();
+
+    // 传输层输出汇（UART console；TCP 变体复用同一 dispatch，输出写套接字）
+    let mut out = |b: &[u8]| uart.write(b);
 
     put_str(&uart, banner);
 
@@ -291,292 +654,8 @@ pub async fn run(banner: &'static str) -> ! {
                     copy[..n].copy_from_slice(&line[..n]);
                     let mut toks: [&[u8]; 8] = [b""; 8];
                     let nt = tokenize(&copy[..n], &mut toks);
-                    // 命令分发
-                    if nt >= 1 && eq(toks[0], "ping") {
-                        put_str(&uart, "OK pong\r\n");
-                    } else if nt >= 2 && eq(toks[0], "cpld") && eq(toks[1], "mux") {
-                        if nt >= 3 && eq(toks[2], "get") {
-                            match cpld_dev.get_uart_mux() {
-                                Ok(v) => {
-                                    put_str(&uart, "OK 0x");
-                                    put_u8(&uart, v as u8);
-                                    put_str(&uart, "\r\n");
-                                }
-                                Err(_) => put_str(&uart, "ERR cpld-bus\r\n"),
-                            }
-                        } else if nt >= 4 && eq(toks[2], "set") {
-                            match parse_u8(toks[3]) {
-                                Some(t) if (0x80..=0x85).contains(&t) => {
-                                    match cpld_dev.set_uart_mux(t as u16) {
-                                        Ok(_) => put_str(&uart, "OK\r\n"),
-                                        Err(_) => put_str(&uart, "ERR cpld-bus\r\n"),
-                                    }
-                                }
-                                _ => put_str(&uart, "ERR arg (0x80-0x85)\r\n"),
-                            }
-                        } else {
-                            put_str(&uart, "ERR usage: cpld mux get|set <val>\r\n");
-                        }
-                    } else if nt >= 2 && eq(toks[0], "out") {
-                        // out <n(1-8)> <0|1>（3 token）
-                        if nt >= 3 {
-                            let idx = match parse_u8(toks[1]) {
-                                Some(v) if (1..=8).contains(&v) => (v - 1) as usize,
-                                _ => {
-                                    put_str(&uart, "ERR arg n(1-8)\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            let lvl = eq(toks[2], "1");
-                            if idx < 7 {
-                                if lvl {
-                                    outs_e[idx].set_high();
-                                } else {
-                                    outs_e[idx].set_low();
-                                }
-                            } else if lvl {
-                                out8.set_high();
-                            } else {
-                                out8.set_low();
-                            }
-                            put_str(&uart, "OK\r\n");
-                        } else {
-                            put_str(&uart, "ERR usage: out <n> <0|1>\r\n");
-                        }
-                    } else if nt >= 1 && eq(toks[0], "in") {
-                        let mut in_byte = 0u8;
-                        for (i, pin) in ins_d.iter().enumerate() {
-                            if pin.input_level() {
-                                in_byte |= 1 << i;
-                            }
-                        }
-                        for (i, pin) in ins_c.iter().enumerate() {
-                            if pin.input_level() {
-                                in_byte |= 1 << (6 + i);
-                            }
-                        }
-                        put_str(&uart, "OK 0x");
-                        put_u8(&uart, in_byte);
-                        put_str(&uart, "\r\n");
-                    } else if nt >= 2 && eq(toks[0], "ctrl") {
-                        // ctrl <1|2> <0|1>（3 token）
-                        if nt >= 3 {
-                            let which = parse_u8(toks[1]);
-                            let lvl = eq(toks[2], "1");
-                            match which {
-                                Some(1) => {
-                                    if lvl {
-                                        ctrl1.set_high();
-                                    } else {
-                                        ctrl1.set_low();
-                                    }
-                                    put_str(&uart, "OK\r\n");
-                                }
-                                Some(2) => {
-                                    if lvl {
-                                        ctrl2.set_high();
-                                    } else {
-                                        ctrl2.set_low();
-                                    }
-                                    put_str(&uart, "OK\r\n");
-                                }
-                                _ => put_str(&uart, "ERR arg ctrl(1|2)\r\n"),
-                            }
-                        } else {
-                            put_str(&uart, "ERR usage: ctrl <1|2> <0|1>\r\n");
-                        }
-                    } else if nt >= 2 && eq(toks[0], "flash") {
-                        if nt >= 2 && eq(toks[1], "jedec") {
-                            let id = w25q.jedec_id();
-                            put_str(&uart, "OK ");
-                            put_hex4(&uart, u16::from(id[0]) << 8 | u16::from(id[1]));
-                            uart.write_byte(b' ');
-                            put_hex4(&uart, u16::from(id[2]));
-                            uart.write(b"\r\n");
-                        } else if nt >= 4 && eq(toks[1], "read") {
-                            // flash read <addr6hex> <len_dec(1-128)>
-                            let addr = match parse_u32_hex(toks[2]) {
-                                Some(v) => v,
-                                None => {
-                                    put_str(&uart, "ERR addr\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            let cnt = match parse_u8(toks[3]) {
-                                Some(v) if (1..=128).contains(&v) => v as usize,
-                                _ => {
-                                    put_str(&uart, "ERR len (1-128)\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            let mut buf = [0u8; 128];
-                            w25q.read(addr, &mut buf[..cnt]);
-                            put_str(&uart, "OK");
-                            for &b in buf[..cnt].iter() {
-                                uart.write_byte(b' ');
-                                put_u8(&uart, b);
-                            }
-                            put_str(&uart, "\r\n");
-                        } else if nt >= 3 && eq(toks[1], "se") {
-                            // flash se <addr6hex>——4K 扇区擦除
-                            let addr = match parse_u32_hex(toks[2]) {
-                                Some(v) if v % 4096 == 0 => v,
-                                _ => {
-                                    put_str(&uart, "ERR addr (4K aligned)\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            w25q.erase_sector(addr);
-                            put_str(&uart, "OK\r\n");
-                        } else if nt >= 4 && eq(toks[1], "wr") {
-                            // flash wr <addr6hex> <hexbytes..>（须已擦除；≤32B/命令）
-                            let addr = match parse_u32_hex(toks[2]) {
-                                Some(v) if (v as usize) < 16 * 1024 * 1024 => v,
-                                _ => {
-                                    put_str(&uart, "ERR addr\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            let mut data = [0u8; 80];
-                            let mut len = 0usize;
-                            let mut parse_err = false;
-                            for t in toks[3..nt].iter() {
-                                match parse_hex_bytes(t, &mut data[len..]) {
-                                    Some(k) => len += k,
-                                    None => {
-                                        parse_err = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if parse_err || len == 0 {
-                                put_str(&uart, "ERR data hex\r\n");
-                                n = 0;
-                                continue;
-                            }
-                            if addr as usize + len > 16 * 1024 * 1024 {
-                                put_str(&uart, "ERR range\r\n");
-                                n = 0;
-                                continue;
-                            }
-                            w25q.write(addr, &data[..len]);
-                            put_str(&uart, "OK ");
-                            put_u8(&uart, len as u8);
-                            put_str(&uart, "\r\n");
-                        } else if nt >= 4 && eq(toks[1], "crc") {
-                            // flash crc <addr6hex> <len_dec(1-32768)>——区间 CRC-32
-                            let addr = match parse_u32_hex(toks[2]) {
-                                Some(v) => v,
-                                _ => {
-                                    put_str(&uart, "ERR addr\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            let len = match parse_dec_u32(toks[3]) {
-                                Some(v) if (1..=32768).contains(&v) => v,
-                                _ => {
-                                    put_str(&uart, "ERR len (1-32768)\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            if addr as u64 + len as u64 > 16 * 1024 * 1024 {
-                                put_str(&uart, "ERR range\r\n");
-                                n = 0;
-                                continue;
-                            }
-                            let mut c = Crc32::init();
-                            let mut buf = [0u8; PAGE_SIZE];
-                            let mut off = 0u32;
-                            while off < len {
-                                let k = core::cmp::min(PAGE_SIZE as u32, len - off) as usize;
-                                w25q.read(addr + off, &mut buf[..k]);
-                                c.update(&buf[..k]);
-                                off += k as u32;
-                            }
-                            put_str(&uart, "OK ");
-                            put_hex8(&uart, c.final_crc());
-                            put_str(&uart, "\r\n");
-                        } else {
-                            put_str(&uart, "ERR usage: flash jedec|read|se|wr|crc\r\n");
-                        }
-                    } else if nt >= 2 && eq(toks[0], "ota") && eq(toks[1], "boot") {
-                        // 软复位进 bootloader（升级流程触发点）
-                        put_str(&uart, "OK rebooting\r\n");
-                        delay_ms(100); // 等 UART TC
-                        SCB::sys_reset();
-                    } else if nt >= 2 && eq(toks[0], "can0") {
-                        if eq(toks[1], "recv") {
-                            match can0.recv() {
-                                Some(f) => {
-                                    put_str(&uart, "OK 0x");
-                                    put_hex4(&uart, f.id);
-                                    uart.write_byte(b' ');
-                                    put_u8(&uart, f.len);
-                                    for &b in f.data[..f.len as usize].iter() {
-                                        uart.write_byte(b' ');
-                                        put_u8(&uart, b);
-                                    }
-                                    put_str(&uart, "\r\n");
-                                }
-                                None => put_str(&uart, "OK empty\r\n"),
-                            }
-                        } else if nt >= 3 && eq(toks[1], "send") {
-                            // can0 send <id> <db0> [db1..db7]（全部 hex）
-                            let id = match parse_u16_hex(toks[2]) {
-                                Some(v) if v <= 0x7FF => v,
-                                _ => {
-                                    put_str(&uart, "ERR id (0-7FF)\r\n");
-                                    n = 0;
-                                    continue;
-                                }
-                            };
-                            // 数据 = 各 token 的 hex 串按字节对解析合并
-                            let mut data = [0u8; 8];
-                            let mut len = 0usize;
-                            let mut parse_err = false;
-                            for t in toks[3..nt].iter() {
-                                let need = (t.len() + 1) / 2;
-                                if len + need > 8 {
-                                    put_str(&uart, "ERR data >8 bytes\r\n");
-                                    parse_err = true;
-                                    break;
-                                }
-                                match parse_hex_bytes(t, &mut data[len..]) {
-                                    Some(k) => len += k,
-                                    None => {
-                                        parse_err = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if parse_err {
-                                n = 0;
-                                continue;
-                            }
-                            if len == 0 {
-                                put_str(&uart, "ERR need >=1 data byte\r\n");
-                                n = 0;
-                                continue;
-                            }
-                            let frame = Frame { id, len: len as u8, data };
-                            if can0.send(&frame) {
-                                put_str(&uart, "OK sent\r\n");
-                            } else {
-                                put_str(&uart, "ERR send-timeout\r\n");
-                            }
-                        } else {
-                            put_str(&uart, "ERR usage: can0 send <id> <bytes..>\r\n");
-                        }
-                    } else {
-                        put_str(&uart, "ERR unknown cmd\r\n");
-                    }
+                    // 命令分发（UART/TCP 双传输共用主体）
+                    deps.dispatch(&mut out, &toks, nt);
                     n = 0;
                 }
             }

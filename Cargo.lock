@@ -107,7 +107,7 @@ checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 
 [[package]]
 name = "control-server"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
@@ -115,7 +115,10 @@ dependencies = [
  "embassy-gd32",
  "embassy-time",
  "gd32f470",
+ "linked_list_allocator",
+ "managed",
  "panic-halt",
+ "smoltcp",
 ]
 
 [[package]]
@@ -346,6 +349,7 @@ dependencies = [
  "embedded-hal 1.0.0",
  "gd32f470",
  "paste",
+ "smoltcp",
 ]
 
 [[package]]

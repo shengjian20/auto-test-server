@@ -73,7 +73,7 @@ fn main() -> ! {
     delay_ms(5);
     let spi = Spi::new(&p.spi2);
     spi.enable_master(PCLK1_HZ, 500_000);
-    let mut cpld = cpld::Cpld::new(&spi, &mut cs);
+    let mut cpld = cpld::Cpld::new(spi, cs);
 
     let mut result = "PASS";
 

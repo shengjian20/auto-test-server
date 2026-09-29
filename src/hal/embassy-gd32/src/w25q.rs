@@ -22,12 +22,12 @@ pub const SECTOR_SIZE: u32 = 4096;
 
 /// W25Q 设备句柄（SPI 总线 + 软件 CS）
 pub struct W25q<'a> {
-    spi: &'a Spi<'a>,
-    cs: &'a mut Pin<'a>,
+    spi: Spi<'a>,
+    pub cs: Pin<'a>,
 }
 
 impl<'a> W25q<'a> {
-    pub fn new(spi: &'a Spi<'a>, cs: &'a mut Pin<'a>) -> Self {
+    pub fn new(spi: Spi<'a>, cs: Pin<'a>) -> Self {
         Self { spi, cs }
     }
 
