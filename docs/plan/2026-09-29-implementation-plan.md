@@ -126,3 +126,23 @@ auto_test_server/
 - 不破坏宿主机 ✓（构建全在容器，仅 git/docker/串口设备访问）
 - target.md 保留 ✓
 - 每流程 git 记录 ✓（阶段=里程碑 commit）
+
+## 6. 执行记录
+
+### 阶段 0（2026-09-29 完成，main 分支）
+- git 环境 + 国内源构建容器（apt=USTC/rust=rsproxy/pip=清华，probe-rs 0.32 vendored）
+- 裸机 blink（手写寄存器）板上验证；7 份官方 datasheet 入库
+- 踩坑记录：GD32F470 主 SRAM=128K@0x20000000（非 512K 连续）；RCU 基址
+  0x40023800（手算错两轮，Fault 寄存器 BFAR 定位）
+
+### 阶段 1（2026-09-29 完成，feat/stage1-async-time-driver 分支）
+- PAC：svd2rust 0.37 从 DFP SVD 生成（tools/gen-pac.sh 可复现；patch-svd.py
+  清洗非法 access/控制字符 + 补 GPIO CTL 枚举 + TIMER 数值字段 writeConstraint）
+- blink-pac：纯安全 API 固件（#![deny(unsafe_code)]），寄存器级验证
+- embassy-gd32 骨架：gpio（表驱动宏+embedded-hal 1.0）+ rcc + interrupt
+  typelevel 基础设施 + time driver
+- 异步化：TIMER1@1MHz time driver（32 位单比较闹钟）+ blink-async 板上验证
+- 关键实测：TIMER1 是 32 位计数器；PSC 影子寄存器需 UG 事件锁存；
+  外设时钟未开时寄存器写丢弃；svd2rust 0.37 不生成 pub mod interrupt
+  （cortex-m-rt #[interrupt] 需 HAL 提供作用域模块）
+- 约束执行：固件零 unsafe；HAL 仅 2 处注释过的 unsafe 收敛点

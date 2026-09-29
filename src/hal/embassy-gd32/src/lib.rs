@@ -11,7 +11,11 @@
 #![no_std]
 
 pub mod gpio;
+pub mod interrupt;
 pub mod rcc;
+pub mod time_driver;
+
+pub use time_driver::init_time_driver;
 
 pub use gpio::{Pin, PinMode, Port};
 pub use rcc::Rcc;
