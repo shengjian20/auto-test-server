@@ -94,34 +94,18 @@ fn main() -> ! {
     }
     uart.write(b"SWR: cleared (REF_CLK alive)\r\n");
 
-    // 6. MDIO 时钟：MDC = HCLK/(42+2*2^CLR)，CLR=0 -> ~364kHz @16MHz
-    p.enet_mac.mac_phy_ctl().modify(|_, w| w.clr().set(0));
-
-    // MDIO 读原语（闭内联，避免借用问题）
-    macro_rules! mdio_read {
-        ($phy:expr, $reg:expr) => {{
-            p.enet_mac
-                .mac_phy_ctl()
-                .modify(|_, w| {
-                    w.pa().set($phy).pr().set($reg).pw().clear_bit()
-                });
-            p.enet_mac.mac_phy_ctl().modify(|_, w| w.pb().set_bit());
-            let mut g = 2_000_000u32;
-            while p.enet_mac.mac_phy_ctl().read().pb().bit_is_set() {
-                g -= 1;
-                if g == 0 {
-                    break;
-                }
-            }
-            p.enet_mac.mac_phy_data().read().pd().bits()
-        }};
-    }
+    // 6. MDIO 原语走 HAL（clr 收敛于 Mdio::new，零 unsafe 泄漏到固件）
+    let mdio = embassy_gd32::enet::Mdio::new(&p.enet_mac);
 
     uart.write(b"PHY scan (REG2/REG3, x=dead addr):\r\n");
     let mut found: Option<(u8, u16, u16)> = None;
     for phy in 0u8..32 {
-        let id1 = mdio_read!(phy, 2);
-        let id2 = mdio_read!(phy, 3);
+        let Some(id1) = mdio.read(phy, 2) else {
+            continue;
+        };
+        let Some(id2) = mdio.read(phy, 3) else {
+            continue;
+        };
         // 无 PHY 的地址典型表现为全 0 或全 F
         if id1 == 0x0000 || id1 == 0xFFFF {
             continue;

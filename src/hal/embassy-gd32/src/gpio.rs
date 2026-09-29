@@ -86,26 +86,28 @@ macro_rules! pin_write {
 }
 
 /// 寄存器读改写（modify 闭包）：按引脚号分发
-macro_rules! pin_modify {
-    ($rb:expr, $n:expr, $reg:ident, |$w:ident| $fld:ident.$method:ident()) => {
+/// 寄存器字段写（unsafe bits，值表达式）：按引脚号分发。
+/// 供 CTLx 这类无枚举多 bit 字段使用；值域合法性由调用点注释保证
+macro_rules! pin_modify_bits {
+    ($rb:expr, $n:expr, $reg:ident, $fld:ident, $val:expr) => {
         paste::paste! {
             match $n {
-                0 => $rb.$reg().modify(|_, $w| $w.[<$fld 0>]().$method()),
-                1 => $rb.$reg().modify(|_, $w| $w.[<$fld 1>]().$method()),
-                2 => $rb.$reg().modify(|_, $w| $w.[<$fld 2>]().$method()),
-                3 => $rb.$reg().modify(|_, $w| $w.[<$fld 3>]().$method()),
-                4 => $rb.$reg().modify(|_, $w| $w.[<$fld 4>]().$method()),
-                5 => $rb.$reg().modify(|_, $w| $w.[<$fld 5>]().$method()),
-                6 => $rb.$reg().modify(|_, $w| $w.[<$fld 6>]().$method()),
-                7 => $rb.$reg().modify(|_, $w| $w.[<$fld 7>]().$method()),
-                8 => $rb.$reg().modify(|_, $w| $w.[<$fld 8>]().$method()),
-                9 => $rb.$reg().modify(|_, $w| $w.[<$fld 9>]().$method()),
-                10 => $rb.$reg().modify(|_, $w| $w.[<$fld 10>]().$method()),
-                11 => $rb.$reg().modify(|_, $w| $w.[<$fld 11>]().$method()),
-                12 => $rb.$reg().modify(|_, $w| $w.[<$fld 12>]().$method()),
-                13 => $rb.$reg().modify(|_, $w| $w.[<$fld 13>]().$method()),
-                14 => $rb.$reg().modify(|_, $w| $w.[<$fld 14>]().$method()),
-                15 => $rb.$reg().modify(|_, $w| $w.[<$fld 15>]().$method()),
+                0 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 0>]().bits($val) }),
+                1 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 1>]().bits($val) }),
+                2 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 2>]().bits($val) }),
+                3 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 3>]().bits($val) }),
+                4 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 4>]().bits($val) }),
+                5 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 5>]().bits($val) }),
+                6 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 6>]().bits($val) }),
+                7 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 7>]().bits($val) }),
+                8 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 8>]().bits($val) }),
+                9 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 9>]().bits($val) }),
+                10 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 10>]().bits($val) }),
+                11 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 11>]().bits($val) }),
+                12 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 12>]().bits($val) }),
+                13 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 13>]().bits($val) }),
+                14 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 14>]().bits($val) }),
+                15 => $rb.$reg().modify(|_, w| unsafe { w.[<$fld 15>]().bits($val) }),
                 _ => unreachable!("pin number is 0-15"),
             }
         }
@@ -183,35 +185,42 @@ impl<'a> Pin<'a> {
 
     /// 设置复用功能编号（AFSEL0/AFSEL1 的 SELx 4bit 字段，0-15）
     /// AF8=UART6/7、AF7=USART0/1/2（GD32F470 手册 AF 表）
+    ///
+    /// unsafe 依据（本方法内 bits()）：AFSEL 的 SELx 为 4bit 全值域字段
+    /// （AF 编号 0-15 皆为合法值，手册 AF 表），值域由调用方 af:u8 类型
+    /// 与本 match 的 0-15 分发保证，无越界写入可能。
     pub fn set_af(&mut self, af: u8) {
+        debug_assert!(af <= 15);
         match self.n {
-            0 => self.rb.afsel0().modify(|_, w| w.sel0().set(af)),
-            1 => self.rb.afsel0().modify(|_, w| w.sel1().set(af)),
-            2 => self.rb.afsel0().modify(|_, w| w.sel2().set(af)),
-            3 => self.rb.afsel0().modify(|_, w| w.sel3().set(af)),
-            4 => self.rb.afsel0().modify(|_, w| w.sel4().set(af)),
-            5 => self.rb.afsel0().modify(|_, w| w.sel5().set(af)),
-            6 => self.rb.afsel0().modify(|_, w| w.sel6().set(af)),
-            7 => self.rb.afsel0().modify(|_, w| w.sel7().set(af)),
-            8 => self.rb.afsel1().modify(|_, w| w.sel8().set(af)),
-            9 => self.rb.afsel1().modify(|_, w| w.sel9().set(af)),
-            10 => self.rb.afsel1().modify(|_, w| w.sel10().set(af)),
-            11 => self.rb.afsel1().modify(|_, w| w.sel11().set(af)),
-            12 => self.rb.afsel1().modify(|_, w| w.sel12().set(af)),
-            13 => self.rb.afsel1().modify(|_, w| w.sel13().set(af)),
-            14 => self.rb.afsel1().modify(|_, w| w.sel14().set(af)),
-            15 => self.rb.afsel1().modify(|_, w| w.sel15().set(af)),
+            0 => self.rb.afsel0().modify(|_, w| unsafe { w.sel0().bits(af) }),
+            1 => self.rb.afsel0().modify(|_, w| unsafe { w.sel1().bits(af) }),
+            2 => self.rb.afsel0().modify(|_, w| unsafe { w.sel2().bits(af) }),
+            3 => self.rb.afsel0().modify(|_, w| unsafe { w.sel3().bits(af) }),
+            4 => self.rb.afsel0().modify(|_, w| unsafe { w.sel4().bits(af) }),
+            5 => self.rb.afsel0().modify(|_, w| unsafe { w.sel5().bits(af) }),
+            6 => self.rb.afsel0().modify(|_, w| unsafe { w.sel6().bits(af) }),
+            7 => self.rb.afsel0().modify(|_, w| unsafe { w.sel7().bits(af) }),
+            8 => self.rb.afsel1().modify(|_, w| unsafe { w.sel8().bits(af) }),
+            9 => self.rb.afsel1().modify(|_, w| unsafe { w.sel9().bits(af) }),
+            10 => self.rb.afsel1().modify(|_, w| unsafe { w.sel10().bits(af) }),
+            11 => self.rb.afsel1().modify(|_, w| unsafe { w.sel11().bits(af) }),
+            12 => self.rb.afsel1().modify(|_, w| unsafe { w.sel12().bits(af) }),
+            13 => self.rb.afsel1().modify(|_, w| unsafe { w.sel13().bits(af) }),
+            14 => self.rb.afsel1().modify(|_, w| unsafe { w.sel14().bits(af) }),
+            15 => self.rb.afsel1().modify(|_, w| unsafe { w.sel15().bits(af) }),
             _ => unreachable!("pin number is 0-15"),
         }; // svd2rust 0.37 modify() 返回 u32，语句位置丢弃
     }
 
     /// 切换工作模式
     pub fn set_mode(&mut self, mode: PinMode) {
+        // CTLx 2bit 模式字段（Input=0/Output=1/Alternate=2/Analog=3 全值域），
+        // unsafe bits 收敛于 pin_modify_bits!
         match mode {
-            PinMode::Input => pin_modify!(self.rb, self.n, ctl, |w| ctl.input()),
-            PinMode::Output => pin_modify!(self.rb, self.n, ctl, |w| ctl.output()),
-            PinMode::Alternate => pin_modify!(self.rb, self.n, ctl, |w| ctl.alternate()),
-            PinMode::Analog => pin_modify!(self.rb, self.n, ctl, |w| ctl.analog()),
+            PinMode::Input => pin_modify_bits!(self.rb, self.n, ctl, ctl, 0u8),
+            PinMode::Output => pin_modify_bits!(self.rb, self.n, ctl, ctl, 1u8),
+            PinMode::Alternate => pin_modify_bits!(self.rb, self.n, ctl, ctl, 2u8),
+            PinMode::Analog => pin_modify_bits!(self.rb, self.n, ctl, ctl, 3u8),
         }; // svd2rust 0.37 modify() 返回 u32（写入值），语句位置丢弃
     }
 

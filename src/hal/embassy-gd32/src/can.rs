@@ -23,13 +23,13 @@ pub struct Frame {
 
 /// 位时序参数（tq 数，字段值为 N-1 编码）
 pub struct BitTiming {
-    /// 再同步跳跃宽度，1-4 tq（字段值 0-3）
+    /// 再同步跳跃宽度，1-4 tq（寄存器字段值 0-3，N-1 编码）
     pub sjw: u8,
-    /// 位段1，1-16 tq（字段值 0-15）
+    /// 位段1，1-16 tq（寄存器字段值 0-15，N-1 编码）
     pub bs1: u8,
-    /// 位段2，1-8 tq（字段值 0-7）
+    /// 位段2，1-8 tq（寄存器字段值 0-7，N-1 编码）
     pub bs2: u8,
-    /// 预分频，1-1024（字段值 0-1023）
+    /// 预分频，1-1024（寄存器字段值 0-1023，N-1 编码）
     pub baudp: u16,
 }
 
@@ -79,12 +79,17 @@ impl<'a> Can<'a> {
             }
         }
 
-        // 位时序 + 回环通信模式
-        rb.bt().modify(|_, w| {
-            w.sjw().set(timing.sjw)
-                .bs1().set(timing.bs1)
-                .bs2().set(timing.bs2)
-                .baudpsc().set(timing.baudp)
+        // 位时序 + 回环通信模式。
+        //
+        // unsafe 依据（bits() x4）：BT 寄存器 SJW/BS1/BS2/BAUDPSC 为 N-1
+        // 编码的全值域字段（SJW 0-3=1-4tq、BS1 0-15、BS2 0-7、BAUDPSC
+        // 0-1023，手册位时序章节），BitTiming 结构体字段类型与文档约束
+        // 值域（见其字段注释），无越界可能。
+        rb.bt().modify(|_, w| unsafe {
+            w.sjw().bits(timing.sjw)
+                .bs1().bits(timing.bs1)
+                .bs2().bits(timing.bs2)
+                .baudpsc().bits(timing.baudp)
                 .lcmod().set_bit()
         });
 
@@ -135,26 +140,32 @@ impl<'a> Can<'a> {
     pub fn send(&self, frame: &Frame) -> bool {
         let rb = self.rb;
 
-        // 填邮箱（Ten=0 时配置）：ID -> TMI0，DLC/时间戳 -> TMP0
-        rb.tmi0().modify(|_, w| {
+        // 填邮箱（Ten=0 时配置）：ID -> TMI0，DLC/时间戳 -> TMP0。
+        //
+        // unsafe 依据（bits() x2）：SFID_EFID 11bit 标准帧 ID 全值域
+        // 0-0x7FF（Frame.id:u16 由调用方保证 <=0x7FF，超出位硬件忽略）；
+        // DLENC 4bit DLC 全值域 0-15（&0xF 掩码兜底）。
+        rb.tmi0().modify(|_, w| unsafe {
             w.ten().clear_bit()
                 .ft().clear_bit() // 数据帧
                 .ff().clear_bit() // 标准帧
-                .sfid_efid().set(frame.id)
+                .sfid_efid().bits(frame.id & 0x7FF)
         });
-        rb.tmp0().modify(|_, w| w.dlenc().set(frame.len & 0xF));
+        rb.tmp0()
+            .modify(|_, w| unsafe { w.dlenc().bits(frame.len & 0xF) });
         // 数据 0-3 -> TMDATA00，4-7 -> TMDATA10
-        rb.tmdata00().modify(|_, w| {
-            w.db0().set(frame.data[0])
-                .db1().set(frame.data[1])
-                .db2().set(frame.data[2])
-                .db3().set(frame.data[3])
+        // unsafe 依据（bits() x8）：DB0-7 各 8bit 全值域（u8 天然界内）
+        rb.tmdata00().modify(|_, w| unsafe {
+            w.db0().bits(frame.data[0])
+                .db1().bits(frame.data[1])
+                .db2().bits(frame.data[2])
+                .db3().bits(frame.data[3])
         });
-        rb.tmdata10().modify(|_, w| {
-            w.db4().set(frame.data[4])
-                .db5().set(frame.data[5])
-                .db6().set(frame.data[6])
-                .db7().set(frame.data[7])
+        rb.tmdata10().modify(|_, w| unsafe {
+            w.db4().bits(frame.data[4])
+                .db5().bits(frame.data[5])
+                .db6().bits(frame.data[6])
+                .db7().bits(frame.data[7])
         });
 
         // 请求发送

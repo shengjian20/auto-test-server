@@ -41,15 +41,18 @@ pub struct Mdio<'a> {
 impl<'a> Mdio<'a> {
     pub fn new(mac: &'a enet_mac::RegisterBlock) -> Self {
         // MDC 时钟范围：CLR=0（HCLK/(42+2*2^0)≈380kHz @16MHz HSI）
-        mac.mac_phy_ctl().modify(|_, w| w.clr().set(0));
+        // unsafe 依据（bits()）：CLR 3bit 时钟范围编码 0-7 全部合法（手册表）
+        mac.mac_phy_ctl().modify(|_, w| unsafe { w.clr().bits(0) });
         Self { mac }
     }
 
     /// 读 PHY 寄存器（阻塞等 PB 完成，带超时护栏）
     pub fn read(&self, phy: u8, reg: u8) -> Option<u16> {
-        self.mac
-            .mac_phy_ctl()
-            .modify(|_, w| w.pa().set(phy).pr().set(reg).pw().clear_bit());
+        // unsafe 依据（bits() x2）：PA 5bit PHY 地址 0-31、PR 5bit 寄存器
+        // 0-31，均全值域（u8 参数 &0x1F 掩码兜底）
+        self.mac.mac_phy_ctl().modify(|_, w| unsafe {
+            w.pa().bits(phy & 0x1F).pr().bits(reg & 0x1F).pw().clear_bit()
+        });
         self.mac.mac_phy_ctl().modify(|_, w| w.pb().set_bit());
         let mut guard = 2_000_000u32;
         while self.mac.mac_phy_ctl().read().pb().bit_is_set() {
@@ -65,10 +68,11 @@ impl<'a> Mdio<'a> {
     pub fn write(&self, phy: u8, reg: u8, value: u16) -> Option<()> {
         self.mac
             .mac_phy_data()
-            .write(|w| w.pd().set(value));
-        self.mac
-            .mac_phy_ctl()
-            .modify(|_, w| w.pa().set(phy).pr().set(reg).pw().set_bit());
+            // unsafe 依据（bits()）：PD 16bit MDIO 数据全值域
+            .write(|w| unsafe { w.pd().bits(value) });
+        self.mac.mac_phy_ctl().modify(|_, w| unsafe {
+            w.pa().bits(phy & 0x1F).pr().bits(reg & 0x1F).pw().set_bit()
+        });
         self.mac.mac_phy_ctl().modify(|_, w| w.pb().set_bit());
         let mut guard = 2_000_000u32;
         while self.mac.mac_phy_ctl().read().pb().bit_is_set() {

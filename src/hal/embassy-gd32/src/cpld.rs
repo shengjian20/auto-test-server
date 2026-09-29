@@ -10,11 +10,9 @@
 //!   0x3<<12 SET_UART  写 uart_mux（低 3 位）        [写]
 //!   0x4<<12 GET_UART  读 uart_mux                   [读]
 //!   EXUART 切换目标值：0x80=MCU_UART，0x81-0x85=EXUART0-4
-#![no_std]
 
 use crate::gpio::Pin;
 use crate::spi::Spi;
-use gd32f470::spi0;
 
 pub const CMD_SET_EXIO: u16 = 0x1 << 12;
 pub const CMD_GET_EXIO: u16 = 0x2 << 12;

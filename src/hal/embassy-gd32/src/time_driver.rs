@@ -66,8 +66,12 @@ impl Timer1Driver {
         // 1MHz tick，自由跑到 2^32。
         // PSC 是影子寄存器：写入后必须发 UG 更新事件才锁存生效，
         // 否则计数器按 PSC=0（16MHz）跑——板上实测"闪烁过快"即此因
-        rb.psc().write(|w| w.psc().set(PSC_DIV));
-        rb.car().write(|w| w.carl().set(u32::MAX));
+        // unsafe 依据（bits() x2）：TIMER1 PSC 16b / CAR 32b 均为无保留位
+        // 全值域计数字段（手册 TIMER 章节），PSC_DIV/MAX 为合法值
+        unsafe {
+            rb.psc().write(|w| w.psc().bits(PSC_DIV));
+            rb.car().write(|w| w.carl().bits(u32::MAX));
+        }
         rb.swevg().write(|w| w.upg().set_bit()); // UG: 装载 PSC/CAR 影子值
         rb.intf().write(|w| w.upif().clear_bit()); // UG 会置 UPIF，清掉
         rb.intf().write(|w| w.upif().clear_bit().ch1if().clear_bit());
@@ -101,7 +105,8 @@ impl Timer1Driver {
 
         // 32 位模语义：比较值 = (now + diff) mod 2^32，硬件自由匹配
         let target = (t as u32).wrapping_add(diff_capped as u32);
-        rb.ch1cv().write(|w| w.ch1val().set(target));
+        // unsafe 依据（bits()）：CH1CV 32b 全值域计数字段
+        unsafe { rb.ch1cv().write(|w| w.ch1val().bits(target)); }
         rb.intf().write(|w| w.ch1if().clear_bit());
         rb.dmainten().modify(|_, w| w.ch1ie().set_bit());
 
