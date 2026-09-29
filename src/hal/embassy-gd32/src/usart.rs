@@ -74,22 +74,18 @@ macro_rules! uart_device {
                 self.flush();
             }
 
-            /// 非阻塞读：RBNE 置位时返回接收字节（读 DATA 自动清 RBNE）。
-            /// 帧错误/溢出等错误态按手册顺序清 flags（读 STAT0 后读 DATA）
+            /// 非阻塞读：手册推荐顺序（读 STAT0 后读 DATA）自动清 RBNE/ORE/
+            /// 帧错误标志。RBNE=0 或错误态返回 None（错误字节丢弃）。
             pub fn read_byte(&self) -> Option<u8> {
                 let st = self.rb.stat0().read();
-                if st.orerr().bit_is_set() || st.ferr().bit_is_set()
-                    || st.nerr().bit_is_set() || st.perr().bit_is_set()
-                {
-                    let _ = self.rb.stat0().read();
-                    let _ = self.rb.data().read();
+                if !st.rbne().bit_is_set() {
+                    // 无数据。若错误标志挂起（ORE 等），读 DATA 一次清除
+                    if st.orerr().bit_is_set() {
+                        let _ = self.rb.data().read();
+                    }
                     return None;
                 }
-                if st.rbne().bit_is_set() {
-                    Some(self.rb.data().read().data().bits() as u8)
-                } else {
-                    None
-                }
+                Some(self.rb.data().read().data().bits() as u8)
             }
         }
     };
