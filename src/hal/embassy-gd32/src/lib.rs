@@ -12,6 +12,7 @@
 
 pub mod can;
 pub mod cpld;
+pub mod crc32;
 pub mod enet;
 pub mod flash;
 pub mod gpio;
