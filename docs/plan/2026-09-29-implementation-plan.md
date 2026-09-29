@@ -194,3 +194,12 @@ auto_test_server/
 - 修复后实测：心跳 'A' 500ms + RX 中断环回显 AXA/AYZA（与心跳交织）
 - 流程教训：改 memory.x 后必须 touch 强制重链（增量构建不重链向量表，
   曾致"烧录成功"实为旧 ELF）——已固化到 memory
+
+### 阶段 2g 终版（2026-09-29，789ebc6）
+- UART6 向量所有权归 HAL（usart.rs 独占 #[interrupt] fn UART6 + 环），
+  固件消费侧零 unsafe（uart6_ring_pop）；修复双 crate 重复定义导致的
+  bitcode 链接失败（usart-async-test 唯一失败 bin 的根因）
+- 快速 256B 连发验收：两次独立运行均 256/256 完美回显（FAST_BURST PASS；
+  之前 255/256 为探针字节串扰的测试时序问题，非固件缺陷）
+- 流程教训：改 memory.x 后 touch 强制重链；openocd cfg 结尾 reset run；
+  构建统一用户（root/ubuntu 交替致 target 权限混乱需 --user root 清理）
