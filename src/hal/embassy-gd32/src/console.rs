@@ -47,13 +47,47 @@ pub fn init() {
 }
 
 
-/// 写原始字节（print! 宏的底层出口；console 未初始化时静默丢弃）
+/// 流式输出缓冲（print! 逐段 format 产生的碎片在此攒批，flush 时一次
+/// critical-section 写出——降低逐字节锁开销）
+static OUT_BUF: Mutex<RefCell<heapless::Vec<u8, 512>>> =
+    Mutex::new(RefCell::new(heapless::Vec::new()));
+
+/// 立即写出缓冲（write_bytes 底层；CONSOLE 未初始化时清缓冲静默丢弃）
+fn flush_out_buf() {
+    critical_section::with(|cs| {
+        let mut buf = OUT_BUF.borrow_ref_mut(cs);
+        if let Some(sync) = CONSOLE.borrow_ref_mut(cs).as_mut() {
+            sync.0.write(&buf[..]);
+        }
+        buf.clear();
+    });
+}
+
+/// 写原始字节（流式：攒批进 OUT_BUF，满 512 或显式 flush 落盘；
+/// console 未初始化时静默丢弃）
 pub fn write_bytes(b: &[u8]) {
     critical_section::with(|cs| {
-        if let Some(sync) = CONSOLE.borrow_ref_mut(cs).as_mut() {
-            sync.0.write(b);
+        let mut buf = OUT_BUF.borrow_ref_mut(cs);
+        if CONSOLE.borrow_ref_mut(cs).is_none() {
+            buf.clear();
+            return;
+        }
+        for &byte in b {
+            if buf.push(byte).is_err() {
+                // 满：先落盘再续
+                if let Some(sync) = CONSOLE.borrow_ref_mut(cs).as_mut() {
+                    sync.0.write(&buf[..]);
+                }
+                buf.clear();
+                let _ = buf.push(byte);
+            }
         }
     });
+}
+
+/// 显式冲刷流式缓冲（行结束/命令边界处调用；UART 直写无缓冲代价）
+pub fn flush() {
+    flush_out_buf();
 }
 
 /// msh 风格宏出口（core::fmt 对 CONSOLE 的适配）
@@ -88,6 +122,8 @@ macro_rules! print {
 /// 宏底层出口（lib crate 根 re-export 供宏展开解析）
 pub fn console_write_fmt(args: core::fmt::Arguments) {
     ConsoleWrite.write_fmt(args).ok();
+    // println 结尾 flush（流式缓冲不满 512 也要立即落盘）
+    flush_out_buf();
 }
 
 pub fn console_write_bytes(b: &[u8]) {
@@ -153,12 +189,16 @@ impl<const MAX_CMDS: usize, const LINE_MAX: usize> Shell<MAX_CMDS, LINE_MAX> {
         while let Some(ch) = crate::usart::uart6_ring_pop() {
             match ch {
                 b'\n' | b'\r' => {
+                    // 回车回显无条件 \r\n（含空行——终端 \n 不回列首，
+                    // 缺 \r 则 prompt 出现在屏幕中部）
+                    write_bytes(b"\r\n");
                     if !self.line.is_empty() {
-                        write_bytes(b"\r\n");
                         done = Some(alloc::string::String::from(self.line.as_str()));
                         self.line.clear();
                     }
                     self.print_prompt();
+                    // 行结束 flush（响应+prompt 一次性落盘）
+                    flush_out_buf();
                 }
                 0x08 | 0x7F => {
                     // 退格：终端侧擦除（\b \x1b[K）+ 缓冲收缩
@@ -195,10 +235,13 @@ impl<const MAX_CMDS: usize, const LINE_MAX: usize> Shell<MAX_CMDS, LINE_MAX> {
                 let resp = (cmd.handler)(&toks[..nt]);
                 write_bytes(resp.as_bytes());
                 write_bytes(b"\r\n");
+                // 响应行 flush
+                flush_out_buf();
                 return;
             }
         }
         write_bytes(b"unknown cmd, try 'help'\r\n");
+        flush_out_buf();
     }
 
     /// help 命令（命令表自动生成）
