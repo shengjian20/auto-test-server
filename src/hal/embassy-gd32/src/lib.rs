@@ -11,6 +11,7 @@
 #![no_std]
 
 pub mod can;
+pub mod console;
 pub mod cpld;
 pub mod crc32;
 pub mod enet;
@@ -33,3 +34,17 @@ pub use can::Can;
 pub use spi::Spi;
 pub use usart::{Uart, Usart};
 pub use rcc::Rcc;
+
+/// PAC 外设句柄集的安全获取（Peripherals::take 的绕行——跳转链/二次
+/// 初始化场景下 take() 因 DEVICE_PERIPHERALS 标志返回 None；字段为
+/// 'static 寄存器块引用，子句柄自动获得 'static）。
+/// unsafe 收敛点：外设地址为 SVD 定案物理常驻，引用永不悬垂；调用方
+/// 需自行保证无别名写（console::init 仅写 UART6 寄存器）
+#[allow(unsafe_code)]
+pub fn periph_steal() -> periph::Peripherals {
+    periph::steal()
+}
+
+pub mod periph;
+
+pub use console::{console_write_bytes, console_write_fmt, delay_ms, delay_us};

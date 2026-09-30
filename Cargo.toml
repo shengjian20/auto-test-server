@@ -20,6 +20,7 @@ members = [
     "src/firmware/enet-link-test",
     "src/firmware/control-server",
     "src/firmware/enet-dma-test",
+    "src/firmware/msh-demo",
     "src/firmware/tcp-echo",
     "tools/mcp-server",
 ]

@@ -174,3 +174,10 @@ fn TIMER1() {
 }
 
 
+
+/// 当前时刻（微秒；embassy now() 的 tick 换算——TICK_HZ=1MHz 时 1:1。
+/// 确定性延时 delay_us/delay_ms 的时基（教训 #15 的正解：TIMER1 CNT
+/// 差值轮询，无 O1 空转问题）
+pub fn now_us() -> u64 {
+    DRIVER.now()
+}

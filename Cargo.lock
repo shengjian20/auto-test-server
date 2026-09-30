@@ -348,6 +348,7 @@ dependencies = [
  "embassy-time-queue-utils",
  "embedded-hal 1.0.0",
  "gd32f470",
+ "heapless 0.8.0",
  "paste",
  "smoltcp",
 ]
@@ -685,6 +686,20 @@ name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "msh-demo"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-executor",
+ "embassy-gd32",
+ "embassy-time",
+ "gd32f470",
+ "linked_list_allocator",
+ "panic-halt",
+]
 
 [[package]]
 name = "nb"
