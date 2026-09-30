@@ -16,6 +16,7 @@
 use cortex_m::peripheral::SCB;
 use embassy_gd32::can::{Can, Frame};
 use embassy_gd32::crc32::Crc32;
+use embassy_gd32::flash::{Flash, FLAG_ADDR, FLAG_PENDING, FLAG_SECTOR};
 use embassy_gd32::w25q::{W25q, PAGE_SIZE};
 use embassy_gd32::{cpld, Pin, Port, Rcc, Spi, Uart};
 
@@ -458,6 +459,16 @@ impl<'a> AppDeps<'a> {
             } else {
                 o_str(out, "ERR usage: flash jedec|read|se|wr|crc\r\n");
             }
+        } else if nt >= 2 && eq(toks[0], "ota") && eq(toks[1], "flag") {
+            // ota flag：置升级 pending 标志（片上扇区 5）
+            // 语义：抹除态 0xFF -> program 1（1->0 编程无需整擦前的
+            // 扇区擦除由本命令完成：整擦扇区 5 回 0xFF 再写 1）
+            let flash = Flash::new();
+            flash.unlock();
+            let _ = flash.erase_sector(FLAG_SECTOR);
+            let _ = flash.program_word(FLAG_ADDR + 8, FLAG_PENDING);
+            flash.lock();
+            o_str(out, "OK flag pending\r\n");
         } else if nt >= 2 && eq(toks[0], "ota") && eq(toks[1], "boot") {
             // 软复位进 bootloader（升级流程触发点）
             o_str(out, "OK rebooting\r\n");
