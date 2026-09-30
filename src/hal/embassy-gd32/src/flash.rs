@@ -20,6 +20,16 @@ pub const SECTOR_BASE: [u32; 12] = [
     0x0808_0000, 0x080A_0000, 0x080C_0000, 0x080E_0000, // 8-11: 128KB
 ];
 
+/// OTA 升级标志：扇区 5（0x08020000，128K 专用标志扇区，与应用区
+/// 扇区 2-4 不重叠）。语义（经典嵌入式 flag 模式）：
+/// - 应用写完 W25Q 镜像后 `program_word(FLAG_ADDR+8, 1)` 置 pending
+///   （抹除态 0xFF -> 0x01，1->0 编程无需整擦）
+/// - bootloader 上电读 +8 处 == 1 即升级；成功后整扇区擦除回 0xFF
+///   （1->0 无法逆转，清除必须擦除），下次复位直接快跳应用
+pub const FLAG_SECTOR: u8 = 5;
+pub const FLAG_ADDR: u32 = 0x0802_0000;
+pub const FLAG_PENDING: u32 = 1;
+
 #[derive(Debug)]
 pub enum FlashError {
     BusyTimeout,

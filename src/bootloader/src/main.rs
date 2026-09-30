@@ -19,7 +19,7 @@
 #![no_main]
 
 use embassy_gd32::crc32::Crc32;
-use embassy_gd32::flash::{Flash, SECTOR_BASE};
+use embassy_gd32::flash::{Flash, FLAG_ADDR, FLAG_PENDING, FLAG_SECTOR};
 use embassy_gd32::w25q::W25q;
 use embassy_gd32::{Pin, Port, Rcc, Spi, Uart};
 use linked_list_allocator::LockedHeap;
@@ -117,8 +117,6 @@ fn app_region_crc(size: u32) -> u32 {
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = gd32f470::Peripherals::take().expect("peripherals already taken");
-    // （触发窗口时基改用 TIMER1 自由运行计数器——DWT CYCCNT 在本板
-    // 疑似冻结：enable 后 [win] 标记 90s 未现，标记版实测教训）
 
     let rcc = Rcc::new(&p.rcu);
     rcc.enable_gpio_port(Port::E);
@@ -141,116 +139,88 @@ fn main() -> ! {
 
     let mut w25q = W25q::new(fspi, fcs);
 
-    // 串口触发窗口（500ms）：收 "UPGR" 魔数 -> 升级模式（行协议收镜像，
-    // 命令形态与 control-server 的 flash se/wr/crc 一致——PC 侧工具链
-    // 零改动复用）；超时无触发 -> 常规路径（W25Q 校验搬运/直接跳转）
-    uart.write(b"UPGR?\r\n");
-    let mut trigger = [0u8; 4];
-    let mut got = 0usize;
-    // 触发窗口：TIMER1 自由运行计数器 @1MHz（PSC=15），2s = 2_000_000
-    // tick 精确窗口。软循环 guard（O1 优化空转）与 DWT CYCCNT（本板
-    // 疑似冻结，[win] 标记 90s 未现）双双弃用——TIMER1 是板上充分
-    // 验证过的外设（app time_driver 同款时基）
-    // TIMER1 时钟门（教训 #8：漏 enable=寄存器写入静默丢弃）
-    let rcu = unsafe { &*gd32f470::Rcu::PTR };
-    rcu.apb1en().modify(|_, w| w.timer1en().set_bit());
-    let t1 = &p.timer1;
-    // unsafe 收敛点：PSC/CAR 全宽字段（原生 PAC 仅 unsafe bits()——用户
-    // 拍板 PAC 禁语义增强）；值与 app time_driver 同款（PSC=15 -> 1MHz，
-    // CAR=u32::MAX 自由跑）
-    unsafe {
-        t1.psc().write(|w| w.psc().bits(15));
-        t1.car().write(|w| w.carl().bits(u32::MAX));
-    }
-    // UG 事件：PSC 影子寄存器须 UG 才锁存（stage1 blink 实测教训——
-    // 漏发 UG 则计数跑 16MHz，窗口时长差 16 倍）
-    t1.swevg().write(|w| w.upg().set_bit());
-    t1.ctl0().modify(|_, w| w.cen().set_bit().arse().clear_bit());
-    let start = t1.cnt().read().cnt().bits();
-    while t1.cnt().read().cnt().bits().wrapping_sub(start) < 2_000_000 && got < 4 {
-        if let Some(b) = uart.read_byte() {
-            trigger[got] = b;
-            got += 1;
-        }
-    }
-    // 窗口退出标记（二分定位：出现=窗口正常，缺失=计数器异常）
-    uart.write(b"[win]\r\n");
-    if got == 4 && &trigger == b"UPGR" {
-        uart.write(b"upgrade mode\r\n");
-        serial_upgrade(&uart, &mut w25q);
-        // 升级模式以 boot 命令结束（软复位回常规路径校验搬运）
-        uart.write(b"upgrade done, rebooting\r\n");
-        delay_ms(100);
-        cortex_m::peripheral::SCB::sys_reset();
-    }
+    // OTA 门控（正统 flag 语义——用户拍板）：应用写完 W25Q 镜像后置
+    // FLAG_PENDING（扇区 5），bootloader 上电仅在有 pending 标志时才
+    // 校验搬运（无标志直接快跳应用——每次上电不再有 2s 串口窗口）。
+    // 串口观测层（ATEN 桥）失效后此形态不依赖任何交互
+    let mut flash = Flash::new();
+    let flag = flash.read_word(FLAG_ADDR).unwrap_or(0xFFFF_FFFF);
+    if flag == FLAG_PENDING {
+        uart.write(b"boot: OTA pending\r\n");
+        let slot = read_slot_header(&mut w25q, &uart);
 
-    let slot = read_slot_header(&mut w25q, &uart);
-
-    if let Some((size, crc)) = slot {
-        // 槽位有效：比对应用区 CRC，决定是否搬运
-        let app_crc = app_region_crc(size);
-        if app_crc == crc {
-            uart.write(b"ota: app up-to-date\r\n");
-        } else {
-            uart.write(b"ota: flashing app (");
-            put_hex8(&uart, size);
-            uart.write(b" bytes)\r\n");
-            // 搬运进度打点（每 8KB 一行——50K 级搬运耗时数十秒且无
-            // 逐块输出时外部无法区分"在搬"与"卡死"）
-            let flash = Flash::new();
-            flash.unlock();
-            // 应用区 = 扇区 2-4（0x08008000..0x08020000）
-            let mut erased = true;
-            for s in 2..=4u8 {
-                if flash.erase_sector(s).is_err() {
-                    erased = false;
-                    break;
+        if let Some((size, crc)) = slot {
+            // 槽位有效：比对应用区 CRC，决定是否搬运
+            let app_crc = app_region_crc(size);
+            if app_crc == crc {
+                uart.write(b"ota: app up-to-date\r\n");
+            } else {
+                uart.write(b"ota: flashing app (");
+                put_hex8(&uart, size);
+                uart.write(b" bytes)\r\n");
+                // 搬运进度打点（每 8KB 一行——50K 级搬运耗时数十秒且无
+                // 逐块输出时外部无法区分"在搬"与"卡死"）
+                flash.unlock();
+                // 应用区 = 扇区 2-4（0x08008000..0x08020000）
+                let mut erased = true;
+                for s in 2..=4u8 {
+                    if flash.erase_sector(s).is_err() {
+                        erased = false;
+                        break;
+                    }
                 }
-            }
-            if !erased {
-                uart.write(b"ota: erase FAIL\r\n");
-                error_halt(&uart);
-            }
-            // 分块搬运：W25Q 读 256B -> FMC 字编程
-            let mut buf = [0u8; 256];
-            let mut off = 0u32;
-            let mut last_mark = 0u32;
-            while off < size {
-                if off - last_mark >= 8192 {
-                    last_mark = off;
-                    uart.write(b"ota: ...");
-                    put_hex8(&uart, off);
-                    uart.write(b"\r\n");
+                if !erased {
+                    uart.write(b"ota: erase FAIL\r\n");
+                    error_halt(&uart);
                 }
-                let n = core::cmp::min(256, (size - off) as usize);
-                w25q.read(W25Q_SLOT + HDR_SIZE + off, &mut buf[..n]);
-                // 尾块补 FF 对齐到字
-                let words = (n + 3) / 4;
-                for wi in 0..words {
-                    let mut w = [0xFFu8; 4];
-                    for bi in 0..4 {
-                        let idx = wi * 4 + bi;
-                        if idx < n {
-                            w[bi] = buf[idx];
+                // 分块搬运：W25Q 读 256B -> FMC 字编程
+                let mut buf = [0u8; 256];
+                let mut off = 0u32;
+                let mut last_mark = 0u32;
+                while off < size {
+                    if off - last_mark >= 8192 {
+                        last_mark = off;
+                        uart.write(b"ota: ...");
+                        put_hex8(&uart, off);
+                        uart.write(b"\r\n");
+                    }
+                    let n = core::cmp::min(256, (size - off) as usize);
+                    w25q.read(W25Q_SLOT + HDR_SIZE + off, &mut buf[..n]);
+                    // 尾块补 FF 对齐到字
+                    let words = (n + 3) / 4;
+                    for wi in 0..words {
+                        let mut w = [0xFFu8; 4];
+                        for bi in 0..4 {
+                            let idx = wi * 4 + bi;
+                            if idx < n {
+                                w[bi] = buf[idx];
+                            }
+                        }
+                        let word = u32::from_le_bytes(w);
+                        if flash.program_word(APP_ADDR + off + (wi as u32) * 4, word).is_err() {
+                            uart.write(b"ota: program FAIL\r\n");
+                            error_halt(&uart);
                         }
                     }
-                    let word = u32::from_le_bytes(w);
-                    if flash.program_word(APP_ADDR + off + (wi as u32) * 4, word).is_err() {
-                        uart.write(b"ota: program FAIL\r\n");
-                        error_halt(&uart);
-                    }
+                    off += n as u32;
                 }
-                off += n as u32;
+                flash.lock();
+                let check = app_region_crc(size);
+                if check != crc {
+                    uart.write(b"ota: post-copy crc FAIL\r\n");
+                    error_halt(&uart);
+                }
+                uart.write(b"ota: copy verified\r\n");
+                // 清 pending 标志（1->0 编程不可逆，整擦扇区 5 回抹除态——
+                // 下次上电无标志直接快跳应用）
+                if flash.erase_sector(FLAG_SECTOR).is_err() {
+                    uart.write(b"ota: flag erase FAIL\r\n");
+                    error_halt(&uart);
+                }
+                flash.lock();
             }
-            flash.lock();
-            let check = app_region_crc(size);
-            if check != crc {
-                uart.write(b"ota: post-copy crc FAIL\r\n");
-                error_halt(&uart);
-            }
-            uart.write(b"ota: copy verified\r\n");
         }
-    }
+    } // flag pending gate
 
     // 应用合法性检查（无升级/升级完成后共用）
     let sp = read_u32(APP_ADDR);
