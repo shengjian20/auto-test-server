@@ -359,3 +359,18 @@ auto_test_server/
 - 剩余断点（待专项会话）：Runner::run poll_fn 与主任务共享 smoltcp
   栈无同步——embassy 官方 HAL 形态是栈收进驱动任务、经 channel 交付
   （Ariel OS 调研 bg_50ebf277 进行中，结论将决定需求 1 收官路径）
+
+### 需求 6 Ariel OS 调研（2026-09-30 完成，librarian 深度调研 + 源码实证）
+- 结论：**采用 embassy-net 内部模式（feat/embassy-net 已实现），不迁 Ariel OS**
+- 关键发现：Ariel OS 直接用 embassy-net（fork @ 0.9.1 + smoltcp 0.13.1），
+  网络任务 = runner.run().await 一行；双任务 smoltcp 共享官方模式 =
+  Copy Stack 句柄共享 RefCell<Inner>（借用不过 await + 单协作执行器）
+  ——feat/embassy-net 分支已实现该正统模式（Stack/Runner 分离 +
+  TcpSocket::new(stack,...)），此前认为的"核心阻塞"实际已被 RefCell
+  机制解决
+- GD32 生态：Ariel OS 零 GD32 支持（仅 stm32/nrf/rp/esp 四族）；迁移
+  需将 13/13 E2E 验证的 embassy-gd32 重写为全新 ariel-os-gd32 HAL 族
+  + MSRV 1.95/edition 2024/fork pin——成本 >> 收益
+- 若未来需跨线程套接字访问：借鉴 Ariel OS 的 SameExecutorCell/Delegate
+  模式（而非采用该 OS）
+- 完整报告：docs/research/2026-09-30-ariel-os-gd32-integration.md
