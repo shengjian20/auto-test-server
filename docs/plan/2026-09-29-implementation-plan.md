@@ -388,3 +388,10 @@ auto_test_server/
   （扇区 2-4）、bootloader 搬运进度打点（8KB/行）
 - 时基三换终定：TIMER1 自由运行计数器（PSC=15@1MHz + UG 锁存 +
   时钟门，教训 #8/#20）——delay_ms 空转/DWT CYCCNT 冻结双弃用
+
+### 诊断补充（2026-09-30 晚）
+- 串口观测层失效：ATEN 桥（ttyUSB0）在多容器长会话后静默（root 容器
+  亦无输出），CPU 活体反汇编证实 boot 正常驻留 UPGR 窗口循环等待——
+  观测层与固件功能已分离；待用户重新插拔 USB 恢复
+- OTA 功能证据链不依赖串口：TCP 写入计数 + 板端 CRC + openocd
+  dump_image 逐字节比对 + 活体 PC/寄存器——四类独立证据闭环
