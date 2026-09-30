@@ -374,3 +374,17 @@ auto_test_server/
 - 若未来需跨线程套接字访问：借鉴 Ariel OS 的 SameExecutorCell/Delegate
   模式（而非采用该 OS）
 - 完整报告：docs/research/2026-09-30-ariel-os-gd32-integration.md
+
+### 需求 2 OTA over TCP（2026-09-30 收官，feat/ota-over-tcp 分支，dump MATCH 实证）
+- 完整闭环（32c14be + 8da3078）：
+  PC 打包 lbm 变体（GDOTA001+size+crc32）→ TCP :9000 `flash se/wr`
+  写 W25Q 槽位（698/698 命令，板端 CRC==zlib 逐位）→ 复位 →
+  bootloader v4 校验槽位 CRC vs 应用区 → 擦除扇区 2-4 → 搬运
+  50208B → 跳转 → **openocd dump_image：应用区 == lbm 镜像逐字节
+  MATCH**（串口容器抖动无关的确定性验证）→ 双向 OTA 语义（直烧
+  normal 后复位自动搬回 lbm）
+- 收官修复：smoltcp 路线行组装 carry-over（TCP 分段撕裂 160 字符
+  flash wr 命令）、flash crc 上限 65536、bootloader APP_MAX 96K
+  （扇区 2-4）、bootloader 搬运进度打点（8KB/行）
+- 时基三换终定：TIMER1 自由运行计数器（PSC=15@1MHz + UG 锁存 +
+  时钟门，教训 #8/#20）——delay_ms 空转/DWT CYCCNT 冻结双弃用
