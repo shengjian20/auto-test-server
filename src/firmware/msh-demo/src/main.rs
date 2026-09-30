@@ -95,9 +95,9 @@ async fn main(sp: Spawner) {
     });
     shell.add_cmd(embassy_gd32::console::CmdEntry {
         name: "reboot",
-        usage: "soft reset",
+        usage: "reset to bootloader (re-verify W25Q slot)",
         handler: |_args| {
-            cortex_m::peripheral::SCB::sys_reset()
+            embassy_gd32::console::jump_to_bootloader()
         },
     });
     shell.print_prompt();

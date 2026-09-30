@@ -195,6 +195,8 @@ fn main() -> ! {
             uart.write(b"ota: flashing app (");
             put_hex8(&uart, size);
             uart.write(b" bytes)\r\n");
+            // 搬运进度打点（每 8KB 一行——50K 级搬运耗时数十秒且无
+            // 逐块输出时外部无法区分"在搬"与"卡死"）
             let flash = Flash::new();
             flash.unlock();
             // 应用区 = 扇区 2-4（0x08008000..0x08020000）
@@ -212,7 +214,14 @@ fn main() -> ! {
             // 分块搬运：W25Q 读 256B -> FMC 字编程
             let mut buf = [0u8; 256];
             let mut off = 0u32;
+            let mut last_mark = 0u32;
             while off < size {
+                if off - last_mark >= 8192 {
+                    last_mark = off;
+                    uart.write(b"ota: ...");
+                    put_hex8(&uart, off);
+                    uart.write(b"\r\n");
+                }
                 let n = core::cmp::min(256, (size - off) as usize);
                 w25q.read(W25Q_SLOT + HDR_SIZE + off, &mut buf[..n]);
                 // 尾块补 FF 对齐到字

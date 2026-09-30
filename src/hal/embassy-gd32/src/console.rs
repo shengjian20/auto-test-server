@@ -254,3 +254,42 @@ impl<const MAX_CMDS: usize, const LINE_MAX: usize> Shell<MAX_CMDS, LINE_MAX> {
         s
     }
 }
+
+/// 软跳转到 bootloader（0x08000000 reset 向量，带 thumb 位）——OTA
+/// 语义的"回 boot 校验搬运"入口。sys_reset() 的实测缺陷：SYSRESETREQ
+/// 后 VTOR 残留 0x08008000（bl 跳转链所设），CPU 直接回应用而非 boot
+/// （板上实测 reboot 后 banner 重现而非 bootloader banner）。
+///
+/// unsafe 收敛点：裸金属跳转的本质操作（关中断 + VTOR 重定向 0x08000000
+/// + MSP 重载 boot 栈顶 + 清流水线跳转），序列与 bootloader 的应用跳转
+/// 互为逆过程（0dc49c3 前的 bl4 已验证正向）；bootloader 入口为 SVD
+/// 定案物理常驻（flash 起始），目标 SP/thumb 位经 bootloader 自身
+/// 合法性检查兜底
+#[allow(unsafe_code)]
+pub fn jump_to_bootloader() -> ! {
+    const BOOT_ADDR: u32 = 0x0800_0000;
+    // 打点：确认执行到跳转函数（跳转后 UART 可能被 bootloader 重新
+    // 初始化，此前输出应已落盘）
+    write_bytes(b"[jump-to-boot]\r\n");
+    unsafe {
+        // 0. 禁用并清掉应用开启的外设中断（UART6 RXNE 等）：NVIC 使能位
+        //    不随 SYSRESETREQ/跳转清除，残留中断会在 boot 里第一次
+        //    cpsie i 时打向 boot 向量表的 handler（boot 未初始化该外设
+        //    时读回垃圾/卡死）
+        cortex_m::peripheral::NVIC::mask(gd32f470::Interrupt::UART6);
+        cortex_m::peripheral::NVIC::unpend(gd32f470::Interrupt::UART6);
+        // 1. 关中断（跳转过程不被打断）
+        core::arch::asm!("cpsid i");
+        // 2. VTOR 重定向到 bootloader 向量表
+        (0xE000_ED08u32 as *mut u32).write_volatile(BOOT_ADDR);
+        core::arch::asm!("dsb", "isb");
+        // 3. MSP 重载为 bootloader 初始 SP（boot 向量表首字）
+        let sp = (BOOT_ADDR as *const u32).read_volatile();
+        core::arch::asm!("msr msp, {sp}", sp = in(reg) sp);
+        // 4. 恢复中断 + 清流水线跳转（thumb 位保留——bootloader reset
+        //    向量自带 LSB）
+        core::arch::asm!("cpsie i");
+        let reset = ((BOOT_ADDR + 4) as *const u32).read_volatile();
+        core::arch::asm!("dsb", "isb", "bx {r}", r = in(reg) reset, options(noreturn));
+    }
+}
