@@ -307,3 +307,20 @@ auto_test_server/
 - mcp 单包+NODELAY 修复保留；板侧 v2 行拼接尝试回退（引入
   critical-section 自旋挂死：ldrex/strex 循环 PC=0x080002F4，与 UART6
   RXNE ISR 同临界区高频重入相关）——保留已验证 13/13 的 v1 行处理
+
+### 阶段 6d（2026-09-30 完成，feat/ota-over-tcp 分支，OTA over TCP E2E PASS）
+- 完整升级闭环（32c14be）：
+  PC 打包 lbm 变体 → TCP :9000 `flash se/wr` 写 W25Q 槽位（698/698
+  命令，板端 CRC==zlib 逐位）→ 复位 → bootloader v4 校验槽位 CRC vs
+  应用区 → 擦除扇区 2-4 → 搬运 50208B → 复算跳转 → 应用区 dump ==
+  lbm 镜像逐字节 MATCH（openocd dump_image 实证）→ 双向 OTA 语义
+  （直烧 normal 后复位自动搬回 lbm，槽位即升级源语义闭环）
+- 修复清单：
+  1. smoltcp 路线行组装 carry-over（TCP 分段撕裂 160 字符 flash wr
+     命令；"残尾丢弃"注释与实际需求相悖——板上 WRITE ERR batch@360
+     连刷实证；纯主循环缓冲移动，与教训 #16 的 ISR 场景区分）
+  2. `flash crc` 长度上限 32768 → 65536（50K 级包双段校验）
+  3. bootloader APP_MAX 32K → 96K（扇区 2-4；control-server-tcp
+     ~50K 镜像被槽位 size 检查直接拒绝）
+  4. bootloader 最小 global_allocator（console.rs 的 extern crate
+     alloc 把 alloc 拉进全部 embassy-gd32 依赖的链接图）

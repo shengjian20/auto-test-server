@@ -41,7 +41,12 @@ const LOCAL_IP: [u8; 4] = [172, 22, 0, 50];
 const LOCAL_MAC: [u8; 6] = [0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C];
 const PORT: u16 = 9000;
 /// MAC LBM 自测模式（无网线）；接网线实测时改 0
+/// MAC LBM 自测模式：lbm feature 开启时启用（无网线全栈自环自测）；
+/// 缺省=normal（接网线实测，PC 侧 `nc 172.22.0.50 9000` 发数据回显）
+#[cfg(feature = "lbm")]
 const MAC_LBM: bool = true;
+#[cfg(not(feature = "lbm"))]
+const MAC_LBM: bool = false;
 /// 自测模式串长度
 const PATTERN_LEN: usize = 256;
 

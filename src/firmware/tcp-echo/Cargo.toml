@@ -8,6 +8,10 @@ name = "tcp-echo"
 test = false
 bench = false
 
+[features]
+# lbm：MAC LBM 自测模式（无网线全栈自环）；缺省=normal（接网线实测）
+lbm = []
+
 [dependencies]
 embassy-gd32 = { path = "../../hal/embassy-gd32" }
 gd32f470 = { path = "../../pac/gd32f470" }
