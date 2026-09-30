@@ -16,7 +16,7 @@ pub mod crc32;
 pub mod enet;
 pub mod flash;
 pub mod enet_dma;
-#[cfg(feature = "smoltcp-device")]
+#[cfg(any(feature = "smoltcp-device", feature = "embassy-net"))]
 pub mod enet_smoltcp;
 pub mod gpio;
 pub mod interrupt;

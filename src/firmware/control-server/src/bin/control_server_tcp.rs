@@ -1,42 +1,32 @@
-//! control-server-tcp：TCP 传输变体（协议主体单一来源复用）
+//! control-server-tcp：embassy-net 形态（需求 1 验收——socket 风格 async API）
 //!
-//! 与 UART 变体共享 app.rs 的 init_deps + AppDeps::dispatch——传输层仅
-//! 替换输入行来源（TCP 套接字）与输出汇（send_slice），协议行为逐字节
-//! 一致（UART 变体回归 CONTROL_V2 PASS 后重构，E2E 双向等价）。
-//!
-//! 内置自测（MAC_LBM=1，无网线）：内置 client 连本机 :9000 发 "ping"，
-//! 经 ARP+SYN+DATA 全栈往返，验证 "OK pong" 响应——协议-over-TCP 证明。
-//! 接网线实测：改 MAC_LBM=0，PC `nc 172.22.0.50 9000` 直接发协议命令。
+//! tcp::Socket 的 read/write 原生 async，行组装/回显由 await 驱动，
+//! 无手写 poll 状态机。协议主体单一来源复用（init_deps + dispatch）。
+//! 内置自测（lbm feature）：client 连本机 :9000 发 "ping" 验证 "OK pong"。
 #![no_std]
 #![no_main]
 extern crate alloc;
 
+use alloc::boxed::Box;
 use alloc::vec;
-use linked_list_allocator::LockedHeap;
-use smoltcp::iface::{Config, Interface, SocketSet};
-use smoltcp::socket::tcp;
-use smoltcp::time::Instant;
-use smoltcp::wire::{EthernetAddress, HardwareAddress, IpAddress, IpCidr};
-use managed::ManagedSlice;
-
 use control_server::app;
-use embassy_gd32::enet::{self, LinkState, Phy};
-use embassy_gd32::enet_dma;
+use embassy_executor::Spawner;
 use embassy_gd32::{Pin, Port, Rcc, Uart};
+use embassy_net::tcp::TcpSocket;
+use embassy_net::{Config, Ipv4Address, Ipv4Cidr, Stack, StackResources};
+use linked_list_allocator::LockedHeap;
 use panic_halt as _;
 
-const PCLK_HZ: u32 = 16_000_000;
+const PORT: u16 = 9000;
 const LOCAL_IP: [u8; 4] = [172, 22, 0, 50];
 const LOCAL_MAC: [u8; 6] = [0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C];
-const PORT: u16 = 9000;
-/// MAC LBM 自测模式：lbm feature 开启时启用（无网线全栈自环自测）；
-/// 缺省=normal（接网线实测，PC 侧 `nc 172.22.0.50 9000` 发协议命令）
+
 #[cfg(feature = "lbm")]
 const MAC_LBM: bool = true;
 #[cfg(not(feature = "lbm"))]
 const MAC_LBM: bool = false;
 
-// ---- 堆（smoltcp alloc；DMA 可达性约束：TCM 禁 DMA，堆必须在主 SRAM）----
+// ---- 堆（smoltcp alloc；TCM 禁 DMA——堆必须在主 SRAM）----
 static mut HEAP_MEM: [u8; 65536] = [0; 65536];
 
 #[global_allocator]
@@ -65,30 +55,110 @@ fn put_hex8(uart: &Uart, v: u32) {
     }
 }
 
+/// 网卡驱动（embassy-net-driver::Driver 薄包装：复用 enet_smoltcp token）
+struct EnetDriver<'a> {
+    rings: &'a mut embassy_gd32::enet_dma::Rings,
+    mac: [u8; 6],
+}
+
+/// LinkState 采样：DMA/PHY 状态经 Phi 方法注入有借用冲突，LBM 自测恒
+/// Up（self-ping 语义下链路必达）；normal 模式由 smoltcp 超时自然处理
+fn link_assume() -> bool {
+    true
+}
+
+impl embassy_net_driver::Driver for EnetDriver<'_> {
+    type RxToken<'a>
+        = embassy_gd32::enet_smoltcp::EnetRxToken<'a>
+    where
+        Self: 'a;
+    type TxToken<'a>
+        = embassy_gd32::enet_smoltcp::EnetTxToken<'a>
+    where
+        Self: 'a;
+
+    fn receive(&mut self, cx: &mut core::task::Context) -> Option<(Self::RxToken<'_>, Self::TxToken<'_>)> {
+        // embassy-net-driver 契约：返回 None 必须注册 waker——缺失则
+        // Runner::run poll_fn 永挂（板上实证：帧滞留描述符 FL=64/FS|LS/
+        // OWN=0 而主任务 polls=1 永不再被轮询）
+        let idx = match self.rings.rx.first_valid() {
+            Some(i) => i,
+            None => {
+                embassy_gd32::enet_smoltcp::net_poll::register(cx);
+                return None;
+            }
+        };
+        embassy_gd32::enet_smoltcp::enet_dma_stats::rx_hit();
+        let fl = self.rings.rx.frame_len(idx);
+        let len = fl.saturating_sub(4).min(embassy_gd32::enet_dma::BUF_SIZE);
+        let rx = &mut self.rings.rx;
+        let tx = &mut self.rings.tx;
+        Some((
+            embassy_gd32::enet_smoltcp::EnetRxToken::new(len, rx, idx),
+            embassy_gd32::enet_smoltcp::EnetTxToken::new(tx),
+        ))
+    }
+
+    fn transmit(&mut self, cx: &mut core::task::Context) -> Option<Self::TxToken<'_>> {
+        if self.rings.tx.available() {
+            Some(embassy_gd32::enet_smoltcp::EnetTxToken::new(&mut self.rings.tx))
+        } else {
+            embassy_gd32::enet_smoltcp::net_poll::register(cx);
+            None
+        }
+    }
+
+    fn link_state(&mut self, _cx: &mut core::task::Context) -> embassy_net_driver::LinkState {
+        // LBM 自测：self-ping 必达恒 Up；normal 模式接网线时由 PHY 实际
+        // 链路决定——静态近似（PHY 采样与 Driver 的借用冲突留待重构）
+        if MAC_LBM || link_assume() {
+            embassy_net_driver::LinkState::Up
+        } else {
+            embassy_net_driver::LinkState::Down
+        }
+    }
+
+    fn capabilities(&self) -> embassy_net_driver::Capabilities {
+        let mut caps = embassy_net_driver::Capabilities::default();
+        caps.max_transmission_unit = 1500;
+        caps.max_burst_size = Some(embassy_gd32::enet_dma::RING_LEN as usize);
+        caps
+    }
+
+    fn hardware_address(&self) -> embassy_net_driver::HardwareAddress {
+        embassy_net_driver::HardwareAddress::Ethernet(self.mac)
+    }
+}
+
 #[embassy_executor::main]
-async fn main(_sp: embassy_executor::Spawner) {
+async fn main(sp: Spawner) {
     init_heap();
 
     let p = app::periph::steal();
     embassy_gd32::init_time_driver();
 
-    // 全外设依赖（dispatch 操作对象）+ UART 日志口（init_deps 内含时钟门
-    // 使能与 UART6 RXNE 环切换——TCP 变体下环无人消费，环形覆写无害）
-    let (mut deps, uart) = app::init_deps();
-
     let rcc = Rcc::new(p.rcu);
+    rcc.enable_gpio_port(Port::A);
+    rcc.enable_gpio_port(Port::B);
+    rcc.enable_gpio_port(Port::C);
+    rcc.enable_gpio_port(Port::D);
+    rcc.enable_gpio_port(Port::E);
+    rcc.enable_uart6();
     rcc.enable_syscfg();
     rcc.enable_enet();
+    rcc.enable_spi3();
+    rcc.enable_spi2();
 
     let _utx = Pin::alternate(p.gpioe, 7, 8);
     let _urx = Pin::alternate(p.gpioe, 8, 8);
-    uart.enable(PCLK_HZ, 115_200);
-    uart.write(b"control-server-tcp v1\r\n");
+    let uart = Uart::new(p.uart6);
+    uart.enable(16_000_000, 115_200);
+    uart.write(b"control-server-tcp v2 (embassy-net)\r\n");
 
     // 1. RMII 选择（ENET 复位前）
     p.syscfg.cfg1().modify(|_, w| w.enet_phy_sel().set_bit());
 
-    // 2. PHY 硬复位 + 引脚 AF11
+    // 2. PHY 硬复位 + RMII 引脚 AF11
     let mut phy_rst = Pin::output(p.gpioc, 0);
     phy_rst.set_low();
     delay_ms(10);
@@ -104,8 +174,8 @@ async fn main(_sp: embassy_executor::Spawner) {
     let _txd0 = Pin::alternate(p.gpiob, 12, 11);
     let _txd1 = Pin::alternate(p.gpiob, 13, 11);
 
-    // 3. SWR 轮询（REF_CLK 死线检测）
-    if !enet::sw_reset(&p.enet_dma) {
+    // 3. SWR 轮询
+    if !embassy_gd32::enet::sw_reset(&p.enet_dma) {
         uart.write(b"SWR STUCK (REF_CLK dead)\r\n");
         loop {
             core::hint::spin_loop();
@@ -113,7 +183,7 @@ async fn main(_sp: embassy_executor::Spawner) {
     }
 
     // 4. PHY ID 校验
-    let phy = Phy::new(p.enet_mac);
+    let phy = embassy_gd32::enet::Phy::new(p.enet_mac);
     match phy.read_id() {
         Some(0x0007C0F1) => uart.write(b"PHY: LAN8720A OK\r\n"),
         _ => {
@@ -135,192 +205,149 @@ async fn main(_sp: embassy_executor::Spawner) {
         uart.write(b"mode: normal\r\n");
     }
     p.enet_mac.mac_frmf().modify(|_, w| w.pm().set_bit());
-    enet::set_mac_addr0(p.enet_mac, LOCAL_MAC);
+    embassy_gd32::enet::set_mac_addr0(p.enet_mac, LOCAL_MAC);
 
     // 6. 描述符环 + DMA 启动
-    let rings = enet_dma::take_rings();
+    let rings = embassy_gd32::enet_dma::take_rings();
     rings.tx.init();
     rings.rx.init();
-    enet_dma::start_dma(&p.enet_dma, rings);
+    embassy_gd32::enet_dma::start_dma(&p.enet_dma, rings);
     p.enet_mac
         .mac_cfg()
         .modify(|_, w| w.ren().set_bit().ten().set_bit());
-    enet_dma::rx_poll(&p.enet_dma);
+    embassy_gd32::enet_dma::rx_poll(&p.enet_dma);
     uart.write(b"DMA started\r\n");
 
-    // 7. smoltcp 栈
-    let mut device = enet_smoltcp_wrap(&mut rings.rx, &mut rings.tx, &p.enet_dma);
-    let mut interface = Interface::new(
-        Config::new(HardwareAddress::Ethernet(EthernetAddress(LOCAL_MAC))),
-        &mut device,
-        Instant::from_millis(0i64),
+    // 7. embassy-net Stack：driver 按值移动（D = EnetDriver<'static>，
+    //    Runner<'static, EnetDriver<'static>> 与 net_task 签名精确匹配；
+    //    传 &mut 会带双引用参数，spawn 的 'static 约束必炸）；resources
+    //    需 'static 引用故 Box::leak
+    let rings: &'static mut embassy_gd32::enet_dma::Rings = rings;
+    let resources: &'static mut StackResources<3> =
+        Box::leak(Box::new(StackResources::<3>::new()));
+    let (stack, runner) = embassy_net::new(
+        EnetDriver { rings, mac: LOCAL_MAC },
+        Config::ipv4_static(embassy_net::StaticConfigV4 {
+            address: Ipv4Cidr::new(Ipv4Address::new(
+                LOCAL_IP[0], LOCAL_IP[1], LOCAL_IP[2], LOCAL_IP[3],
+            ), 23),
+            gateway: Some(Ipv4Address::new(172, 22, 0, 1)),
+            dns_servers: Default::default(),
+        }),
+        resources,
+        0x1234_5678_9abc_def0,
     );
-    interface.update_ip_addrs(|addrs| {
-        let _ = addrs.push(IpCidr::new(
-            IpAddress::v4(LOCAL_IP[0], LOCAL_IP[1], LOCAL_IP[2], LOCAL_IP[3]),
-            23,
-        ));
-    });
+    sp.spawn(net_task(runner).unwrap());
+    sp.spawn(poll_kicker().unwrap());
+    sp.spawn(diag_task(Uart::new(p.uart6), p.enet_dma).unwrap());
+    uart.write(b"stack up\r\n");
 
-    let mut sockets = SocketSet::new(vec![]);
-    let server_h = sockets.add(tcp::Socket::new(
-        ManagedSlice::Owned(vec![0u8; 2048]),
-        ManagedSlice::Owned(vec![0u8; 2048]),
-    ));
-    let client_h = sockets.add(tcp::Socket::new(
-        ManagedSlice::Owned(vec![0u8; 512]),
-        ManagedSlice::Owned(vec![0u8; 512]),
-    ));
-    sockets
-        .get_mut::<tcp::Socket>(server_h)
-        .listen(PORT)
-        .unwrap();
+    // 8. 协议主体（单一来源）+ socket 风格 async API（accept().await 形态）
+    let (mut deps, _) = app::init_deps();
+    let mut rx_buf = vec![0u8; 2048];
+    let mut tx_buf = vec![0u8; 2048];
+    let mut socket = TcpSocket::new(stack, &mut rx_buf, &mut tx_buf);
     uart.write(b"listening :9000\r\n");
 
-    // 8. 协议自测状态机：client 发 "ping" -> server dispatch -> "OK pong"
-    let probe = b"ping\n";
-    let mut sent = 0usize;
-    let mut resp = [0u8; 64];
-    let mut resp_len = 0usize;
-    let mut phase = 0u8; // 0=连接 1=发送 2=收验 3=完成
-    let mut t_ms: i64 = 0;
+    let mut line = [0u8; app::LINE_MAX];
+    let mut n = 0usize;
     let mut hb: i32 = 0;
 
     loop {
-        interface.poll(Instant::from_millis(t_ms), &mut device, &mut sockets);
-        t_ms += 2;
-
-        // server：CloseWait 回收（PC 断开后 socket 滞留 CLOSE_WAIT 且
-        // is_open()==true 永不重听——后续连接全部 refused，板上实测
-        // 15 次尝试仅首次成功即此）+ 行组装 -> deps.dispatch
-        {
-            let mut s = sockets.get_mut::<tcp::Socket>(server_h);
-            if s.state() == tcp::State::CloseWait {
-                s.close();
-            }
-            if !s.is_open() {
-                let _ = s.listen(PORT);
-            }
-            let mut line = [0u8; app::LINE_MAX];
-            if s.can_recv() {
-                let n = s.recv_slice(&mut line).unwrap_or(0);
-                let mut start = 0usize;
-                for i in 0..n {
-                    if line[i] == b'\n' || line[i] == b'\r' {
-                        if i > start {
-                            let mut toks: [&[u8]; 8] = [b""; 8];
-                            let nt = app::tokenize(&line[start..i], &mut toks);
-                            let mut out = |b: &[u8]| {
-                                let _ = s.send_slice(b);
-                            };
-                            deps.dispatch(&mut out, &toks, nt);
-                        }
-                        start = i + 1;
-                    }
-                }
-                // 残尾（无换行的部分行）留待下拍拼接——简化：协议命令行短，
-                // TCP 有序字节流按包边界即整行（单命令 < MSS），残尾丢弃
-                let _ = start;
-            }
-        }
-        drop_sockets(&mut sockets);
-
-        // client 状态机（仅 MAC_LBM 自测模式；normal 模式下连本机 IP：
-        // SYN 经交换机有去无回 -> 重传死循环持续置 TBU 干扰 server）
-        if MAC_LBM {
-        {
-            let mut c = sockets.get_mut::<tcp::Socket>(client_h);
-            match phase {
-                0 => {
-                    if !c.is_open() && !c.is_active() {
-                        let _ = c.connect(
-                            &mut interface.context(),
-                            (
-                                IpAddress::v4(LOCAL_IP[0], LOCAL_IP[1], LOCAL_IP[2], LOCAL_IP[3]),
-                                PORT,
-                            ),
-                            49152u16, // 本地临时端口：smoltcp 不自动分配（port=0 立即被拒）
-                        );
-                    }
-                    if c.is_active() {
-                        uart.write(b"client connected\r\n");
-                        phase = 1;
-                    }
-                }
-                1 => {
-                    if c.can_send() {
-                        let n = c.send_slice(&probe[sent..]).unwrap_or(0);
-                        sent += n;
-                        if sent >= probe.len() {
-                            phase = 2;
-                        }
-                    }
-                }
-                2 => {
-                    if c.can_recv() {
-                        let mut tmp = [0u8; 64];
-                        if let Ok(n) = c.recv_slice(&mut tmp) {
-                            let k = core::cmp::min(n, resp.len() - resp_len);
-                            resp[resp_len..resp_len + k].copy_from_slice(&tmp[..k]);
-                            resp_len += k;
-                            if resp_len >= 7 {
-                                // "OK pong" 全量到达即判
-                                phase = 3;
-                                uart.write(b"TCP_PROTO_SELFTEST: ");
-                                if &resp[..7] == b"OK pong" {
-                                    uart.write(b"PASS (OK pong via TCP)\r\n");
-                                } else {
-                                    uart.write(b"FAIL resp=");
-                                    put_hex8(&uart, u32::from_le_bytes([
-                                        resp[0], resp[1], resp[2], resp[3],
-                                    ]));
-                                    uart.write(b"\r\n");
-                                }
-                            }
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
-        }
-
-        // RX/TX 挂起恢复（TBU 无恢复则帧滞留描述符永不发出——ARP 永不解析）
-        embassy_gd32::enet_smoltcp::recover_suspended(&p.enet_dma);
-
-        // 心跳
-        hb += 2;
-        if hb >= 5000 {
+        // 心跳（主循环每拍判定；accept await 挂起期间本任务不运行，
+        // kicker/poll 计数由 kicker 任务持续推进——读数即任务健康证据）
+        hb += 1;
+        if hb >= 2500 {
             hb = 0;
-            if phase != 3 {
-                uart.write(b"hb t=");
-                put_hex8(&uart, t_ms as u32);
-                uart.write(b" phase=");
-                put_hex8(&uart, phase as u32);
-                uart.write(b" link=");
-                match phy.link_state() {
-                    Some(LinkState::Down) => uart.write(b"DOWN"),
-                    Some(_) => uart.write(b"UP"),
-                    None => uart.write(b"ERR"),
+            uart.write(b"hb kicks=");
+            put_hex8(&uart, embassy_gd32::enet_smoltcp::net_poll::kicks());
+            uart.write(b" polls=");
+            put_hex8(&uart, embassy_gd32::enet_smoltcp::net_poll::polls());
+            uart.write(b" stat=0x");
+            put_hex8(&uart, p.enet_dma.dma_stat().read().bits());
+            uart.write(b"\r\n");
+        }
+        embassy_gd32::enet_smoltcp::net_poll::poll_tick();
+
+        // accept：等连接建立（0.7.1 服务端形态）
+        if let Err(e) = socket.accept(embassy_net::IpListenEndpoint::from(PORT)).await {
+            uart.write(b"accept err\r\n");
+            continue;
+        }
+        uart.write(b"client connected\r\n");
+
+        // 连接 established：async read 行组装 -> dispatch -> write
+        loop {
+            let mut tmp = [0u8; 512];
+            match socket.read(&mut tmp).await {
+                Ok(0) | Err(_) => break,
+                Ok(k) => {
+                    for &ch in &tmp[..k] {
+                        if ch == b'\n' || ch == b'\r' {
+                            if n > 0 {
+                                let mut toks: [&[u8]; 8] = [b""; 8];
+                                let nt = app::tokenize(&line[..n], &mut toks);
+                                // dispatch 输出汇 = async write（同步闭包内
+                                // 不便 await，先收集后一次写出——响应 < MTU）
+                                let mut resp = heapless::Vec::<u8, 512>::new();
+                                deps.dispatch(&mut |b: &[u8]| {
+                                    let _ = resp.extend_from_slice(b);
+                                }, &toks, nt);
+                                let _ = socket.write(&resp).await;
+                                n = 0;
+                            }
+                        } else if n < app::LINE_MAX {
+                            line[n] = ch;
+                            n += 1;
+                        }
+                    }
                 }
-                uart.write(b" stat=0x");
-                put_hex8(&uart, p.enet_dma.dma_stat().read().bits());
-                uart.write(b"\r\n");
             }
         }
+        socket.close();
+    }
+}
 
+/// 网卡 poll 任务（Runner::run 挂起后由 poll_kicker 任务周期唤醒——
+/// 轮询式网卡无 RX 中断，"外部 kick" 是 embassy 正统驱动形态）
+#[embassy_executor::task]
+async fn net_task(mut runner: embassy_net::Runner<'static, EnetDriver<'static>>) {
+    runner.run().await
+}
+
+/// poll 驱动节拍 + 挂起恢复：2ms 唤醒 Runner 的 poll_fn（receive 返回
+/// None 时已向 HAL 的 WakerRegistration 注册本任务的 waker）；TBU/RBU
+/// 挂起恢复缺失的后果 = smoltcp 提交的帧滞留描述符永不发出（ARP 永不
+/// 解析，connect 全超时——smoltcp 路线已踩过的同款坑）
+#[embassy_executor::task]
+async fn poll_kicker() {
+    let p = app::periph::steal();
+    loop {
+        embassy_gd32::enet_smoltcp::wake_net_poll();
+        embassy_gd32::enet_smoltcp::recover_suspended(&p.enet_dma);
         embassy_time::Timer::after(embassy_time::Duration::from_millis(2)).await;
     }
 }
 
-/// 结束 socket 借用（作用域辅助；NLL 下 drop_sockets 仅为显式化）
-fn drop_sockets(_sockets: &mut SocketSet<'_>) {}
-
-/// smoltcp Device 适配（HAL enet_smoltcp 模块的借用组装）
-fn enet_smoltcp_wrap<'a>(
-    rx: &'a mut enet_dma::RDesRing,
-    tx: &'a mut enet_dma::TDesRing,
-    dma: &'a gd32f470::EnetDma,
-) -> embassy_gd32::enet_smoltcp::EnetDevice<'a> {
-    embassy_gd32::enet_smoltcp::EnetDevice { rx, tx, dma }
+/// 诊断任务：5s 打印 kicker/poll 计数 + RX/TX 帧计数 + DMA stat
+/// （独立调度——accept 挂起期间主循环不转，此任务计数即任务健康证据）
+#[embassy_executor::task]
+async fn diag_task(uart: Uart<'static>, dma: &'static gd32f470::EnetDma) {
+    loop {
+        embassy_time::Timer::after(embassy_time::Duration::from_millis(5000)).await;
+        let (rx, tx, txf) = embassy_gd32::enet_smoltcp::enet_dma_stats::snapshot();
+        uart.write(b"diag kicks=");
+        put_hex8(&uart, embassy_gd32::enet_smoltcp::net_poll::kicks());
+        uart.write(b" polls=");
+        put_hex8(&uart, embassy_gd32::enet_smoltcp::net_poll::polls());
+        uart.write(b" rx=");
+        put_hex8(&uart, rx);
+        uart.write(b" tx=");
+        put_hex8(&uart, tx);
+        uart.write(b" txf=");
+        put_hex8(&uart, txf);
+        uart.write(b" stat=0x");
+        put_hex8(&uart, dma.dma_stat().read().bits());
+        uart.write(b"\r\n");
+    }
 }

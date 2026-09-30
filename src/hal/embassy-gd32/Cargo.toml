@@ -15,7 +15,9 @@ critical-section = "1"
 embassy-time-driver = { version = "0.2", features = ["tick-hz-1_000_000"] }
 embassy-time-queue-utils = { version = "0.3", features = ["generic-queue-64"] }
 smoltcp = { version = "0.11", optional = true, default-features = false, features = ["medium-ethernet", "proto-ipv4", "socket-tcp"] }
+embassy-net-driver = { version = "0.2", optional = true }
 
 [features]
 default = []
 smoltcp-device = ["dep:smoltcp"]
+embassy-net = ["dep:embassy-net-driver"]
