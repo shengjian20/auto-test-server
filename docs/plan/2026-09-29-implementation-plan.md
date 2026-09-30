@@ -324,3 +324,38 @@ auto_test_server/
      ~50K 镜像被槽位 size 检查直接拒绝）
   4. bootloader 最小 global_allocator（console.rs 的 extern crate
      alloc 把 alloc 拉进全部 embassy-gd32 依赖的链接图）
+
+### console-stack（2026-09-30 完成，feat/console-stack 分支，MSH_E2E PASS）
+- 需求 3/4/5 三合一（71eea73，main @ be980ca）：
+  - println!/print! 宏（UART6 定向，core::fmt；SyncUart 包裹解决 PAC
+    寄存器块非 Sync 问题——volatile 访问 + critical-section 串行化依据）
+  - 确定性延时 delay_us/delay_ms：TIMER1 CNT 差值轮询（板上实测
+    1000ms -> 1000001us，误差 1us；教训 #15 spin_loop 空转的正解）
+  - msh 风格 shell：命令表驱动（CmdEntry name/usage/handler）、回显/
+    退格擦除（\b \x1b[K）/prompt、poll_line 非阻塞消费 RXNE 环
+- 板上回归教训再证：embassy 线程执行器中阻塞 delay_ms 会饿死其它任务
+  （blink_task 阻塞 333ms 致 shell poll_line 永不执行）——async 任务
+  必须 Timer::after().await 让出（教训 #17）
+- periph.rs：HAL 级 'static 寄存器块引用集（zst 形态，与 control-server
+  app::periph 同源），供 console::init 等 HAL 基础设施使用
+
+### bootloader v3（2026-09-30 完成，feat/bootloader-serial-trigger 分支，BL3_E2E PASS）
+- 串口触发升级（8abf4f4，main @ 36f7365）：banner 后 UPGR? 窗口收
+  "UPGR" 魔数进升级模式；行协议 se/wr/crc/boot 与 control-server
+  flash 命令形态一致（PC 工具链零改动复用）；boot 软复位回常规
+  校验搬运路径
+- 窗口时基三换：delay_ms（O1 空转，500ms 形同虚设）-> 软循环 guard
+  （实测 ~3 分钟）-> DWT CYCCNT（本板疑似冻结，[win] 标记 90s 未现）
+  -> TIMER1 自由运行计数器（板上充分验证外设，PSC=15@1MHz + UG 锁存
+  ——教训 #20），2s 精确窗口
+- token 计数 bug：se=2/wr>=3/crc=3（曾 nt>=3 挡住 2-token se，命令
+  回显插桩定位）
+
+### 需求 1 embassy-net（2026-09-30 WIP 留档，feat/embassy-net @ 5218bed）
+- HAL enet_smoltcp 双 feature 门控（smoltcp-device=smoltcp 0.11 直连 /
+  embassy-net=embassy-net-driver 0.2），独立编译全绿
+- waker 契约修复已验证：receive/transmit 返回 None 注册 cx.waker()
+  （板上 diag rx=0x18->0x11C 递增，帧到达追踪恢复）
+- 剩余断点（待专项会话）：Runner::run poll_fn 与主任务共享 smoltcp
+  栈无同步——embassy 官方 HAL 形态是栈收进驱动任务、经 channel 交付
+  （Ariel OS 调研 bg_50ebf277 进行中，结论将决定需求 1 收官路径）
