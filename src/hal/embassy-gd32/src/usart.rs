@@ -14,6 +14,7 @@
 //! - BAUD/DATA/AFSEL 字段经 SVD writeConstraint 补丁为 Safe writer
 
 use crate::interrupt;
+use crate::Pin;
 use gd32f470::{timer3, uart3, usart0, Interrupt};
 
 /// 生成同类布局的串口 newtype（UART 类与 USART 类寄存器块类型不同，
@@ -174,4 +175,16 @@ unsafe fn UART6() {
     } else if st.orerr().bit_is_set() {
         let _ = uart.data().read();
     }
+}
+
+/// uart6_ring_enable 的无参包装（外部 HAL family crate 以 steal 语义
+/// 自取 UART6——ariel-os-gd32 集成入口）
+pub fn uart6_ring_enable_dyn() {
+    // steal 语义（外部 HAL family 集成入口；与 crate::periph::steal
+    // 同款 'static 引用形态——板上验证的 zst 派生）
+    let p = crate::periph::steal();
+    p.rcu.apb1en().modify(|_, w| w.uart6en().set_bit());
+    let _utx = Pin::alternate(p.gpioe, 7, 8);
+    let _urx = Pin::alternate(p.gpioe, 8, 8);
+    uart6_ring_enable(p.uart6);
 }
