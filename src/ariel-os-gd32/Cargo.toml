@@ -1,0 +1,17 @@
+[workspace]
+
+[package]
+name = "ariel-os-gd32"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gd32f470 = { path = "../pac/gd32f470" }
+embassy-gd32 = { path = "../../src/hal/embassy-gd32" }
+# ariel-os-embassy-common：并入 ariel-os workspace 时按官方路径接入
+# ariel-os-embassy-common = { path = "../../../ariel-os/src/ariel-os-embassy-common" }
+embassy-executor = { version = "0.10", default-features = false, features = ["platform-cortex-m", "executor-interrupt"] }
+embassy-time-driver = { version = "0.2", optional = true }
+critical-section = "1"
+heapless = "0.8"
+paste = "1"

@@ -231,3 +231,20 @@ Steal two patterns from Ariel OS rather than adopting it:
 2. Optional: swap 2ms kicker for ENET IRQ-driven wake (`net_poll::WAKER` already exists).
 3. File a note against future embassy-net upgrades: our HAL only depends on `embassy-net-driver` (0.2, trait-stable by design), so `embassy-net` 0.7→0.9 upgrades touch only the firmware bin, not the HAL.
 4. Re-evaluate Ariel OS only if the project needs preemptive OS threads or certified toolchains — at that point, budget a full `ariel-os-gd32` family port as the entry fee.
+
+## 2026-09-30 补充：官方路径源码级考证结论（用户硬约束"不允许鬼点子"后）
+
+对 ariel-os @ b69f1f1b + ariel-os/embassy fork @ 1b75c3d6 的源码级考证：
+
+1. embassy-stm32 芯片支持 = stm32-metapac（embassy-rs/stm32-data-generated
+   固定 tag stm32-data-7bb5f235）的生成表，仅含 ST 官方型号
+2. GD32F470 进入官方路径的两条分支：
+   a. stm32 族 chip context（轻路径）：需要 stm32f470vg feature = 需要
+      stm32-data 生成器收录 GD32 芯片描述 = 伪造 ST 输入数据（违反官方语义）
+   b. 全新 HAL family（重路径）：自写 ariel-os-gd32 crate 对接
+      ariel-os-hal 的 13 项导出契约（gpio/peripheral/init/extint_registry/
+      i2c/spi/uart define_uart_drivers!/identity/hwrng/storage/usb/
+      ethernet NetworkDevice/Executor+swi）——数周级专项，无捷径
+3. 决策建议：立项 b 路线专项（唯一无鬼点子的正统路线），以
+   ariel-os-stm32 为结构模板逐文件对接；我们的 embassy-gd32 模块
+   （gpio/spi/usart/enet/timer 已板上验证）是重写的实现基础

@@ -36,3 +36,7 @@ docker/data/
 
 # 容器持久 cargo 缓存（rsproxy 抖动防护）
 .cargo-home/
+
+# Ariel OS 官方仓库克隆（考证用临时目录，不入库）
+ariel-os-src/
+ariel-os-embassy-src/
