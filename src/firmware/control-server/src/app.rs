@@ -422,7 +422,9 @@ impl<'a> AppDeps<'a> {
                 o_u8(out, len as u8);
                 o_str(out, "\r\n");
             } else if nt >= 4 && eq(toks[1], "crc") {
-                // flash crc <addr6hex> <len_dec(1-32768)>——区间 CRC-32
+                // flash crc <addr6hex> <len_dec(1-65536)>——区间 CRC-32
+                // （50K 级 OTA 包的双段校验需要 >32K；0.11 smoltcp 路线的
+                // 长命令行已由 carry-over 拼接支撑）
                 let addr = match parse_u32_hex(toks[2]) {
                     Some(v) => v,
                     _ => {
@@ -431,7 +433,7 @@ impl<'a> AppDeps<'a> {
                     }
                 };
                 let len = match parse_dec_u32(toks[3]) {
-                    Some(v) if (1..=32768).contains(&v) => v,
+                    Some(v) if (1..=65536).contains(&v) => v,
                     _ => {
                         o_str(out, "ERR len (1-32768)\r\n");
                         return;

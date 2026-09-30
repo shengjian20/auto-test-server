@@ -22,11 +22,20 @@ use embassy_gd32::crc32::Crc32;
 use embassy_gd32::flash::{Flash, SECTOR_BASE};
 use embassy_gd32::w25q::W25q;
 use embassy_gd32::{Pin, Port, Rcc, Spi, Uart};
+use linked_list_allocator::LockedHeap;
 use panic_halt as _;
 
+// console.rs（embassy-gd32 内）的 extern crate alloc 把 alloc 拉进本
+// 二进制的链接图——bootloader 自身零分配，符号占位即可
+static mut HEAP_MEM: [u8; 1024] = [0; 1024];
+
+#[global_allocator]
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
+
 const APP_ADDR: u32 = 0x0800_8000;
-/// 应用区容量（扇区 2-3：0x08008000..0x08010000，32K）
-const APP_MAX: u32 = 0x0000_8000;
+/// 应用区容量（扇区 2-4：0x08008000..0x08020000，16+16+64=96K——
+/// control-server-tcp 镜像 ~50K，32K 上限时槽位 size 检查直接拒绝）
+const APP_MAX: u32 = 0x0001_8000;
 const RAM_BASE: u32 = 0x2000_0000;
 const RAM_END: u32 = 0x2007_0000;
 const MAGIC: &[u8; 8] = b"GDOTA001";
@@ -108,6 +117,8 @@ fn app_region_crc(size: u32) -> u32 {
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let p = gd32f470::Peripherals::take().expect("peripherals already taken");
+    // （触发窗口时基改用 TIMER1 自由运行计数器——DWT CYCCNT 在本板
+    // 疑似冻结：enable 后 [win] 标记 90s 未现，标记版实测教训）
 
     let rcc = Rcc::new(&p.rcu);
     rcc.enable_gpio_port(Port::E);
@@ -136,19 +147,34 @@ fn main() -> ! {
     uart.write(b"UPGR?\r\n");
     let mut trigger = [0u8; 4];
     let mut got = 0usize;
-    // 触发窗口：确定性递减计数（spin_loop 忙等会被 O1 优化空转——教训
-    // #15）。guard 按实测校准：read_byte 每轮 volatile 读 STAT0+可选读
-    // DATA ≈ 20+ cycles/迭代，128M 计数 ≈ 4-6s 实际窗口（PC 侧 spray
-    // 连发 UPGR，收齐 4 字节立即触发）
-    let mut guard: u64 = 128_000_000;
-    while guard > 0 && got < 4 {
+    // 触发窗口：TIMER1 自由运行计数器 @1MHz（PSC=15），2s = 2_000_000
+    // tick 精确窗口。软循环 guard（O1 优化空转）与 DWT CYCCNT（本板
+    // 疑似冻结，[win] 标记 90s 未现）双双弃用——TIMER1 是板上充分
+    // 验证过的外设（app time_driver 同款时基）
+    // TIMER1 时钟门（教训 #8：漏 enable=寄存器写入静默丢弃）
+    let rcu = unsafe { &*gd32f470::Rcu::PTR };
+    rcu.apb1en().modify(|_, w| w.timer1en().set_bit());
+    let t1 = &p.timer1;
+    // unsafe 收敛点：PSC/CAR 全宽字段（原生 PAC 仅 unsafe bits()——用户
+    // 拍板 PAC 禁语义增强）；值与 app time_driver 同款（PSC=15 -> 1MHz，
+    // CAR=u32::MAX 自由跑）
+    unsafe {
+        t1.psc().write(|w| w.psc().bits(15));
+        t1.car().write(|w| w.carl().bits(u32::MAX));
+    }
+    // UG 事件：PSC 影子寄存器须 UG 才锁存（stage1 blink 实测教训——
+    // 漏发 UG 则计数跑 16MHz，窗口时长差 16 倍）
+    t1.swevg().write(|w| w.upg().set_bit());
+    t1.ctl0().modify(|_, w| w.cen().set_bit().arse().clear_bit());
+    let start = t1.cnt().read().cnt().bits();
+    while t1.cnt().read().cnt().bits().wrapping_sub(start) < 2_000_000 && got < 4 {
         if let Some(b) = uart.read_byte() {
             trigger[got] = b;
             got += 1;
-        } else {
-            guard = guard.wrapping_sub(24);
         }
     }
+    // 窗口退出标记（二分定位：出现=窗口正常，缺失=计数器异常）
+    uart.write(b"[win]\r\n");
     if got == 4 && &trigger == b"UPGR" {
         uart.write(b"upgrade mode\r\n");
         serial_upgrade(&uart, &mut w25q);
@@ -171,9 +197,9 @@ fn main() -> ! {
             uart.write(b" bytes)\r\n");
             let flash = Flash::new();
             flash.unlock();
-            // 应用区 = 扇区 2、3（0x08008000/0x0800C000，各 16K）
+            // 应用区 = 扇区 2-4（0x08008000..0x08020000）
             let mut erased = true;
-            for s in 2..=3u8 {
+            for s in 2..=4u8 {
                 if flash.erase_sector(s).is_err() {
                     erased = false;
                     break;

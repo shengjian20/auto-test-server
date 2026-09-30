@@ -16,3 +16,4 @@ embassy-gd32 = { path = "../hal/embassy-gd32" }
 cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7"
 panic-halt = "1.0"
+linked_list_allocator = "0.10"

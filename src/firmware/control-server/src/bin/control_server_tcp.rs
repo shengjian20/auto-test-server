@@ -182,6 +182,11 @@ async fn main(_sp: embassy_executor::Spawner) {
     let mut sent = 0usize;
     let mut resp = [0u8; 64];
     let mut resp_len = 0usize;
+    // server 行组装跨拍拼接缓冲（TCP 分段撕裂长命令：160 字符的
+    // flash wr 命令被拆两段，旧实现"残尾丢弃"把后半 hex 丢成独立
+    // 未知命令行——板上实测 WRITE ERR batch@360 连刷 ERR unknown cmd）
+    let mut co_buf = [0u8; app::LINE_MAX];
+    let mut co_len = 0usize;
     let mut phase = 0u8; // 0=连接 1=发送 2=收验 3=完成
     let mut t_ms: i64 = 0;
     let mut hb: i32 = 0;
@@ -197,19 +202,20 @@ async fn main(_sp: embassy_executor::Spawner) {
             let mut s = sockets.get_mut::<tcp::Socket>(server_h);
             if s.state() == tcp::State::CloseWait {
                 s.close();
+                co_len = 0; // 新连接新缓冲（旧连接残尾不得污染）
             }
             if !s.is_open() {
                 let _ = s.listen(PORT);
             }
-            let mut line = [0u8; app::LINE_MAX];
             if s.can_recv() {
-                let n = s.recv_slice(&mut line).unwrap_or(0);
+                let n = s.recv_slice(&mut co_buf[co_len..]).unwrap_or(0);
+                co_len += n;
                 let mut start = 0usize;
-                for i in 0..n {
-                    if line[i] == b'\n' || line[i] == b'\r' {
+                for i in 0..co_len {
+                    if co_buf[i] == b'\n' || co_buf[i] == b'\r' {
                         if i > start {
                             let mut toks: [&[u8]; 8] = [b""; 8];
-                            let nt = app::tokenize(&line[start..i], &mut toks);
+                            let nt = app::tokenize(&co_buf[start..i], &mut toks);
                             let mut out = |b: &[u8]| {
                                 let _ = s.send_slice(b);
                             };
@@ -218,9 +224,12 @@ async fn main(_sp: embassy_executor::Spawner) {
                         start = i + 1;
                     }
                 }
-                // 残尾（无换行的部分行）留待下拍拼接——简化：协议命令行短，
-                // TCP 有序字节流按包边界即整行（单命令 < MSS），残尾丢弃
-                let _ = start;
+                // 残尾前移（跨拍拼接）：TCP 分段撕裂的命令行在下拍续齐。
+                // 与教训 #16 的区别：无 ISR 交互，纯主循环缓冲移动，安全
+                if start > 0 {
+                    co_buf.copy_within(start..co_len, 0);
+                    co_len -= start;
+                }
             }
         }
         drop_sockets(&mut sockets);
