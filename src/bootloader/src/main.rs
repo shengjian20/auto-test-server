@@ -116,7 +116,7 @@ fn main() -> ! {
     let _urx = Pin::alternate(&p.gpioe, 8, 8);
     let uart = Uart::new(&p.uart6);
     uart.enable(16_000_000, 115_200);
-    uart.write(b"bootloader v2\r\n");
+    uart.write(b"bootloader v3 (serial-trigger OTA)\r\n");
 
     // SPI3 Flash 总线（W25Q128）
     rcc.enable_spi3();
@@ -128,7 +128,35 @@ fn main() -> ! {
     let fspi = Spi::new(&p.spi3);
     fspi.enable_master(16_000_000, 2_000_000);
 
-    let mut w25q = W25q::new(&fspi, &mut fcs);
+    let mut w25q = W25q::new(fspi, fcs);
+
+    // 串口触发窗口（500ms）：收 "UPGR" 魔数 -> 升级模式（行协议收镜像，
+    // 命令形态与 control-server 的 flash se/wr/crc 一致——PC 侧工具链
+    // 零改动复用）；超时无触发 -> 常规路径（W25Q 校验搬运/直接跳转）
+    uart.write(b"UPGR?\r\n");
+    let mut trigger = [0u8; 4];
+    let mut got = 0usize;
+    // 触发窗口：确定性递减计数（spin_loop 忙等会被 O1 优化空转——教训
+    // #15）。guard 按实测校准：read_byte 每轮 volatile 读 STAT0+可选读
+    // DATA ≈ 20+ cycles/迭代，128M 计数 ≈ 4-6s 实际窗口（PC 侧 spray
+    // 连发 UPGR，收齐 4 字节立即触发）
+    let mut guard: u64 = 128_000_000;
+    while guard > 0 && got < 4 {
+        if let Some(b) = uart.read_byte() {
+            trigger[got] = b;
+            got += 1;
+        } else {
+            guard = guard.wrapping_sub(24);
+        }
+    }
+    if got == 4 && &trigger == b"UPGR" {
+        uart.write(b"upgrade mode\r\n");
+        serial_upgrade(&uart, &mut w25q);
+        // 升级模式以 boot 命令结束（软复位回常规路径校验搬运）
+        uart.write(b"upgrade done, rebooting\r\n");
+        delay_ms(100);
+        cortex_m::peripheral::SCB::sys_reset();
+    }
 
     let slot = read_slot_header(&mut w25q, &uart);
 
@@ -213,6 +241,140 @@ fn main() -> ! {
     // 向量表的 HardFault handler 自环（VTOR 已先重定向）-> 全静默（板上
     // 实证：异常帧 fault PC=0x080028F2 即 bx 指令）
     jump(sp, rv)
+}
+
+/// 升级模式：行协议收镜像到 W25Q（命令形态与 control-server flash
+/// se/wr/crc 一致，PC 侧工具链零改动复用）。收 "boot" 行后返回（调用方
+/// 软复位走常规校验搬运路径）。
+fn serial_upgrade(uart: &Uart, w25q: &mut W25q) {
+    const LINE_MAX: usize = 440; // 80B 数据 = 160 hex 字符 + 命令头
+    let mut line = [0u8; LINE_MAX];
+    let mut n = 0usize;
+
+    // 极简 hex 解析（bootloader 内联，不依赖 control-server）
+    fn hex_val(c: u8) -> Option<u8> {
+        match c {
+            b'0'..=b'9' => Some(c - b'0'),
+            b'a'..=b'f' => Some(c - b'a' + 10),
+            b'A'..=b'F' => Some(c - b'A' + 10),
+            _ => None,
+        }
+    }
+    fn parse_hex_bytes(t: &[u8], buf: &mut [u8]) -> Option<usize> {
+        if t.is_empty() || t.len() % 2 != 0 || t.len() > buf.len() * 2 {
+            return None;
+        }
+        for i in (0..t.len()).step_by(2) {
+            buf[i / 2] = (hex_val(t[i])? << 4) | hex_val(t[i + 1])?;
+        }
+        Some(t.len() / 2)
+    }
+    fn parse_u32_hex(t: &[u8]) -> Option<u32> {
+        if t.is_empty() || t.len() > 6 {
+            return None;
+        }
+        let mut v: u32 = 0;
+        for &c in t {
+            v = (v << 4) + hex_val(c)? as u32;
+        }
+        Some(v)
+    }
+
+    loop {
+        match uart.read_byte() {
+            Some(b'\n') | Some(b'\r') => {
+                if n == 0 {
+                    continue;
+                }
+                let mut toks: [&[u8]; 12] = [b""; 12];
+                // 内联 tokenize（bootloader 独立 workspace，不依赖 control-server）
+                let mut nt = 0usize;
+                let mut i = 0usize;
+                while i < n && nt < 12 {
+                    while i < n && line[i] == b' ' { i += 1; }
+                    if i >= n { break; }
+                    let start = i;
+                    while i < n && line[i] != b' ' { i += 1; }
+                    toks[nt] = &line[start..i];
+                    nt += 1;
+                }
+                // 命令回显（诊断：PC 侧按序比对，同时暴露 spray 污染）
+                uart.write(b"[");
+                uart.write(&line[..n]);
+                uart.write(b"]\r\n");
+                let resp = if nt == 2 && toks[0] == b"se" {
+                    if let Some(addr) = parse_u32_hex(toks[1]) {
+                        if addr % 4096 == 0 {
+                            w25q.erase_sector(addr);
+                            "OK\r\n"
+                        } else {
+                            "ERR align\r\n"
+                        }
+                    } else {
+                        "ERR addr\r\n"
+                    }
+                } else if nt >= 3 && toks[0] == b"wr" {
+                    let mut data = [0u8; 128];
+                    if let (Some(addr), Some(k)) = (parse_u32_hex(toks[1]), parse_hex_bytes(toks[2], &mut data)) {
+                        // 多 token hex 合并（wr <addr> <hex..>）
+                        let mut total = k;
+                        for t in toks[3..nt].iter() {
+                            if let Some(m) = parse_hex_bytes(t, &mut data[total..]) {
+                                total += m;
+                            } else {
+                                total = 0;
+                                break;
+                            }
+                        }
+                        if total > 0 {
+                            w25q.write(addr, &data[..total]);
+                            "OK\r\n"
+                        } else {
+                            "ERR data\r\n"
+                        }
+                    } else {
+                        "ERR addr\r\n"
+                    }
+                } else if nt == 3 && toks[0] == b"crc" {
+                    use embassy_gd32::crc32::Crc32;
+                    if let (Some(addr), Some(len)) = (parse_u32_hex(toks[1]), parse_u32_hex(toks[2]).map(|v| v as usize)) {
+                        if (1..=32768).contains(&len) {
+                            let mut c = Crc32::init();
+                            let mut buf = [0u8; 256];
+                            let mut off = 0usize;
+                            while off < len {
+                                let k = core::cmp::min(256, len - off);
+                                w25q.read(addr + off as u32, &mut buf[..k]);
+                                c.update(&buf[..k]);
+                                off += k;
+                            }
+                            uart.write(b"OK ");
+                            put_hex8(uart, c.final_crc());
+                            "\r\n"
+                        } else {
+                            "ERR len\r\n"
+                        }
+                    } else {
+                        "ERR arg\r\n"
+                    }
+                } else if nt >= 1 && toks[0] == b"boot" {
+                    return; // 调用方软复位
+                } else {
+                    "ERR cmd\r\n"
+                };
+                uart.write(resp.as_bytes());
+                n = 0;
+            }
+            Some(ch) if ch != b'\r' => {
+                if n < LINE_MAX {
+                    line[n] = ch;
+                    n += 1;
+                }
+            }
+            Some(_) => {}
+            None => {}
+        }
+    }
 }
 
 /// 错误停机：console 提示 + 停机循环（LED_1 常亮=低电平，可目视区分）
